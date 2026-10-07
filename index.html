@@ -214,6 +214,17 @@ nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:re
 .sr-status .btn{margin-top:8px}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.tag-muted{font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--soft);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.oneoff-note{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:.88rem;margin-bottom:12px}
+.check-row{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px dashed var(--border);border-radius:12px;margin:0 0 8px;cursor:pointer;background:var(--card)}
+.check-row input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--accent)}
+.hr-warn{font-size:.82rem;background:#fef3c7;color:#78350f;border-radius:8px;padding:6px 10px;margin:-6px 0 12px}
+.hr-warn.err{background:#fee2e2;color:#991b1b}
+.legend{display:flex;gap:14px;justify-content:center;font-size:.78rem;color:var(--muted);margin-top:2px}
+.legend .lg{display:inline-flex;align-items:center;gap:5px}
+.burned{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--muted);margin:2px 0 4px;padding:8px 10px;background:color-mix(in srgb,var(--k-func) 10%,transparent);border-radius:10px}
+.burned svg{color:var(--k-func);flex:none;width:18px;height:18px;margin-top:1px}
+.burned b{color:var(--text)}
 </style>
 </head>
 <body>
@@ -305,7 +316,7 @@ function defaultMeal(){ const h = new Date().getHours(); if(h < 10) return 'aami
 /* ====================== Tila ja tallennus ====================== */
 function defaultState(){
   return { version:2, templates:[], sessions:[], types:JSON.parse(JSON.stringify(DEFAULT_TYPES)), strokes:DEFAULT_STROKES.slice(),
-    food:{ goals:{kcal:2500, protein:null, carbs:null, fat:null}, entries:[], meals:DEFAULT_MEALS.map(m => Object.assign({}, m)), products:{} } };
+    food:{ goals:{kcal:2500, protein:null, carbs:null, fat:null}, entries:[], meals:DEFAULT_MEALS.map(m => Object.assign({}, m)), products:{}, addBurnedToGoal:false } };
 }
 /* v1 -> v2: ateriat olivat kiinteitä avaimia (aamiainen, lounas, paivallinen, valipala) – samat id:t säilyvät oletusaterioissa */
 function normMeals(m){
@@ -329,7 +340,7 @@ function normalize(s){
     types, strokes: Array.isArray(s.strokes) && s.strokes.length ? s.strokes.map(String) : d.strokes,
     food: { goals: Object.assign({}, d.food.goals, (s.food && s.food.goals) || {}),
             entries: Array.isArray(s.food && s.food.entries) ? s.food.entries.filter(e => e && e.id && e.date) : [],
-            meals: normMeals(s.food && s.food.meals), products: normProducts(s.food && s.food.products) } };
+            meals: normMeals(s.food && s.food.meals), products: normProducts(s.food && s.food.products), addBurnedToGoal: !!(s.food && s.food.addBurnedToGoal) } };
 }
 function load(){ try{ const raw = localStorage.getItem(STORE_KEY); return raw ? normalize(JSON.parse(raw)) : defaultState(); } catch(e){ console.warn('Lataus epäonnistui', e); return defaultState(); } }
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){ toast('Tallennus epäonnistui: ' + e.message, {error:true}); } }
@@ -374,12 +385,20 @@ let rsTimer; window.addEventListener('resize', () => { clearTimeout(rsTimer); rs
 
 /* ====================== Yhteenvedot ====================== */
 function gymTotals(s){ let sets = 0, vol = 0; for(const e of (s.exercises||[])) for(const st of e.sets){ sets++; vol += (st.reps||0) * (st.kg||0); } return {sets, vol}; }
+function hrText(s){
+  if(s.hr && s.hrMax) return `syke ka ${s.hr} · max ${s.hrMax}`;
+  if(s.hr) return `syke ka ${s.hr}`;
+  if(s.hrMax) return `maksimisyke ${s.hrMax}`;
+  return '';
+}
 function sessionSummary(s){
   const p = [];
   if(s.kind === 'gym'){ const t = gymTotals(s); p.push(`${(s.exercises||[]).length} liikettä`, `${t.sets} sarjaa`); if(t.vol) p.push(`${fmtNum(t.vol,0)} kg`); }
-  if(s.kind === 'run'){ if(s.distanceKm) p.push(`${fmtNum(s.distanceKm,2)} km`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceKm && s.durationSec) p.push(`${fmtPace(s.durationSec/s.distanceKm)} /km`); if(s.loadKg) p.push(`kuorma ${fmtNum(s.loadKg)} kg`); if(s.hr) p.push(`syke ${s.hr}`); }
+  if(s.kind === 'run'){ if(s.distanceKm) p.push(`${fmtNum(s.distanceKm,2)} km`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceKm && s.durationSec) p.push(`${fmtPace(s.durationSec/s.distanceKm)} /km`); if(s.loadKg) p.push(`kuorma ${fmtNum(s.loadKg)} kg`); }
   if(s.kind === 'swim'){ if(s.distanceM) p.push(`${fmtNum(s.distanceM,0)} m`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceM && s.durationSec) p.push(`${fmtPace(s.durationSec/s.distanceM*100)} /100 m`); if(s.stroke) p.push(s.stroke); }
   if(s.kind === 'func'){ if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.rounds) p.push(`${s.rounds} kierrosta`); if(s.result) p.push(`tulos: ${s.result}`); }
+  if(s.kind !== 'gym' && hrText(s)) p.push(hrText(s));
+  if(s.kcalBurned) p.push(`kulutus ${fmtNum(s.kcalBurned, 0)} kcal`);
   if(s.rpe) p.push(`RPE ${s.rpe}`);
   if(s.intervals && s.kind !== 'gym') p.push(s.intervals);
   return p.join(' · ');
@@ -387,19 +406,19 @@ function sessionSummary(s){
 function sessionRow(s){
   return `<button type="button" class="srow k-${s.kind}" data-action="session-edit" data-id="${s.id}">
     <span class="kbar"></span>
-    <div class="srow-main"><div class="srow-top"><b>${esc(s.title || KINDS[s.kind].label)}</b>${s.type ? `<span class="tag">${esc(s.type)}</span>` : ''}${s.sample ? '<span class="badge">esim.</span>' : ''}</div>
+    <div class="srow-main"><div class="srow-top"><b>${esc(s.title || KINDS[s.kind].label)}</b>${s.type ? `<span class="tag">${esc(s.type)}</span>` : ''}${s.sample ? '<span class="badge">esim.</span>' : ''}${!s.templateId ? '<span class="tag-muted">kerta</span>' : ''}</div>
     <div class="srow-sub">${esc(sessionSummary(s)) || '&nbsp;'}</div></div>
     <div class="srow-date">${weekday(s.date)} ${fmtDate(s.date)}</div></button>`;
 }
 /* ====================== TREENIT ====================== */
 function renderTreenit(){
   let h = `<div class="page-head"><h1>Treenit</h1></div>
-  <section class="card"><h2>Kirjaa nopeasti</h2><div class="quick">
+  <section class="card" id="oneOffCard"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px"><h2 style="margin:0">Kirjaa kertatreeni</h2><span class="tag-muted">ilman pohjaa</span></div><div class="quick">
     ${KIND_ORDER.map(k => `<button type="button" class="quick-btn k-${k}" data-action="log-new" data-kind="${k}"><span class="ic">${icon(k)}</span>${KINDS[k].short}</button>`).join('')}
-  </div><div class="hint">Tai valitse alta oma treenipohja – liikkeet ja asetukset täyttyvät valmiiksi.</div></section>
+  </div><div class="hint">Kertatreeni tallentuu vain historiaan – treenipohjaa ei luoda. Toistuville treeneille tee alta oma pohja, jolloin liikkeet täyttyvät valmiiksi.</div></section>
   <div class="sec-row"><h2>Omat treenit</h2><button type="button" class="btn small primary" data-action="tpl-new">+ Uusi treeni</button></div>`;
   if(!S.templates.length){
-    h += `<div class="card empty"><b>Ei vielä treenipohjia.</b><br>Luo esimerkiksi “Treeni1” ja lisää siihen salin liikkeet, tai tee pohja juoksulle, uinnille tai toiminnalliselle treenille.<br><br>
+    h += `<div class="card empty"><b>Ei vielä treenipohjia.</b><br>Yksittäisen treenin voit kirjata ylhäältä kertatreeninä ilman pohjaa. Toistuville treeneille luo esimerkiksi “Treeni1” ja lisää siihen salin liikkeet, tai tee pohja juoksulle, uinnille tai toiminnalliselle treenille.<br><br>
       <button type="button" class="btn primary" data-action="tpl-new">Luo ensimmäinen treeni</button><br><br>
       <span class="small">Haluatko ensin kokeilla? Asetuksista löytyy <a href="#asetukset">Lisää esimerkkidata</a>.</span></div>`;
   }
@@ -497,15 +516,40 @@ const setsText = sets => sets.map(st => `${st.reps}×${fmtNum(st.kg||0,2)}`).joi
 function setRowHtml(i, st={}){
   return `<div class="set-row"><span class="set-no">${i}</span><input type="text" class="set-reps" inputmode="numeric" placeholder="toistot" aria-label="Toistot" value="${st.reps ?? ''}"><input type="text" class="set-kg" inputmode="decimal" placeholder="kg" aria-label="Paino kg" value="${inNum(st.kg)}"><button type="button" class="icon-btn" data-action="set-remove" aria-label="Poista sarja">${ICON_X}</button></div>`;
 }
+function allExerciseNames(){
+  const seen = new Map();
+  for(const s of sortedSessions()) if(s.kind === 'gym') for(const e of (s.exercises||[])){ const k = e.name.trim().toLowerCase(); if(k && !seen.has(k)) seen.set(k, e.name.trim()); }
+  for(const t of S.templates) if(t.kind === 'gym') for(const e of (t.exercises||[])){ const k = e.name.trim().toLowerCase(); if(k && !seen.has(k)) seen.set(k, e.name.trim()); }
+  return [...seen.values()];
+}
+function prevText(prev){ return prev ? `Edellinen (${fmtDate(prev.date)}): ${setsText(prev.sets)}` : 'Ei aiempia kirjauksia'; }
 function exBlockHtml(name, sets, prev){
   if(!sets || !sets.length) sets = [{},{},{}];
   return `<div class="ex-block">
-    <div class="ex-head"><input type="text" class="ex-name" placeholder="Liikkeen nimi" value="${esc(name||'')}" aria-label="Liikkeen nimi"><button type="button" class="icon-btn" data-action="ex-remove" aria-label="Poista liike">${ICON_X}</button></div>
-    <div class="ex-prev">${prev ? `Edellinen (${fmtDate(prev.date)}): ${esc(setsText(prev.sets))}` : 'Ei aiempia kirjauksia'}</div>
+    <div class="ex-head"><input type="text" class="ex-name" list="exNameList" autocomplete="off" placeholder="Liikkeen nimi, esim. Penkkipunnerrus" value="${esc(name||'')}" aria-label="Liikkeen nimi"><button type="button" class="icon-btn" data-action="ex-remove" aria-label="Poista liike">${ICON_X}</button></div>
+    <div class="ex-prev">${esc(prevText(prev))}</div>
     <div class="set-grid-h"><span style="text-align:center">#</span><span style="text-align:center">Toistot</span><span style="text-align:center">Paino (kg)</span><span></span></div>
     <div class="sets">${sets.map((st, i) => setRowHtml(i+1, st)).join('')}</div>
     <button type="button" class="btn small" data-action="set-add">+ Sarja</button>
   </div>`;
+}
+function hrFieldsHtml(v){
+  return `<div class="row">
+      <label class="f"><span>Keskisyke (valinn.)</span><input type="text" name="hr" inputmode="numeric" placeholder="bpm" maxlength="3" value="${v.hr ?? ''}"></label>
+      <label class="f"><span>Maksimisyke (valinn.)</span><input type="text" name="hrMax" inputmode="numeric" placeholder="bpm" maxlength="3" value="${v.hrMax ?? ''}"></label>
+    </div><div class="hr-warn" id="hrWarn" hidden></div>`;
+}
+/* Sykkeen tarkistus: 30–250 bpm (estää tallennuksen), max < keskisyke (lempeä varoitus) */
+function hrCheck(f){
+  const a = f.hr ? num(f.hr.value) : null, m = f.hrMax ? num(f.hrMax.value) : null;
+  const bad = v => v != null && (v < 30 || v > 250);
+  if(bad(a) || bad(m)) return {block:true, text:'Syke tulee antaa väliltä 30–250 bpm.'};
+  if(a != null && m != null && m < a) return {block:false, text:'Maksimisyke on pienempi kuin keskisyke – tarkista arvot (tallennus onnistuu silti).'};
+  return null;
+}
+function updateHrWarn(f){
+  const w = $('#hrWarn'); if(!w) return; const c = hrCheck(f);
+  w.hidden = !c; w.textContent = c ? c.text : ''; w.className = 'hr-warn' + (c && c.block ? ' err' : '');
 }
 function rpeSelect(val){ return `<select name="rpe"><option value="">–</option>${RPE_LABELS.slice(1).map((l, i) => `<option value="${i+1}" ${+val === i+1 ? 'selected' : ''}>${l}</option>`).join('')}</select>`; }
 function openLogForm({kind, tplId, sessionId}){
@@ -514,7 +558,10 @@ function openLogForm({kind, tplId, sessionId}){
   kind = s ? s.kind : (t ? t.kind : kind);
   const v = s || {};
   const selType = s ? s.type : (t && t.defaultType) || (kind === 'gym' ? '' : S.types[kind][0]);
+  const oneOff = !t;
   let body = `<form id="logForm" data-submit="session-save" data-kind="${kind}" data-tpl="${t ? t.id : ''}" data-id="${s ? s.id : ''}">
+    ${oneOff ? `<div class="oneoff-note"><b>Kertatreeni ilman pohjaa.</b> Tallentuu vain historiaan – treenipohjaa ei luoda${s ? '' : ' (voit halutessasi tallentaa sen pohjaksi lomakkeen lopussa)'}.</div>
+    <label class="f"><span>Nimi (valinnainen)</span><input type="text" name="stitle" maxlength="60" placeholder="esim. ${kind === 'gym' ? 'Yläkroppa hotellin salilla' : kind === 'run' ? 'Iltalenkki' : kind === 'swim' ? 'Uimahalli' : 'Kotitreeni'} – oletus: ${KINDS[kind].label}" value="${esc(s && s.title && s.title !== KINDS[kind].label ? s.title : '')}"></label>` : ''}
     <label class="f"><span>Päivämäärä <b id="dateFi" style="color:var(--text);font-weight:600"></b></span><input type="date" name="date" value="${v.date || todayISO()}"></label>
     <div class="f-label">Tyyppi${kind === 'gym' ? ' (valinnainen)' : ''}</div>
     <div class="chips" id="typeChips" style="margin-bottom:6px">${typeChipsHtml(kind, selType)}</div>
@@ -534,7 +581,11 @@ function openLogForm({kind, tplId, sessionId}){
       });
       if(!exs.length) exs = [{name:'', sets:null, prev:null}];
     } else exs = [{name:'', sets:null, prev:null}];
+    const names = allExerciseNames();
     body += `<div class="f-label">Liikkeet ja sarjat</div>${!s && t && lastSessionOf(t.id) ? '<div class="hint" style="margin:-2px 0 8px">Sarjat on esitäytetty edellisen kerran arvoilla – muuta tarvittaessa. Sarjat ilman toistoja ohitetaan.</div>' : ''}
+      ${oneOff && !s ? `<div class="hint" style="margin:-2px 0 8px">Kirjoita liikkeen nimi vapaasti – aiemmin käytetyt nimet ehdotetaan. Edellisen kerran sarjat täyttyvät automaattisesti.</div>` : ''}
+      ${oneOff && !s && names.length ? `<div class="f-label" style="font-weight:500">Aiemmin tehdyt liikkeet – napauta lisätäksesi</div><div class="chips" id="exQuick" style="margin-bottom:10px">${names.slice(0, 10).map(n => `<button type="button" class="chip-btn" data-action="ex-quick" data-name="${esc(n)}">+ ${esc(n)}</button>`).join('')}</div>` : ''}
+      <datalist id="exNameList">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>
       <div id="exs">${exs.map(e => exBlockHtml(e.name, e.sets, e.prev)).join('')}</div>
       <button type="button" class="btn small" data-action="ex-add">+ Lisää liike</button><div style="height:14px"></div>`;
   }
@@ -549,10 +600,8 @@ function openLogForm({kind, tplId, sessionId}){
     if(!isRun) body += `<div class="f-label">Uintityyli</div><div class="chips" style="margin-bottom:12px">${S.strokes.map(x => `<label class="chip"><input type="radio" name="stroke" value="${esc(x)}" ${(v.stroke || S.strokes[0]) === x ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>`;
     body += `<label class="f" id="intWrap"><span>${isRun ? 'Intervallit / rakenne' : 'Sarjat / rakenne'}</span><input type="text" name="intervals" placeholder="${isRun ? 'esim. 6 × 800 m / 2 min palautus' : 'esim. 10 × 100 m / 20 s palautus'}" value="${esc(v.intervals ?? (t && t.intervals) ?? '')}"></label>`;
     if(isRun) body += `<label class="f" id="loadWrap"><span>Kuorma (kg)</span><input type="text" name="load" inputmode="decimal" placeholder="esim. 10" value="${inNum(v.loadKg)}"></label>`;
-    body += `<div class="row">
-      <label class="f"><span>Keskisyke (valinn.)</span><input type="text" name="hr" inputmode="numeric" placeholder="bpm" value="${v.hr ?? ''}"></label>
-      <label class="f"><span>Tuntuma RPE (valinn.)</span>${rpeSelect(v.rpe)}</label>
-    </div>
+    body += `${hrFieldsHtml(v)}
+    <label class="f"><span>Tuntuma RPE (valinn.)</span>${rpeSelect(v.rpe)}</label>
     <div style="margin:-6px 0 10px"><button type="button" class="btn small ghost" id="showAllBtn" data-action="show-all-fields">Näytä kaikki kentät</button></div>`;
   }
   if(kind === 'func'){
@@ -564,17 +613,22 @@ function openLogForm({kind, tplId, sessionId}){
     <div class="row">
       <label class="f"><span>Tulos / pisteet</span><input type="text" name="result" placeholder="esim. 6 krs + 5" value="${esc(v.result || '')}"></label>
       <label class="f"><span>Tuntuma RPE</span>${rpeSelect(v.rpe)}</label>
-    </div>`;
+    </div>
+    ${hrFieldsHtml(v)}`;
   }
-  body += `<label class="f"><span>Muistiinpanot</span><textarea name="notes" placeholder="Fiilis, sää, kipeytyminen…">${esc(v.notes || '')}</textarea></label></form>`;
+  body += `<label class="f"><span>Kulutetut kalorit (kcal, valinn.)</span><input type="text" name="kcalBurned" inputmode="numeric" maxlength="5" placeholder="esim. sykemittarista, 450" value="${v.kcalBurned ?? ''}"></label>
+  <label class="f"><span>Muistiinpanot</span><textarea name="notes" placeholder="Fiilis, sää, kipeytyminen…">${esc(v.notes || '')}</textarea></label>`;
+  if(oneOff) body += `<label class="check-row"><input type="checkbox" name="asTpl"><span><b>Tallenna myös treenipohjaksi</b><br><span class="small muted">Valinnainen. Pohja ilmestyy Treenit-sivun “Omat treenit” -listaan ja tämä kirjaus liitetään siihen. Pohjan nimeksi tulee yllä annettu nimi.</span></span></label>`;
+  body += `</form>`;
   const foot = `${s ? `<button type="button" class="btn danger" data-action="session-delete" data-id="${s.id}">Poista</button>` : ''}<span class="spacer"></span><button type="button" class="btn" data-action="modal-close">Peruuta</button><button type="submit" form="logForm" class="btn primary">Tallenna</button>`;
-  const title = s ? `Muokkaa: ${s.title || KINDS[kind].label}` : t ? `Kirjaa: ${t.name}` : `Uusi kirjaus: ${KINDS[kind].label}`;
+  const title = s ? `Muokkaa: ${s.title || KINDS[kind].label}` : t ? `Kirjaa: ${t.name}` : `Kertatreeni: ${KINDS[kind].label}`;
   openModal(title, body, foot);
   updateCalc();
 }
 function updateCalc(){
   const f = $('#logForm'); if(!f) return; const kind = f.dataset.kind;
   const df = $('#dateFi'); if(df){ const dv = f.date.value; df.textContent = dv ? `· ${weekday(dv)} ${fmtDate(dv)} (${relDays(dv)})` : ''; }
+  updateHrWarn(f);
   if(kind !== 'run' && kind !== 'swim') return;
   const d = num(f.distance.value), t = parseDuration(f.duration.value), out = $('#paceOut');
   if(d && t) out.textContent = kind === 'run' ? `${fmtPace(t/d)} min/km · ${fmtNum(d/(t/3600), 1)} km/h` : `${fmtPace(t/d*100)} /100 m`;
@@ -590,22 +644,34 @@ function saveSession(f){
   const s = id ? Object.assign({}, sessById(id)) : {id:uid(), createdAt:Date.now()};
   const t = f.dataset.tpl ? tplById(f.dataset.tpl) : null;
   s.kind = kind; s.templateId = f.dataset.tpl || null;
-  if(!id) s.title = t ? t.name : KINDS[kind].label;
+  if(t){ if(!id) s.title = t.name; }
+  else s.title = (f.stitle && f.stitle.value.trim()) || KINDS[kind].label;
+  const makeTpl = !t && f.asTpl && f.asTpl.checked;
+  if(makeTpl && !(f.stitle && f.stitle.value.trim())){ toast('Anna treenille nimi, niin se voidaan tallentaa pohjaksi', {error:true}); f.stitle.focus(); return; }
   s.date = f.date.value || todayISO();
   s.type = (f.querySelector('input[name=stype]:checked') || {}).value || '';
   s.notes = f.notes.value.trim();
+  const kb = num(f.kcalBurned.value);
+  if(f.kcalBurned.value.trim() && (kb == null || kb < 0 || kb > 10000)){ toast('Kulutetut kalorit: anna luku väliltä 0–10 000 kcal', {error:true}); f.kcalBurned.focus(); return; }
+  s.kcalBurned = kb ? Math.round(kb) : null;
   if(kind === 'gym'){
     s.exercises = $$('.ex-block', f).map(b => ({ name:b.querySelector('.ex-name').value.trim(),
       sets: $$('.set-row', b).map(r => ({reps:Math.round(num(r.querySelector('.set-reps').value) || 0), kg:num(r.querySelector('.set-kg').value) || 0})).filter(x => x.reps > 0) }))
       .filter(e => e.name && e.sets.length);
     if(!s.exercises.length){ toast('Lisää vähintään yksi liike ja sarja (toistot)', {error:true}); return; }
   }
+  if(kind !== 'gym'){
+    const c = hrCheck(f);
+    if(c && c.block){ toast(c.text, {error:true}); f.hr.focus(); return; }
+    const a = num(f.hr.value), m = num(f.hrMax.value);
+    s.hr = a ? Math.round(a) : null; s.hrMax = m ? Math.round(m) : null;
+  }
   if(kind === 'run' || kind === 'swim'){
     const d = num(f.distance.value), dur = parseDuration(f.duration.value);
     if(f.duration.value.trim() && dur == null){ toast('Kesto ei kelpaa – käytä esim. 45:30', {error:true}); return; }
     if(!d && !dur){ toast('Anna vähintään matka tai kesto', {error:true}); return; }
     if(kind === 'run'){ s.distanceKm = d; s.loadKg = num(f.load.value); } else { s.distanceM = d; s.stroke = (f.querySelector('input[name=stroke]:checked') || {}).value || ''; }
-    s.durationSec = dur; s.hr = num(f.hr.value) ? Math.round(num(f.hr.value)) : null; s.rpe = num(f.rpe.value); s.intervals = f.intervals.value.trim();
+    s.durationSec = dur; s.rpe = num(f.rpe.value); s.intervals = f.intervals.value.trim();
   }
   if(kind === 'func'){
     const dur = parseDuration(f.duration.value);
@@ -614,8 +680,16 @@ function saveSession(f){
     if(!dur && !s.rounds && !s.result && !s.movements){ toast('Täytä ainakin kesto, kierrokset, liikkeet tai tulos', {error:true}); return; }
   }
   delete s.sample;
+  let newTpl = null;
+  if(makeTpl){
+    newTpl = {id:uid(), createdAt:Date.now(), name:s.title, kind, notes:''};
+    if(kind === 'gym') newTpl.exercises = s.exercises.map(e => ({name:e.name, target:`${e.sets.length}×${e.sets[0].reps}`}));
+    else { newTpl.defaultType = s.type || ''; newTpl.intervals = kind !== 'func' ? (s.intervals || '') : ''; newTpl.movements = kind === 'func' ? (s.movements || '') : ''; }
+    S.templates.push(newTpl); s.templateId = newTpl.id;
+  }
   if(id){ const i = S.sessions.findIndex(x => x.id === id); S.sessions[i] = s; } else S.sessions.push(s);
-  save(); closeModal(); render(); toast(id ? 'Kirjaus päivitetty' : 'Treeni tallennettu');
+  save(); closeModal(); render();
+  toast(newTpl ? `Tallennettu – pohja “${newTpl.name}” luotu` : id ? 'Kirjaus päivitetty' : (t ? 'Treeni tallennettu' : 'Kertatreeni tallennettu historiaan'));
 }
 
 /* ====================== KEHITYS: kaaviot ====================== */
@@ -645,6 +719,32 @@ function lineChart(pts, {fmtY = v => fmtNum(v), invert = false, color = 'var(--a
   const area = pts.length > 1 ? `<path d="${path}L${sx(pts[pts.length-1].x).toFixed(1)},${base}L${sx(pts[0].x).toFixed(1)},${base}Z" fill="${color}" opacity=".10"/>` : '';
   const dots = pts.map(p => `<circle class="pt" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="4.5" fill="var(--card)" stroke="${color}" stroke-width="2.5" data-tip="${esc(tip(p))}"><title>${esc(tip(p))}</title></circle>`).join('');
   return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${g}${area}<path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg><div class="chart-tip">Napauta pistettä nähdäksesi arvon</div></div>`;
+}
+function multiLineChart(series, {fmtY = v => fmtNum(v), tip = () => ''} = {}){
+  series = series.filter(se => se.pts.length).map(se => Object.assign({}, se, {pts:se.pts.slice().sort((a, b) => a.x - b.x)}));
+  if(!series.length) return '<div class="chart-empty">Ei vielä dataa</div>';
+  const all = series.flatMap(se => se.pts);
+  const W = chartWidth(), H = 190, L = 44, R = 12, T = 12, B = 26;
+  let x0 = Math.min(...all.map(p => p.x)), x1 = Math.max(...all.map(p => p.x)); if(x0 === x1){ x0 -= 3*DAY; x1 += 3*DAY; }
+  const {lo, hi, ticks} = niceTicks(Math.min(...all.map(p => p.y)), Math.max(...all.map(p => p.y)));
+  const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R), sy = y => H - B - (y - lo) / ((hi - lo) || 1) * (H - T - B);
+  let g = '';
+  for(const tk of ticks){ const y = sy(tk).toFixed(1); g += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y}" y2="${y}"/><text class="axis-t" x="${L-6}" y="${(+y+4).toFixed(1)}" text-anchor="end">${esc(fmtY(tk))}</text>`; }
+  const nx = Math.min(4, Math.max(2, Math.floor((W - L - R) / 80)));
+  for(let i = 0; i < nx; i++){ const x = x0 + (x1 - x0) * i / (nx - 1); const d = new Date(x); g += `<text class="axis-t" x="${sx(x).toFixed(1)}" y="${H-6}" text-anchor="${i === 0 ? 'start' : i === nx-1 ? 'end' : 'middle'}">${d.getDate()}.${d.getMonth()+1}.</text>`; }
+  for(const se of series){
+    const path = se.pts.map((p, i) => `${i ? 'L' : 'M'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join('');
+    g += `<path d="${path}" fill="none" stroke="${se.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" ${se.dash ? 'stroke-dasharray="6 4"' : ''}/>`;
+    g += se.pts.map(p => `<circle class="pt" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="4" fill="var(--card)" stroke="${se.color}" stroke-width="2.5" data-tip="${esc(tip(p, se))}"><title>${esc(tip(p, se))}</title></circle>`).join('');
+  }
+  const legend = series.map(se => `<span class="lg"><svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" stroke="${se.color}" stroke-width="3" ${se.dash ? 'stroke-dasharray="5 3"' : ''}/></svg>${esc(se.label)}</span>`).join('');
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${g}</svg><div class="legend">${legend}</div><div class="chart-tip">Napauta pistettä nähdäksesi arvon</div></div>`;
+}
+function hrChartHtml(sessions){
+  const pt = k => sessions.filter(s => s[k]).map(s => ({x:parseISO(s.date).getTime(), y:s[k], date:s.date}));
+  const avg = pt('hr'), max = pt('hrMax');
+  if(avg.length < 2 && max.length < 2) return '';
+  return `<section class="card" id="hrChart"><h2>Syke</h2>${multiLineChart([{label:'Keskisyke', color:'var(--danger)', pts:avg}, {label:'Maksimisyke', color:'#9f1239', dash:true, pts:max}], {fmtY:v => fmtNum(v, 0), tip:(p, se) => `${fmtDate(p.date)}: ${se.label.toLowerCase()} ${p.y} bpm`})}</section>`;
 }
 function barChart(bars, {fmtY = v => fmtNum(v), color = 'var(--accent)'} = {}){
   if(!bars.length || bars.every(b => !b.value)) return '<div class="chart-empty">Ei dataa viime viikoilta</div>';
@@ -728,6 +828,9 @@ function kehGym(sessions, tpl){
       </tbody></table></div></details>` : ''}
     </section>`;
   }
+  h += `<section class="card" id="gymSessions"><h2>Treenikerrat</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Treeni</th><th class="num">Liikk.</th><th class="num">Sarjat</th><th class="num">Volyymi</th><th class="num">Kulutus</th></tr></thead><tbody>
+    ${sessions.slice().reverse().map(s => { const t = gymTotals(s); return `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.title || '')}${!s.templateId ? ' <span class="tag-muted">kerta</span>' : ''}</td><td class="num">${(s.exercises||[]).length}</td><td class="num">${t.sets}</td><td class="num">${fmtNum(t.vol, 0)}</td><td class="num">${s.kcalBurned ? fmtNum(s.kcalBurned, 0) : '–'}</td></tr>`; }).join('')}
+  </tbody></table></div><div class="hint">Napauta riviä muokataksesi.</div></section>`;
   return h;
 }
 function weeklyBars(sessions, valueFn, fmt, weeks=10){
@@ -757,10 +860,9 @@ function kehEndurance(kind, all){
   const pacePts = sessions.filter(s => dist(s) && s.durationSec).map(s => ({x:parseISO(s.date).getTime(), y:isRun ? s.durationSec/s.distanceKm : s.durationSec/s.distanceM*100, date:s.date, type:s.type}));
   h += `<section class="card"><h2>Vauhti (${isRun ? 'min/km' : 'min/100 m'})</h2><div class="hint" style="margin-top:-4px">Ylempänä = nopeampi${ui.kehType === 'all' ? '. Vertailu on tarkin yhden tyypin sisällä – valitse tyyppi yllä.' : ''}</div>
     ${lineChart(pacePts, {invert:true, color:col, fmtY:fmtPace, tip:p => `${fmtDate(p.date)}: ${fmtPace(p.y)} ${isRun ? '/km' : '/100 m'}${p.type ? ' · ' + p.type : ''}`})}</section>`;
-  const hrPts = sessions.filter(s => s.hr).map(s => ({x:parseISO(s.date).getTime(), y:s.hr, date:s.date}));
-  if(hrPts.length >= 2) h += `<section class="card"><h2>Keskisyke</h2>${lineChart(hrPts, {color:'var(--danger)', fmtY:v => fmtNum(v, 0), tip:p => `${fmtDate(p.date)}: ${p.y} bpm`})}</section>`;
-  h += `<section class="card"><h2>Historia</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Tyyppi</th><th class="num">${unit}</th><th class="num">Aika</th><th class="num">Vauhti</th><th class="num">Syke</th><th>Lisätiedot</th></tr></thead><tbody>
-    ${sessions.slice().reverse().map(s => `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td class="num">${fmtNum(dist(s), isRun ? 2 : 0)}</td><td class="num">${fmtDuration(s.durationSec)}</td><td class="num">${dist(s) && s.durationSec ? fmtPace(isRun ? s.durationSec/s.distanceKm : s.durationSec/s.distanceM*100) : '–'}</td><td class="num">${s.hr || '–'}</td><td class="wrap">${esc([s.loadKg ? `kuorma ${fmtNum(s.loadKg)} kg` : '', s.stroke || '', s.intervals || ''].filter(Boolean).join(' · '))}</td></tr>`).join('')}
+  h += hrChartHtml(sessions);
+  h += `<section class="card"><h2>Historia</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Tyyppi</th><th class="num">${unit}</th><th class="num">Aika</th><th class="num">Vauhti</th><th class="num">Ka syke</th><th class="num">Max syke</th><th class="num">Kulutus</th><th>Lisätiedot</th></tr></thead><tbody>
+    ${sessions.slice().reverse().map(s => `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td class="num">${fmtNum(dist(s), isRun ? 2 : 0)}</td><td class="num">${fmtDuration(s.durationSec)}</td><td class="num">${dist(s) && s.durationSec ? fmtPace(isRun ? s.durationSec/s.distanceKm : s.durationSec/s.distanceM*100) : '–'}</td><td class="num">${s.hr || '–'}</td><td class="num">${s.hrMax || '–'}</td><td class="num">${s.kcalBurned ? fmtNum(s.kcalBurned, 0) : '–'}</td><td class="wrap">${esc([s.loadKg ? `kuorma ${fmtNum(s.loadKg)} kg` : '', s.stroke || '', s.intervals || ''].filter(Boolean).join(' · '))}</td></tr>`).join('')}
   </tbody></table></div><div class="hint">Napauta riviä muokataksesi.</div></section>`;
   return h;
 }
@@ -771,8 +873,9 @@ function kehFunc(all){
   h += `<section class="card"><h2>Treeniminuutit viikoittain</h2>${barChart(weeklyBars(sessions, s => (s.durationSec||0)/60, v => `${fmtNum(v, 0)} min`), {color:'var(--k-func)', fmtY:v => fmtNum(v, 0)})}</section>`;
   const roundPts = sessions.filter(s => s.rounds).map(s => ({x:parseISO(s.date).getTime(), y:s.rounds, date:s.date}));
   if(roundPts.length >= 2) h += `<section class="card"><h2>Kierrokset</h2>${lineChart(roundPts, {color:'var(--k-func)', fmtY:v => fmtNum(v, 0), tip:p => `${fmtDate(p.date)}: ${p.y} kierrosta`})}</section>`;
-  h += `<section class="card"><h2>Historia</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Tyyppi</th><th class="num">Kesto</th><th class="num">Kierr.</th><th>Tulos</th><th>Liikkeet</th></tr></thead><tbody>
-    ${sessions.slice().reverse().map(s => `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td class="num">${fmtDuration(s.durationSec)}</td><td class="num">${s.rounds ?? '–'}</td><td>${esc(s.result || '–')}</td><td class="wrap">${esc((s.movements||'').split('\n').filter(Boolean).join(', '))}</td></tr>`).join('')}
+  h += hrChartHtml(sessions);
+  h += `<section class="card"><h2>Historia</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Tyyppi</th><th class="num">Kesto</th><th class="num">Kierr.</th><th>Tulos</th><th class="num">Ka syke</th><th class="num">Max syke</th><th class="num">Kulutus</th><th>Liikkeet</th></tr></thead><tbody>
+    ${sessions.slice().reverse().map(s => `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td class="num">${fmtDuration(s.durationSec)}</td><td class="num">${s.rounds ?? '–'}</td><td>${esc(s.result || '–')}</td><td class="num">${s.hr || '–'}</td><td class="num">${s.hrMax || '–'}</td><td class="num">${s.kcalBurned ? fmtNum(s.kcalBurned, 0) : '–'}</td><td class="wrap">${esc((s.movements||'').split('\n').filter(Boolean).join(', '))}</td></tr>`).join('')}
   </tbody></table></div></section>`;
   return h;
 }
@@ -784,7 +887,7 @@ function renderHistoria(){
   const km = month.filter(s => s.kind === 'run').reduce((a, s) => a + (s.distanceKm||0), 0);
   const m = month.filter(s => s.kind === 'swim').reduce((a, s) => a + (s.distanceM||0), 0);
   let h = `<div class="page-head"><h1>Historia</h1></div>
-    <section class="card"><h2>${monthLabel(todayISO())}</h2><div class="stats"><span><b>${month.length}</b> treeniä</span><span>Sali: <b>${month.filter(s => s.kind === 'gym').length}</b> krt</span><span>Juoksu: <b>${fmtNum(km, 1)}</b> km</span><span>Uinti: <b>${fmtNum(m, 0)}</b> m</span><span>Toiminnallinen: <b>${month.filter(s => s.kind === 'func').length}</b> krt</span></div></section>
+    <section class="card"><h2>${monthLabel(todayISO())}</h2><div class="stats"><span><b>${month.length}</b> treeniä</span><span>Sali: <b>${month.filter(s => s.kind === 'gym').length}</b> krt</span><span>Juoksu: <b>${fmtNum(km, 1)}</b> km</span><span>Uinti: <b>${fmtNum(m, 0)}</b> m</span><span>Toiminnallinen: <b>${month.filter(s => s.kind === 'func').length}</b> krt</span><span>Kulutus: <b>${fmtNum(month.reduce((a, s) => a + (s.kcalBurned || 0), 0), 0)}</b> kcal</span></div></section>
     <div class="scroll-x" style="margin-bottom:10px"><button type="button" class="chip-btn ${ui.histKind === 'all' ? 'on' : ''}" data-action="hist-kind" data-k="all">Kaikki</button>${KIND_ORDER.map(k => `<button type="button" class="chip-btn ${ui.histKind === k ? 'on' : ''}" data-action="hist-kind" data-k="${k}">${KINDS[k].label}</button>`).join('')}</div>`;
   let list = sortedSessions();
   if(ui.histKind !== 'all'){
@@ -828,7 +931,11 @@ function renderKalorit(){
   const entries = S.food.entries.filter(e => e.date === d);
   const sum = k => entries.reduce((a, e) => a + (e[k]||0), 0);
   const kcal = sum('kcal'), p = sum('p'), c = sum('c'), f = sum('f');
-  const pct = g.kcal ? Math.min(100, kcal / g.kcal * 100) : 0, over = g.kcal && kcal > g.kcal;
+  const daySess = S.sessions.filter(x => x.date === d && x.kcalBurned);
+  const burned = daySess.reduce((a, x) => a + x.kcalBurned, 0);
+  const addB = S.food.addBurnedToGoal && burned > 0 && g.kcal;
+  const goalK = g.kcal ? g.kcal + (addB ? burned : 0) : null;
+  const pct = goalK ? Math.min(100, kcal / goalK * 100) : 0, over = goalK && kcal > goalK;
   const isToday = d === todayISO();
   const known = knownFoods(); ui.recent = known.slice(0, 14);
   const macro = (lbl, val, goal, color) => `<div class="macro" style="--mc:${color}"><div class="lbl">${lbl}</div><div class="val">${fmtNum(val, 0)}${goal ? ` / ${fmtNum(goal, 0)}` : ''} g</div>${goal ? `<div class="bar thin"><i style="width:${Math.min(100, val/goal*100)}%"></i></div>` : ''}</div>`;
@@ -837,9 +944,10 @@ function renderKalorit(){
       <div class="d">${weekday(d)} ${fmtDate(d)}<small>${isToday ? 'Tänään' : `<a href="#kalorit" data-action="kal-today">Takaisin tähän päivään</a>`}</small></div>
       <button type="button" class="icon-btn" data-action="kal-day" data-d="1" aria-label="Seuraava päivä"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></div>
     <section class="card">
-      <div class="kcal-big"><div><span class="v">${fmtNum(kcal, 0)}</span> <span class="g">${g.kcal ? `/ ${fmtNum(g.kcal, 0)} ` : ''}kcal</span></div>
-        <div class="${over ? 'down' : 'muted'}" style="font-weight:700">${g.kcal ? (over ? `Yli ${fmtNum(kcal - g.kcal, 0)} kcal` : `Jäljellä ${fmtNum(g.kcal - kcal, 0)} kcal`) : ''}</div></div>
-      ${g.kcal ? `<div class="bar ${over ? 'over' : ''}"><i style="width:${pct}%"></i></div>` : ''}
+      <div class="kcal-big"><div><span class="v">${fmtNum(kcal, 0)}</span> <span class="g" id="goalK">${goalK ? `/ ${fmtNum(goalK, 0)} ` : ''}kcal</span></div>
+        <div class="${over ? 'down' : 'muted'}" style="font-weight:700" id="kcalLeft">${goalK ? (over ? `Yli ${fmtNum(kcal - goalK, 0)} kcal` : `Jäljellä ${fmtNum(goalK - kcal, 0)} kcal`) : ''}</div></div>
+      ${goalK ? `<div class="bar ${over ? 'over' : ''}"><i style="width:${pct}%"></i></div>` : ''}
+      ${burned ? `<div class="burned" id="burnedInfo"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c.5 3 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.8 2.2-4.8.1 2 1 3.2 2.3 3.3C11 9 11 6 12 3z"/></svg><span>Treeneissä kulutettu: <b>${fmtNum(burned, 0)} kcal</b> (${daySess.length} ${daySess.length === 1 ? 'treeni' : 'treeniä'})${addB ? ` · tavoite ${fmtNum(g.kcal, 0)} + ${fmtNum(burned, 0)}` : g.kcal ? ' · ei lisätty tavoitteeseen' : ''}</span></div>` : ''}
       <div class="macros">${macro('Proteiini', p, g.protein, '#7c3aed')}${macro('Hiilihydraatit', c, g.carbs, '#d97706')}${macro('Rasva', f, g.fat, '#0891b2')}</div>
     </section>
     <section class="card"><h2>Lisää ruoka</h2>
@@ -1250,13 +1358,15 @@ function renderAsetukset(){
       <button type="button" class="btn block" data-action="export">Vie tiedot (JSON)</button>
       <button type="button" class="btn block" data-action="import">Tuo tiedot (JSON)…</button>
       <p class="hint">Tallennettu: ${S.templates.length} treenipohjaa, ${S.sessions.length} kirjausta, ${S.food.entries.length} ruokamerkintää, ${Object.keys(S.food.products).length} tallennettua tuotetta · ${fmtNum(bytes/1024, 1)} kt</p></section>
+    <section class="card"><h2>Kalorilaskuri</h2>
+      <label class="check-row"><input type="checkbox" id="addBurnedToggle" data-change="add-burned" ${S.food.addBurnedToGoal ? 'checked' : ''}><span><b>Lisää treenikulutus päivän kaloritavoitteeseen</b><br><span class="small muted">Kun päällä, päivän tavoite kasvaa sinä päivänä kirjattujen treenien kulutetuilla kaloreilla (esim. 2 500 + 450 = 2 950 kcal). Oletuksena pois päältä.</span></span></label></section>
     <section class="card"><h2>Ateriat (Kalorit)</h2>${mealEditorHtml()}</section>
     <section class="card"><h2>Treenityypit</h2><p class="hint" style="margin-top:-4px">Näistä valitaan tyyppi kirjatessa. Tyypin poistaminen ei muuta vanhoja kirjauksia.</p>
       ${KIND_ORDER.map(k => typeEditor(k, KINDS[k].label, S.types[k])).join('')}
       ${typeEditor('strokes', 'Uintityylit', S.strokes)}
       <button type="button" class="btn small" data-action="types-reset">Palauta oletustyypit</button></section>
     <section class="card set-list"><h2>Vaara-alue</h2><button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot</button></section>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.2</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3</p>`;
 }
 function exportData(){
   const data = JSON.stringify(Object.assign({app:'treeniappi', exportedAt:new Date().toISOString()}, S), null, 2);
@@ -1293,21 +1403,21 @@ function addSampleData(){
   for(let w = 0; w < 10; w++){
     const mon = addDays(start, 7*w), i = w*2;
     const push = (dayOff, o) => { const date = addDays(mon, dayOff); if(date <= T) S.sessions.push(mk(Object.assign({date}, o))); };
-    push(0, {kind:'gym', templateId:t1.id, title:t1.name, type:'Voima', exercises:[
+    push(0, {kind:'gym', templateId:t1.id, title:t1.name, type:'Voima', kcalBurned:Math.round(300 + rnd()*80), exercises:[
       {name:'Penkkipunnerrus', sets:gymEx(60, 2.5, i, 8)}, {name:'Pystypunnerrus', sets:gymEx(35, 2.5, i, 8, true)},
       {name:'Kulmasoutu', sets:gymEx(50, 2.5, i, 10)}, {name:'Leuanveto', sets:[{reps:5 + Math.floor(w/3), kg:0},{reps:5 + Math.floor(w/3), kg:0},{reps:4 + Math.floor(w/3), kg:0}]}]});
-    push(3, {kind:'gym', templateId:t2.id, title:t2.name, type:'Voima', exercises:[
+    push(3, {kind:'gym', templateId:t2.id, title:t2.name, type:'Voima', kcalBurned:Math.round(380 + rnd()*80), exercises:[
       {name:'Takakyykky', sets:gymEx(70, 5, i, 6)}, {name:'Maastaveto', sets:gymEx(90, 5, i, 5, true)},
       {name:'Askelkyykky', sets:gymEx(16, 2, i, 10, true)}, {name:'Pohjenousu', sets:gymEx(60, 5, i, 12, true)}]});
     const pkKm = 7 + Math.round(rnd()*30)/10, pkPace = 372 - w*2.2 + rnd()*8;
-    push(1, {kind:'run', templateId:t3.id, title:t3.name, type:'PK', distanceKm:pkKm, durationSec:Math.round(pkKm*pkPace), hr:Math.round(138 - w*0.6 + rnd()*4), rpe:3});
-    if(w % 2 === 0) push(2, {kind:'run', templateId:t4.id, title:t4.name, type:'Intervalli', intervals:'6 × 800 m / 2 min palautus', distanceKm:8.2, durationSec:Math.round(8.2*(330 - w*2 + rnd()*6)), hr:Math.round(156 + rnd()*5), rpe:8});
-    else push(2, {kind:'run', title:'Juoksu', type:'Vauhtikestävyys (VK)', intervals:'3 × 10 min / 2 min', distanceKm:10, durationSec:Math.round(10*(318 - w*1.5 + rnd()*6)), hr:Math.round(152 + rnd()*4), rpe:7});
-    if(w % 3 === 1) push(6, {kind:'run', title:'Juoksu', type:'Kuormajuoksu', distanceKm:6, durationSec:Math.round(6*(430 - w*2)), loadKg:10, hr:144, rpe:6, notes:'Reppu 10 kg'});
-    else push(6, {kind:'run', title:'Juoksu', type:'Pitkä lenkki', distanceKm:14 + w*0.5, durationSec:Math.round((14 + w*0.5)*(385 - w)), hr:Math.round(140 + rnd()*4), rpe:5});
+    push(1, {kind:'run', templateId:t3.id, title:t3.name, type:'PK', distanceKm:pkKm, durationSec:Math.round(pkKm*pkPace), hr:Math.round(138 - w*0.6 + rnd()*4), hrMax:Math.round(152 + rnd()*6), kcalBurned:Math.round(pkKm * 68), rpe:3});
+    if(w % 2 === 0) push(2, {kind:'run', templateId:t4.id, title:t4.name, type:'Intervalli', intervals:'6 × 800 m / 2 min palautus', distanceKm:8.2, durationSec:Math.round(8.2*(330 - w*2 + rnd()*6)), hr:Math.round(156 + rnd()*5), hrMax:Math.round(181 + rnd()*5), kcalBurned:590, rpe:8});
+    else push(2, {kind:'run', title:'Juoksu', type:'Vauhtikestävyys (VK)', intervals:'3 × 10 min / 2 min', distanceKm:10, durationSec:Math.round(10*(318 - w*1.5 + rnd()*6)), hr:Math.round(152 + rnd()*4), hrMax:Math.round(172 + rnd()*5), rpe:7});
+    if(w % 3 === 1) push(6, {kind:'run', title:'Juoksu', type:'Kuormajuoksu', distanceKm:6, durationSec:Math.round(6*(430 - w*2)), loadKg:10, hr:144, hrMax:163, rpe:6, notes:'Reppu 10 kg'});
+    else push(6, {kind:'run', title:'Juoksu', type:'Pitkä lenkki', distanceKm:14 + w*0.5, durationSec:Math.round((14 + w*0.5)*(385 - w)), hr:Math.round(140 + rnd()*4), hrMax:Math.round(158 + rnd()*6), rpe:5});
     const sm = 1200 + Math.round(rnd()*8)*100, st = ['PK-uinti','Tekniikka','Intervalli'][w % 3];
-    push(4, {kind:'swim', templateId:t5.id, title:t5.name, type:st, distanceM:sm, durationSec:Math.round(sm/100*(132 - w*1.2 + rnd()*5)), stroke:'Vapaa', intervals:st === 'Intervalli' ? '10 × 100 m / 20 s palautus' : ''});
-    if(w % 2 === 1) push(5, {kind:'func', templateId:t6.id, title:t6.name, type:'AMRAP', durationSec:1200, rounds:5 + Math.floor(w/3), movements:t6.movements, result:`${5 + Math.floor(w/3)} kierrosta + ${Math.floor(rnd()*20)} toistoa`, rpe:8});
+    push(4, {kind:'swim', templateId:t5.id, title:t5.name, type:st, distanceM:sm, durationSec:Math.round(sm/100*(132 - w*1.2 + rnd()*5)), stroke:'Vapaa', kcalBurned:Math.round(sm * 0.3), hr:Math.round(128 + rnd()*8), hrMax:Math.round(150 + rnd()*10), intervals:st === 'Intervalli' ? '10 × 100 m / 20 s palautus' : ''});
+    if(w % 2 === 1) push(5, {kind:'func', templateId:t6.id, title:t6.name, type:'AMRAP', durationSec:1200, rounds:5 + Math.floor(w/3), movements:t6.movements, result:`${5 + Math.floor(w/3)} kierrosta + ${Math.floor(rnd()*20)} toistoa`, hr:Math.round(150 + rnd()*6), hrMax:Math.round(176 + rnd()*8), kcalBurned:Math.round(260 + rnd()*40), rpe:8});
   }
   const foods = [['Kaurapuuro marjoilla',380,14,62,8,'aamiainen'],['Kahvi maidolla',40,2,3,2,'aamiainen'],['Kanasalaatti',520,42,30,22,'lounas'],['Rahka + banaani',260,22,38,1,'valipala'],['Lohi, peruna ja kasvikset',680,40,60,28,'paivallinen'],['Proteiinipatukka',210,20,18,7,'valipala']];
   for(const [dOff, picks] of [[-1, [0,1,2,3,4]], [0, [0,1,2,5]]]) for(const k of picks){ const f = foods[k]; S.food.entries.push({id:uid() + (n++), sample:true, date:addDays(T, dOff), name:f[0], kcal:f[1], p:f[2], c:f[3], f:f[4], meal:f[5], t:Date.now() - 1000*k}); S.food.entries[S.food.entries.length-1].meal = S.food.meals.some(x => x.id === f[5]) ? f[5] : S.food.meals[0].id; }
@@ -1336,6 +1446,11 @@ const ACTIONS = {
   'session-edit': el => openLogForm({sessionId:el.dataset.id}),
   'session-delete': el => { const s = sessById(el.dataset.id); if(!confirm(`Poistetaanko kirjaus ${fmtDate(s.date)} (${s.title})?`)) return;
     S.sessions = S.sessions.filter(x => x.id !== s.id); save(); closeModal(); render(); toast('Kirjaus poistettu', {undo:() => { S.sessions.push(s); save(); render(); }}); },
+  'ex-quick': el => { const name = el.dataset.name, prev = findPrevExercise(name);
+    const empty = $$('#exs .ex-block').find(b => !b.querySelector('.ex-name').value.trim() && $$('input', b).every(i => !i.value.trim()));
+    const html = exBlockHtml(name, prev ? prev.sets.map(x => ({reps:x.reps, kg:x.kg})) : null, prev);
+    if(empty) empty.outerHTML = html; else $('#exs').insertAdjacentHTML('beforeend', html);
+    el.remove(); },
   'ex-add': () => { $('#exs').insertAdjacentHTML('beforeend', exBlockHtml('', null, null)); const nm = $$('#exs .ex-name'); nm[nm.length-1].focus(); },
   'ex-remove': el => { const b = el.closest('.ex-block'); const name = b.querySelector('.ex-name').value; if(name && !confirm(`Poistetaanko liike “${name}” tästä kirjauksesta?`)) return; b.remove(); },
   'set-add': el => { const sets = el.closest('.ex-block').querySelector('.sets'); const rows = $$('.set-row', sets); const last = rows[rows.length-1];
@@ -1429,8 +1544,16 @@ document.addEventListener('change', e => {
   const t = e.target;
   if(t.dataset.change === 'keh-sel'){ ui.kehSel = t.value; ui.kehType = 'all'; render(); }
   else if(t.dataset.change === 'hist-type'){ ui.histType = t.value; render(); }
+  else if(t.dataset.change === 'add-burned'){ S.food.addBurnedToGoal = t.checked; save(); toast(t.checked ? 'Treenikulutus lisätään päivän tavoitteeseen' : 'Treenikulutusta ei lisätä tavoitteeseen'); }
+  else if(t.name === 'asTpl'){ const n = $('#logForm input[name=stitle]'); if(n && t.checked && !n.value.trim()) n.focus(); }
   else if(t.name === 'kind' && t.closest('#tplForm')) updateKindVisibility(t.closest('form'));
   else if(t.name === 'stype' || (t.name === 'date' && t.closest('#logForm'))) updateCalc();
+  else if(t.classList.contains('ex-name') && t.closest('#logForm')){
+    const b = t.closest('.ex-block'), f = t.closest('form'), prev = findPrevExercise(t.value, f.dataset.id || null);
+    b.querySelector('.ex-prev').textContent = prevText(prev);
+    const setInputs = $$('.set-row input', b);
+    if(prev && setInputs.every(i => !i.value.trim())) b.querySelector('.sets').innerHTML = prev.sets.map((x, i) => setRowHtml(i + 1, {reps:x.reps, kg:x.kg})).join('');
+  }
   else if(t.name === 'meal' && t.closest('#foodForm')){
     ui.kalMeal = t.value; const lbl = $('#recentLbl'); if(lbl) lbl.textContent = recentLabel(); }
   else if(t.classList.contains('meal-name')){
