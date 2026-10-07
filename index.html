@@ -3,10 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f766e">
+<!-- ikonit:alku -->
+<title>Treeniäppi</title>
+<meta name="application-name" content="Treeniäppi">
+<meta name="apple-mobile-web-app-title" content="Treeniäppi">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Treeniappi</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f4f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg?v=1" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png?v=1" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=1" sizes="180x180">
+<!-- ikonit:loppu -->
 <style>
 :root{
   --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280; --border:#e5e7eb; --soft:#f9fafb;
@@ -1593,6 +1603,7 @@ function renderAsetukset(){
     ${secHtml('backup', 'Varmuuskopio', `${S.sessions.length} kirjausta · ${S.food.entries.length} ruokamerkintää · ${fmtNum(bytes/1024, 1)} kt`, `<div class="set-list"><p class="hint" style="margin-top:0">Tiedot tallentuvat vain tämän laitteen selaimeen (localStorage). Ota välillä varmuuskopio – selaimen tietojen tyhjennys poistaa ne.</p>
       <button type="button" class="btn block" data-action="export">Vie tiedot (JSON)</button>
       <button type="button" class="btn block" data-action="import">Tuo tiedot (JSON)…</button>
+      <p class="hint" id="storageCtx">${isStandalone() ? '<b>Avattu kotivalikon web-appina.</b> Näiden tietojen tallennus on erillään Safarista (ja muista kotivalikon kuvakkeista). Tietoja siirretään Vie/Tuo-toiminnoilla. Kuvakkeen poistaminen (Poista appi) poistaa myös nämä tiedot – vie varmuuskopio ensin.' : '<b>Avattu selaimessa.</b> Kotivalikkoon web-appina lisätyllä kuvakkeella on omat, Safarista erilliset tiedot – siirrä tiedot sinne Vie/Tuo-toiminnoilla.'}</p>
       <p class="hint">Tallennettu: ${S.templates.length} treenipohjaa, ${S.sessions.length} kirjausta, ${S.food.entries.length} ruokamerkintää, ${Object.keys(S.food.products).length} tallennettua tuotetta, ${S.weight.entries.length} painomerkintää · ${fmtNum(bytes/1024, 1)} kt</p></div>`)}
     ${secHtml('kalorit', 'Kalorilaskuri', `Treenikulutus tavoitteeseen: ${S.food.addBurnedToGoal ? 'päällä' : 'pois'}`, `<label class="check-row"><input type="checkbox" id="addBurnedToggle" data-change="add-burned" ${S.food.addBurnedToGoal ? 'checked' : ''}><span><b>Lisää treenikulutus päivän kaloritavoitteeseen</b><br><span class="small muted">Kun päällä, päivän tavoite kasvaa sinä päivänä kirjattujen treenien kulutetuilla kaloreilla (esim. 2 500 + 450 = 2 950 kcal). Oletuksena pois päältä.</span></span></label>`)}
     ${secHtml('ateriat', 'Ateriat', esc(mealsSummary()), mealEditorHtml())}
@@ -1606,7 +1617,7 @@ function renderAsetukset(){
       <div class="danger-box"><h3>Vaarallinen alue</h3>
         <p class="small">Poistaa pysyvästi kaikki tämän laitteen Treeniappi-tiedot. Toimintoa ei voi perua.</p>
         <button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot…</button></div></details>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.2</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.3</p>`;
 }
 /* Koko tietojen tyhjennys: vahva vahvistus (kirjoita POISTA) */
 function openWipeDialog(){
@@ -1620,12 +1631,28 @@ function openWipeDialog(){
     <label class="f"><span>Vahvista kirjoittamalla <b>POISTA</b></span><input type="text" id="wipeConfirm" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="POISTA"></label>`,
     `<button type="button" class="btn" data-action="modal-close">Peruuta</button><button type="button" class="btn danger-solid" id="wipeGo" data-action="wipe-confirm" disabled>Poista kaikki tiedot</button>`);
 }
+/* Kotivalikon web-appina (standalone) avattu? iOS:ssä sen tallennustila on erillään Safarista. */
+function isStandalone(){ return !!((window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true); }
 function exportData(){
   const data = JSON.stringify(Object.assign({app:'treeniappi', exportedAt:new Date().toISOString()}, S), null, 2);
+  const name = `treeniappi-varmuuskopio-${todayISO()}.json`;
   const blob = new Blob([data], {type:'application/json'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `treeniappi-varmuuskopio-${todayISO()}.json`;
-  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-  toast('Varmuuskopio ladattu');
+  const download = () => {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast('Varmuuskopio ladattu');
+  };
+  /* Web-appina iOS:n lataus ei ole luotettava → jakovalikko (Tallenna Tiedostoihin / AirDrop / viesti) */
+  if(isStandalone() && navigator.canShare && typeof File === 'function'){
+    const file = new File([blob], name, {type:'application/json'});
+    if(navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:'Treeniäppi – varmuuskopio'})
+        .then(() => toast('Varmuuskopio jaettu – tallenna se esim. Tiedostot-sovellukseen'))
+        .catch(e => { if(!e || e.name !== 'AbortError') download(); });
+      return;
+    }
+  }
+  download();
 }
 $('#importFile').addEventListener('change', async ev => {
   const file = ev.target.files[0]; ev.target.value = ''; if(!file) return;
