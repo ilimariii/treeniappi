@@ -154,7 +154,7 @@ details summary.sum{cursor:pointer;color:var(--accent);font-weight:600;font-size
 .macro .lbl{font-size:.75rem;color:var(--muted);font-weight:600}
 .macro .val{font-size:.9rem;font-weight:700}
 .macro .bar > i{background:var(--mc)}
-.food-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
+.food-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border)}
 .meal-body > .food-item:first-child{border-top:1px solid var(--border)}
 .food-item .n{flex:1;min-width:0}
 .food-item .n div:first-child{font-weight:600;overflow-wrap:anywhere}
@@ -297,8 +297,26 @@ nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:re
 .scan-status.warn{color:var(--text);background:#fef3c7;border-radius:10px;padding:12px;color:#78350f}
 .notice{background:#fef3c7;color:#78350f;border-radius:10px;padding:10px 12px;font-size:.88rem;margin-bottom:12px}
 .prod-head{display:flex;gap:12px;align-items:center;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px}
-.prod-head img,.prod-ph{width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff;flex:none}
-.prod-ph{display:flex;align-items:center;justify-content:center;color:var(--muted);background:var(--soft)}
+/* v0.4.1 ruokasymbolit: samaa viivatyyliä kuin alavalikon ikonit, kevyt luokkakohtainen sävy */
+.fi{--fc:#64748b;flex:none;width:40px;height:40px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;color:var(--fc);background:color-mix(in srgb,var(--fc) 13%,transparent)}
+.fi svg.i{width:24px;height:24px}
+.fi.sm{width:34px;height:34px;border-radius:10px}
+.fi.sm svg.i{width:20px;height:20px}
+.fi.lg{width:56px;height:56px;border-radius:14px}
+.fi.lg svg.i{width:32px;height:32px;stroke-width:1.75}
+@media (prefers-color-scheme: dark){ .fi{color:color-mix(in srgb,var(--fc) 50%,#fff);background:color-mix(in srgb,var(--fc) 28%,transparent)} }
+.ph-t{min-width:0;flex:1}
+.fi-btn{position:relative;flex:none;border:0;padding:0;background:transparent;border-radius:14px;cursor:pointer;color:inherit}
+.fi-btn .fi-pen{position:absolute;right:-5px;bottom:-5px;width:22px;height:22px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center}
+.fi-btn .fi-pen svg.i{width:12px;height:12px;stroke-width:2.4}
+.link-btn{border:0;background:transparent;padding:4px 0 0;color:var(--accent-ink);font:inherit;font-size:.84rem;font-weight:700;cursor:pointer}
+.icon-pick{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 10px 12px;margin:-4px 0 12px}
+.ip-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.ip-h .f-label{font-weight:700;font-size:.9rem}
+.ig{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.ig-b{display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid transparent;background:transparent;border-radius:12px;padding:4px 1px 5px;color:var(--muted);font:inherit;font-size:.7rem;line-height:1.15;cursor:pointer;text-align:center;min-width:0}
+.ig-b span{overflow-wrap:break-word}
+.ig-b.sel{border-color:var(--accent);color:var(--text)}
 .prod-name{font-weight:700;font-size:1.05rem;overflow-wrap:anywhere}
 .prod-head .src{color:var(--accent);margin-top:2px}
 .code-ic svg{width:14px;height:14px;vertical-align:-2px;color:var(--muted)}
@@ -313,8 +331,6 @@ nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:re
 .sr-sec{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 12px 4px;background:var(--soft)}
 .sr-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--border);background:transparent;padding:8px 12px;cursor:pointer;min-height:56px}
 .sr-item:active{background:var(--soft)}
-.sr-item img,.sr-ph{width:40px;height:40px;border-radius:6px;object-fit:contain;background:#fff;flex:none;border:1px solid var(--border)}
-.sr-ph{background:var(--soft)}
 .sr-main{flex:1;min-width:0;display:flex;flex-direction:column}
 .sr-name{font-weight:600;font-size:.93rem;overflow-wrap:anywhere;line-height:1.25}
 .sr-sub{font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1191,6 +1207,106 @@ function renderHistoria(){
 }
 
 /* ====================== KALORIT ====================== */
+/* Ruokasymbolit: viivapiirrokset 24×24, samaa tyyliä kuin alavalikon kuvakkeet (stroke 2, pyöreät päät, currentColor) */
+const FOOD_ICONS = {
+  maito:       {l:'Maito',          c:'#3b82f6', d:'<path d="M8 21h8a1 1 0 0 0 1-1V9.5L15 6H9L7 9.5V20a1 1 0 0 0 1 1z"/><path d="M7 9.5h10"/><path d="M9 6V3h6v3"/><path d="M12 13.5c-1 1.2-1.5 2-1.5 2.7a1.5 1.5 0 0 0 3 0c0-.7-.5-1.5-1.5-2.7z"/>'},
+  jogurtti:    {l:'Jogurtti, rahka', c:'#6366f1', d:'<path d="M4.5 8h15"/><path d="M5.5 8l1.3 11.2A2 2 0 0 0 8.8 21h6.4a2 2 0 0 0 2-1.8L18.5 8"/><path d="M4.5 8V6.5A1.5 1.5 0 0 1 6 5h12a1.5 1.5 0 0 1 1.5 1.5V8"/><path d="M14 5l3-3"/>'},
+  juusto:      {l:'Juusto',         c:'#ca8a04', d:'<path d="M3 18.5V12l11-7 7 7v6.5z"/><path d="M3 12h18"/><circle cx="8" cy="15.5" r="1.2"/><circle cx="15.5" cy="15.8" r="0.8"/><circle cx="13" cy="9" r="0.8"/>'},
+  voi:         {l:'Voi, levite',    c:'#ca8a04', d:'<path d="M3 12l4-4h14v7l-4 4H3z"/><path d="M3 12h14v7"/><path d="M17 12l4-4"/><path d="M7 15.5h6"/>'},
+  kananmuna:   {l:'Kananmuna',      c:'#f59e0b', d:'<path d="M12 3c3.6 0 6.5 5.6 6.5 10.5a6.5 6.5 0 0 1-13 0C5.5 8.6 8.4 3 12 3z"/>'},
+  leipa:       {l:'Leipä',          c:'#b45309', d:'<path d="M6 20.5h12V11.8a3.6 3.6 0 0 0 2-3.2C20 5.6 16.4 3.5 12 3.5S4 5.6 4 8.6a3.6 3.6 0 0 0 2 3.2z"/><path d="M9 9.5l1.5-1.5M13 9.5l1.5-1.5"/>'},
+  puuro:       {l:'Puuro, mysli',   c:'#d97706', d:'<path d="M3 12h18c0 4.4-4 8-9 8s-9-3.6-9-8z"/><path d="M8 16.5h8"/><path d="M8 8.5c0-1.2 1.2-1.6 1.2-3M12 8.5c0-1.2 1.2-1.6 1.2-3M16 8.5c0-1.2 1.2-1.6 1.2-3"/>'},
+  pasta:       {l:'Pasta, riisi',   c:'#f59e0b', d:'<path d="M3 12h18c0 4.4-4 8-9 8s-9-3.6-9-8z"/><path d="M6.5 12c1-1.6 2.2-1.6 3 0s2-1.6 3 0 2-1.6 3 0 2-1.6 2.5 0"/><path d="M13 9l6-6M16 10l5.5-5"/>'},
+  peruna:      {l:'Peruna',         c:'#ea580c', d:'<path d="M6 10.5h12l-1.6 10.5H7.6z"/><path d="M8 10.5V4.5M11 10.5V3M14 10.5V4M17 10.5V6"/>'},
+  liha:        {l:'Liha',           c:'#dc2626', d:'<path d="M4.6 14.2C3.2 10 6.3 5 11.2 5 15.5 5 19.5 7 19.5 11c0 3-2.3 4.2-4.3 4.6S12 18.2 9 19c-2.4.6-3.6-1.9-4.4-4.8z"/><circle cx="10.5" cy="10.5" r="2"/>'},
+  kana:        {l:'Kana',           c:'#f97316', d:'<path d="M10.2 13.8c-2-2-2.2-6 .5-8.6s6.7-2.5 8.6-.5.6 6.4-2 8.4c-2.5 1.9-5.1 2.7-7.1.7z"/><path d="M10.2 13.8L7.2 16.8"/><path d="M7.2 16.8a1.7 1.7 0 1 0-2.4 2.4 1.7 1.7 0 0 0 2.6.6 1.7 1.7 0 1 0 2.2-2.2 1.7 1.7 0 0 0-2.4-.8z"/>'},
+  kala:        {l:'Kala',           c:'#0891b2', d:'<path d="M2.5 12c3.2-5 9.3-5.8 13.8-1.3L21 7.5v9l-4.7-3.2C11.8 17.8 5.7 17 2.5 12z"/><circle cx="7.5" cy="11.2" r="0.6"/>'},
+  makkara:     {l:'Makkara, leikkele', c:'#e11d48', d:'<rect x="3.2" y="8.9" width="17.6" height="6.6" rx="3.3" transform="rotate(-35 12 12.2)"/><path d="M19.6 6.9l1.6-1.1M4.4 17.5l-1.6 1.1"/>'},
+  salaatti:    {l:'Salaatti',       c:'#16a34a', d:'<path d="M5 19C5 10.5 10 5 20 4c0 10-5.5 15-15 15z"/><path d="M5 19l9-9M10 14V10.5M13.5 10.5h-3"/>'},
+  kasvis:      {l:'Kasvikset',      c:'#65a30d', d:'<path d="M4 20c1-4.4 5-11 8.2-12.6a3.4 3.4 0 0 1 4.4 4.4C15 15 8.4 19 4 20z"/><path d="M15.5 8.5L20 4M15 6l1-3.5M18 9l3.5-1"/><path d="M8 13.5l1.8 1.8M10.8 10.3l1.5 1.5"/>'},
+  hedelma:     {l:'Hedelmät',       c:'#dc2626', d:'<path d="M12 7.5C10 6 5 6 5 12c0 4 2.6 9 5 9 1 0 1.4-.5 2-.5s1 .5 2 .5c2.4 0 5-5 5-9 0-6-5-6-7-4.5z"/><path d="M12 7.5c0-2 .8-3.5 2.5-4.5"/>'},
+  banaani:     {l:'Banaani',        c:'#ca8a04', d:'<path d="M4 12.5c1.6 5.8 9.4 8.4 14.6 3.6 1.8-1.7 2.6-4.4 2.4-7.1l-1.6-.5c-.8 3.8-4.4 6.6-9.4 6-2.6-.3-4.4-1.1-6-2z"/><path d="M19.4 8.5l.6-3"/>'},
+  marjat:      {l:'Marjat',         c:'#be123c', d:'<path d="M12 21c-3.8 0-7-5-7-9.2C5 9.7 6.6 8.5 8.6 8.5h6.8c2 0 3.6 1.2 3.6 3.3C19 16 15.8 21 12 21z"/><path d="M8 6l4 2.5L16 6M12 8.5V4"/><path d="M9.5 12.5v.01M14.5 12.5v.01M12 15.5v.01M10 17.5v.01M14 17.5v.01"/>'},
+  pahkinat:    {l:'Pähkinät',       c:'#a16207', d:'<path d="M4.5 11h15"/><path d="M5.5 11c0 5 2.9 9.5 6.5 9.5s6.5-4.5 6.5-9.5"/><path d="M4.5 11c0-3 3.4-5 7.5-5s7.5 2 7.5 5"/><path d="M12 6V3"/>'},
+  suklaa:      {l:'Suklaa',         c:'#92400e', d:'<path d="M6 12V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v8"/><path d="M6 7.5h12M12 3v9"/><path d="M5 12h14l-1 2 1 2v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-4l1-2z"/>'},
+  karkki:      {l:'Karkit',         c:'#db2777', d:'<circle cx="12" cy="12" r="4"/><path d="M8.3 10.5L3.5 8v8l4.8-2.5M15.7 10.5L20.5 8v8l-4.8-2.5"/><path d="M10.5 10.5l3 3"/>'},
+  keksi:       {l:'Keksit',         c:'#b45309', d:'<circle cx="12" cy="12" r="8.5"/><path d="M9 8.5v.01M14.5 9v.01M8.5 14v.01M12.5 12.5v.01M15.5 15v.01M11.5 16.5v.01"/>'},
+  leivonnainen:{l:'Leivonnaiset',   c:'#c026d3', d:'<path d="M5.5 12h13l-1.8 8.2a1 1 0 0 1-1 .8H8.3a1 1 0 0 1-1-.8z"/><path d="M5 12a3 3 0 0 1 1.5-5.5A5.5 5.5 0 0 1 17.5 6.5 3 3 0 0 1 19 12"/><path d="M10 12l.5 9M14 12l-.5 9"/>'},
+  jaatelo:     {l:'Jäätelö',        c:'#ec4899', d:'<path d="M7 10.5l5 11 5-11"/><path d="M6.5 10.5a5.5 5.5 0 1 1 11 0z"/><path d="M9 14.5l5 0"/>'},
+  juoma:       {l:'Mehu, limsa',    c:'#0d9488', d:'<path d="M5.5 7h13l-1.6 13a1 1 0 0 1-1 .9H8.1a1 1 0 0 1-1-.9z"/><path d="M6.2 12h11.6"/><path d="M13 7l2.2-4.5H18"/>'},
+  kahvi:       {l:'Kahvi, tee',     c:'#78350f', d:'<path d="M4 9.5h12v5.5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 11.5h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3c0 1.2 1.2 1.6 1.2 3M12 3c0 1.2 1.2 1.6 1.2 3"/>'},
+  olut:        {l:'Olut, viini',    c:'#9f1239', d:'<path d="M7.5 3h9l-.4 5.2a4.1 4.1 0 0 1-8.2 0z"/><path d="M12 12.4V20.5M8 20.5h8"/><path d="M7.8 6.5h8.4"/>'},
+  oljy:        {l:'Öljy',           c:'#a3a635', d:'<path d="M10 2.5h4"/><path d="M10.5 2.5v3.8L8 9.5v10.5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9.5l-2.5-3.2V2.5"/><path d="M12 13c-1 1.2-1.5 2-1.5 2.7a1.5 1.5 0 0 0 3 0c0-.7-.5-1.5-1.5-2.7z"/>'},
+  kastike:     {l:'Kastikkeet',     c:'#e11d48', d:'<path d="M8.5 9h7l1 11a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1z"/><path d="M9.5 9V6.5h5V9"/><path d="M11 6.5l.6-4h.8l.6 4"/><path d="M8.2 13.5h7.6"/>'},
+  pizza:       {l:'Pizza',          c:'#ea580c', d:'<path d="M12 21L3.5 6.5c5-3 12-3 17 0z"/><path d="M5.2 9.4a14 14 0 0 1 13.6 0"/><circle cx="10" cy="11.5" r="1"/><circle cx="14.2" cy="12.5" r="1"/><circle cx="12" cy="16" r="1"/>'},
+  hampurilainen:{l:'Hampurilainen', c:'#c2410c', d:'<path d="M4 10.5C4 6.6 7.6 4 12 4s8 2.6 8 6.5z"/><path d="M3 14c1.5-1 3-1 4.5 0s3 1 4.5 0 3-1 4.5 0 3 1 4.5 0"/><path d="M4 17.5h16v1a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5z"/>'},
+  keitto:      {l:'Keitto',         c:'#0f766e', d:'<path d="M4 10h16v6.5a4.5 4.5 0 0 1-4.5 4.5h-7A4.5 4.5 0 0 1 4 16.5z"/><path d="M4 12.5H2M20 12.5h2"/><path d="M9 10V8.5a3 3 0 0 1 6 0V10"/>'},
+  proteiini:   {l:'Proteiinijauhe', c:'#7c3aed', d:'<path d="M7 9h10l-1.2 11a1 1 0 0 1-1 .9H9.2a1 1 0 0 1-1-.9z"/><path d="M7 9V6.5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1V9"/><path d="M10 5.5V3h4v2.5"/><path d="M8.5 14h7"/>'},
+  patukka:     {l:'Patukat',        c:'#8b5cf6', d:'<path d="M5.5 8.5h13v7h-13z"/><path d="M5.5 8.5L3 9.8v4.4l2.5 1.3M18.5 8.5L21 9.8v4.4l-2.5 1.3"/><path d="M9 12h6"/>'},
+  ateria:      {l:'Ruoka',          c:'#64748b', d:'<circle cx="12.5" cy="12" r="5.2"/><path d="M3.5 3.5v5a1.6 1.6 0 0 0 3.2 0v-5M5.1 3.5v17"/><path d="M20.5 3.5c-1.6 1-2.2 3.2-2.2 6.5h2.2v10.5"/>'}
+};
+/* Luokittelu nimen (suomi + englanti) ja tarvittaessa Open Food Factsin categories_tags-luokkien perusteella. Järjestys ratkaisee: tarkemmat ensin. */
+const FOOD_RULES = [
+  ['proteiini', /proteiini(jauhe|pirtelö|juoma)|hera(proteiini|jauhe)|whey|protein[- ](powder|shake)s?|palautusjuoma/],
+  ['patukka', /(proteiini|mysli|välipala|energia|granola|kaura|pähkinä|hedelmä)patukka|protein[- ]?bars?|cereal[- ]bars?|nut[- ]bars?/],
+  ['jaatelo', /jäätelö|ice[- ]?creams?|tuutti|sorbet|gelato|mehujää|frozen[- ]desserts/],
+  ['maito', /suklaamaito|kaakaojuoma|chocolate[- ]milk/],
+  ['suklaa', /suklaa|chocolates?|choco|marabou|kit ?kat|snickers|twix|geisha|dumle|tupla|daim|bounty/],
+  ['karkki', /karkki|karkit|karkkej|karamelli|lakritsi|lakupala|salmiakki|toffee|candies|candy|gummi|gummy|marmeladi|tikkari|pastilli|purukumi|chewing|confectioner|\bsweets\b/],
+  ['keksi', /keksi|cookies?|biscuits?|digestive|domino|korppu(?!jauho)|crackers?/],
+  ['leivonnainen', /pulla|korvapuusti|munkki|donitsi|donuts?|kakku|cakes?\b|muffin|leivos|(?<!liha|kala|karjalan|riisi|peruna)piirakka|croissant|viineri|brownie|torttu|pasteija|cupcake|pastr(y|ies)|viennoiserie/],
+  ['pizza', /pizza|pitsa/],
+  ['hampurilainen', /hampurilai|burger|kebab|hot ?dog|hodari|tortilla|\bwraps?\b|taco|burrito|nachos/],
+  ['keitto', /keitto|\bsoups?\b|soppa|liemi|borssi|gulassi/],
+  ['juoma', /jäätee|iced? ?tea/],
+  ['kahvi', /kahvi|coffees?|espresso|cappuccino|\blatte\b|\btee\b|teetä|\bteas?\b|kaakao|cocoa|\bchai\b/],
+  ['olut', /olut|oluet|\bbeers?\b|lager|siideri|ciders?|lonkero|viini|\bwines?\b|samppanja|vodka|viski|whisky|\bgin\b|rommi|likööri|kalja|alcoholic/],
+  ['juusto', /juusto|cheeses?|emmental|edam|gouda|mozzarella|feta|halloumi|parmesan|parmigiano|cheddar|brie|camembert|oltermanni|koskenlaskija|\baura\b|grana padano/],
+  ['jogurtti', /jogurtti|yog(h)?urts?|rahka|viili|skyr|quark|vanukas|puddings?|smetana|ranskankerma|crème fraîche|fermented[- ]milk/],
+  ['maito', /maito|\bmilks?\b|piimä|kerma|\bcreams?\b|kaurajuoma|soijajuoma|mantelijuoma|riisijuoma|oat[- ]?drink|kefiiri|plant[- ]based[- ]milk|dairy[- ]drinks|dairies/],
+  ['oljy', /öljy|\boils?\b|ghee|laardi/],
+  ['voi', /\bvoi\b|voita|levite|margariini|\bbutters?\b|becel|keiju|oivariini|\bflora\b|benecol|\bspreads?\b|\bfats\b/],
+  ['kastike', /kastike|kastikkeet|\bsauces?\b|ketsuppi|ketchup|sinappi|mustard|majoneesi|mayo|dressing|salsa|pesto|hummus|dippi|condiments|\bchili\b/],
+  ['salaatti', /salaatti|\bsalads?\b|pinaatti|spinach|rucola|ruccola|jäävuori|lettuce|lehtikaali|\bkale\b/],
+  ['kananmuna', /kananmun|\bmuna\b|\bmunat\b|munakas|munakokkeli|\beggs?\b|omelet/],
+  ['kana', /(?<!pork)kana|broileri|chicken|kalkkuna|turkey|nugget|poultry/],
+  ['kala', /kala|lohi|lohta|salmon|\btuna\b|silakka|silli|muikku|kuha|ahven|hauki|turska|seiti|katkarapu|äyriäi|shrimp|prawn|\bfish|sardiin|makrilli|graavi|sushi|seafood|surimi/],
+  ['makkara', /makkara|nakki|nakit|sausages?|salami|leikkele|kinkku|\bhams?\b|pekoni|bacon|meetvursti|chorizo|wiener|lenkki|frankfurter|prosciutto|kassler/],
+  ['liha', /liha|pihvi|steak|nauta|naudan|sianliha|porsa|possu|\bbeef\b|\bpork\b|lammas|\bporo|hirvi|\bmeats?\b|kyljys|paisti|meatball|minced|entrecote|härkä|vasikka/],
+  ['puuro', /puuro|hiutale|mysli|müsli|muesli|granola|murot|\bmuro|corn ?flakes|cereals?\b|oatmeal|porridge|leseet/],
+  ['pasta', /pasta|spagett?i|spaghetti|makaroni|nuudeli|noodles?|riisi|\brice\b|lasagne|penne|tagliatelle|couscous|bulgur|kvinoa|quinoa|ohrasuurimo|risotto/],
+  ['peruna', /peruna|potato|ranskalai|\bfries\b|muusi|sipsi|\bchips\b|crisps|rösti/],
+  ['leipa', /leipä|leipa|karjalanpiira|riisipiira|\bbreads?\b|ruis|näkki|knäcke|sämpylä|patonki|baguette|toast|paahto|rieska|lavash|\bpita\b|bagel|crispbread|sandwich|hapankorppu|ciabatta|focaccia/],
+  ['juoma', /mehu|juices?|limsa|limonadi|\bcola\b|\bkola\b|fanta|sprite|pepsi|energiajuoma|energy[- ]drinks?|\bvesi\b|kivennäisvesi|\bwaters?\b|smoothie|jaffa|virvoitus|\bsodas?\b|nektari|sports?[- ]drinks?|beverages|juoma/],
+  ['marjat', /marja|mansik|mustik|puoluk|vadelm|karpalo|lakka|lakat|herukk|berr(y|ies)/],
+  ['banaani', /banaani|banana/],
+  ['hedelma', /hedelmä|omena|\bapples?\b|päärynä|\bpears?\b|appelsiini|\boranges?\b|mandariini|klementiini|sitruuna|\blemons?\b|\blime\b|kiivi|kiwi|ananas|pineapple|mango|persikka|peach|luumu|\bplums?\b|viinirypäle|\bgrapes?\b|meloni|melon|rusina|raisin|taateli|\bfruits?\b|aprikoosi|nektariini/],
+  ['pahkinat', /pähkinä|pahkina|\bnuts?\b|manteli|almond|cashew|pistaasi|peanut|siemen|\bseeds?\b|\bchia\b|pellava|hazelnut|walnut/],
+  ['kasvis', /kasvis|vihannes|porkkana|carrot|tomaatti|tomato|kurkku|cucumber|paprika|sipuli|onion|parsakaali|broccoli|kukkakaali|herne|\bpeas?\b|papu|pavut|\bbeans?\b|maissi|\bcorn\b|sieni|sienet|mushroom|kesäkurpitsa|zucchini|avokado|avocado|punajuuri|lanttu|nauris|vegetables?|wokki|parsa|kaali|cabbage|selleri|garlic|inkivääri|tofu|linssi|lentils?|kikherne|chickpeas?|legumes/],
+  ['patukka', /patukka|\bbars?\b/]
+];
+const catMemo = new Map();
+function ruleCat(t){ for(const [k, re] of FOOD_RULES) if(re.test(t)) return k; return null; }
+function foodCat(name, tags){
+  const t = lc(name).trim();
+  if(!tags && catMemo.has(t)) return catMemo.get(t);
+  let k = ruleCat(t);
+  if(!k && Array.isArray(tags)) for(const tag of tags.slice().reverse()){ k = ruleCat(String(tag).replace(/^[a-z]{2}:/, '').replace(/-/g, ' ')); if(k) break; }
+  k = k || 'ateria';
+  if(!tags) catMemo.set(t, k);
+  return k;
+}
+const productCat = p => (p && FOOD_ICONS[p.cat]) ? p.cat : foodCat(p ? p.name : '');
+/* Merkinnän symboli: käsin valittu > tallennetun tuotteen luokka > nimen perusteella */
+function entryIcon(e){
+  if(e.icon && FOOD_ICONS[e.icon]) return e.icon;
+  const p = e.code && S.food.products[e.code];
+  return p ? productCat(p) : foodCat(e.name);
+}
+function iconHtml(k, cls){
+  const key = FOOD_ICONS[k] ? k : 'ateria', f = FOOD_ICONS[key];
+  return `<span class="fi${cls ? ' ' + cls : ''}" style="--fc:${f.c}" data-icon="${key}" title="${esc(f.l)}" aria-hidden="true"><svg class="i" viewBox="0 0 24 24">${f.d}</svg></span>`;
+}
 const meals = () => S.food.meals;
 const mealName = id => (S.food.meals.find(m => m.id === id) || {}).name;
 function validMeal(id){ const ms = S.food.meals; if(ms.some(m => m.id === id)) return id; const d = defaultMeal(); return ms.some(m => m.id === d) ? d : ms[0].id; }
@@ -1232,7 +1348,7 @@ const ICON_PEN = '<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L
 const ICON_COPY = '<svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>';
 function foodItemHtml(e){
   const sub = [e.grams ? `${fmtNum(e.grams)} g` : '', macroLine(e) ? macroLine(e) + ' g' : ''].filter(Boolean).join(' · ');
-  return `<button type="button" class="food-item${ui.newFood === e.id ? ' new' : ''}" data-action="food-edit" data-id="${e.id}" aria-label="Muokkaa: ${esc(e.name)}"><span class="n"><span class="fn">${esc(e.name)}${e.sample ? ' <span class="badge">esim.</span>' : ''}${e.code ? ' <span class="code-ic" title="Viivakoodilla lisätty">' + ICON_BARCODE + '</span>' : ''}</span><span class="small muted">${sub || '&nbsp;'}</span></span><span class="k">${fmtNum(e.kcal, 0)} kcal</span>${ICON_GO}</button>`;
+  return `<button type="button" class="food-item${ui.newFood === e.id ? ' new' : ''}" data-action="food-edit" data-id="${e.id}" aria-label="Muokkaa: ${esc(e.name)}">${iconHtml(entryIcon(e), 'sm')}<span class="n"><span class="fn">${esc(e.name)}${e.sample ? ' <span class="badge">esim.</span>' : ''}${e.code ? ' <span class="code-ic" title="Viivakoodilla lisätty">' + ICON_BARCODE + '</span>' : ''}</span><span class="small muted">${sub || '&nbsp;'}</span></span><span class="k">${fmtNum(e.kcal, 0)} kcal</span>${ICON_GO}</button>`;
 }
 function renderKalorit(){
   ui.kalMeal = validMeal(ui.kalMeal);
@@ -1294,6 +1410,7 @@ function backToMeal(meal, rowId){
 function addFood(name, kcal, p, c, f, meal, extra){
   meal = validMeal(meal);
   const e = Object.assign({id:uid(), date:ui.kalDate, name, kcal, p, c, f, meal, t:Date.now()}, extra || {});
+  if(!e.icon){ const same = knownFoods().find(x => x.icon && lc(x.name).trim() === lc(name).trim()); if(same && FOOD_ICONS[same.icon]) e.icon = same.icon; }
   S.food.entries.push(e); save(); ui.kalMeal = meal;
   backToMeal(meal, e.id);
   toast(addedMsg(meal), {undo:() => { S.food.entries = S.food.entries.filter(x => x.id !== e.id); save(); render(); }});
@@ -1313,7 +1430,7 @@ const saveFoot = form => `<button type="submit" form="${form}" class="btn primar
 function fsOpen(meal){ ui.fs = {meal:validMeal(meal), q:''}; ui.kalMeal = ui.fs.meal; fsPick(); }
 function rcItem(e, i){
   const sub = [e.grams ? `${fmtNum(e.grams)} g` : '', macroLine(e) ? macroLine(e) + ' g' : ''].filter(Boolean).join(' · ') || 'annos';
-  return `<button type="button" class="rc-item" data-action="fs-recent" data-i="${i}"><span class="sr-main"><span class="sr-name">${esc(e.name)}</span><span class="sr-sub">${sub}</span></span><span class="rc-k">${fmtNum(e.kcal, 0)} kcal</span><span class="rc-plus" aria-hidden="true">${ICON_PLUS}</span></button>`;
+  return `<button type="button" class="rc-item" data-action="fs-recent" data-i="${i}">${iconHtml(entryIcon(e), 'sm')}<span class="sr-main"><span class="sr-name">${esc(e.name)}</span><span class="sr-sub">${sub}</span></span><span class="rc-k">${fmtNum(e.kcal, 0)} kcal</span><span class="rc-plus" aria-hidden="true">${ICON_PLUS}</span></button>`;
 }
 function fsPick(){
   stopScanner();
@@ -1375,8 +1492,12 @@ function fsAmount(src, editId){
     : [0.5, 1, 1.5, 2].map(v => `<button type="button" class="chip-btn" data-action="amt-set" data-v="${v}">${fmtNum(v)}</button>`).join('');
   const sub = edit ? `${weekday(edit.date)} ${fmtDate(edit.date)}${edit.code ? ' · viivakoodituote' : ''}` : `Aiempi merkintä · ${gm ? `${fmtNum(amount)} g` : '1 annos'} = ${fmtNum(src.kcal, 0)} kcal`;
   const v = k => inNum(src[k]);
+  const autoIc = prod ? productCat(prod) : foodCat(src.name), curIc = src.icon && FOOD_ICONS[src.icon] ? src.icon : autoIc;
+  Object.assign(ui.amt, {icon:curIc, iconAuto:autoIc, iconSet:!!(src.icon && FOOD_ICONS[src.icon]), iconTouched:false, srcName:src.name, srcIcon:src.icon || null});
+  const head = edit ? `<button type="button" class="fi-btn" id="iconBtn" data-action="icon-toggle" aria-expanded="false" aria-controls="iconPicker" aria-label="Vaihda symboli">${iconHtml(curIc, 'lg')}<span class="fi-pen">${ICON_PEN}</span></button>` : iconHtml(curIc, 'lg');
+  const picker = edit ? `<div class="icon-pick" id="iconPicker" hidden><div class="ip-h"><span class="f-label">Valitse symboli</span><button type="button" class="btn small ghost" data-action="icon-auto">Automaattinen</button></div><div class="ig">${Object.keys(FOOD_ICONS).map(k => `<button type="button" class="ig-b${k === curIc ? ' sel' : ''}" data-action="icon-pick" data-k="${k}" aria-pressed="${k === curIc}">${iconHtml(k)}<span>${esc(FOOD_ICONS[k].l)}</span></button>`).join('')}</div></div>` : '';
   fsShell(edit ? 'Muokkaa merkintää' : addToTitle(meal), `<form id="amtForm" data-submit="amt-save" autocomplete="off">
-      <div class="prod-head">${prod && prod.image ? `<img src="${esc(prod.image)}" alt="" onerror="this.remove()">` : ''}<div><div class="prod-name" id="amtName">${esc(src.name)}</div><div class="small muted">${sub}</div></div></div>
+      <div class="prod-head">${head}<div class="ph-t"><div class="prod-name" id="amtName">${esc(src.name)}</div><div class="small muted">${sub}</div>${edit ? '<button type="button" class="link-btn" data-action="icon-toggle">Vaihda symboli</button>' : ''}</div></div>${picker}
       <div class="amt-box"><label class="f"><span>Määrä</span><span class="amt-row"><input type="text" name="amount" id="amtInput" inputmode="decimal" value="${inNum(amount)}" aria-label="Määrä ${gm ? 'grammoina' : 'annoksina'}"><span class="unit">${gm ? 'g' : 'annosta'}</span></span></label>
         <div class="chips">${chips}</div></div>
       <div class="calc col"><span>Yhteensä</span><b id="amtCalc">–</b></div>
@@ -1419,12 +1540,24 @@ function saveAmount(f){
   if(ui.amt.editId){
     const e = S.food.entries.find(x => x.id === ui.amt.editId); if(!e){ closeModal(); return; }
     const moved = e.meal !== meal;
+    if(ui.amt.iconTouched){ // käsin valittu symboli: kaikille saman ruoan merkinnöille ja tallennetulle tuotteelle
+      const key = lc(ui.amt.srcName).trim();
+      S.food.entries.forEach(x => { if(lc(x.name).trim() === key){ if(ui.amt.iconSet) x.icon = ui.amt.icon; else delete x.icon; } });
+      const pr = e.code && S.food.products[e.code]; if(pr) pr.cat = ui.amt.iconSet ? ui.amt.icon : foodCat(pr.name);
+    }
     Object.assign(e, vals, {meal}); if(ui.amt.gm) e.grams = r1(a);
     save(); backToMeal(meal, e.id); toast(moved ? movedMsg(meal) : 'Muutokset tallennettu');
     return;
   }
-  const extra = {}; if(ui.amt.code) extra.code = ui.amt.code; if(ui.amt.gm) extra.grams = r1(a);
+  const extra = {}; if(ui.amt.code) extra.code = ui.amt.code; if(ui.amt.gm) extra.grams = r1(a); if(ui.amt.srcIcon && FOOD_ICONS[ui.amt.srcIcon]) extra.icon = ui.amt.srcIcon;
   addFood(vals.name, vals.kcal, vals.p, vals.c, vals.f, meal, extra);
+}
+function setAmtIcon(k, manual){
+  if(!ui.amt || !FOOD_ICONS[k]) return;
+  Object.assign(ui.amt, {icon:k, iconSet:manual, iconTouched:true});
+  const b = $('#iconBtn'); if(b) b.querySelector('.fi').outerHTML = iconHtml(k, 'lg');
+  $$('#iconPicker .ig-b').forEach(x => { const on = x.dataset.k === k; x.classList.toggle('sel', on); x.setAttribute('aria-pressed', String(on)); });
+  const p = $('#iconPicker'); if(p) p.hidden = true; if(b) b.setAttribute('aria-expanded', 'false');
 }
 function copyPrevDay(){
   const meal = ui.fs.meal, prev = addDays(ui.kalDate, -1);
@@ -1574,7 +1707,7 @@ function openMealEditor(){ openModal('Ateriat', mealEditorHtml(), `<span class="
 
 /* ---------- Viivakoodi & Open Food Facts ---------- */
 const ZXING_URL = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/umd/zxing-browser.min.js';
-const OFF_FIELDS = 'product_name,product_name_fi,brands,nutriments,serving_size,serving_quantity,image_small_url';
+const OFF_FIELDS = 'product_name,product_name_fi,brands,nutriments,serving_size,serving_quantity,categories_tags'; // v0.4.1: ei tuotekuvia (image_small_url) – luokat vain symbolin valintaan
 const offUrl = code => `https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=${OFF_FIELDS}`;
 const scan = { stream:null, timer:null, token:0, detector:null, zx:null, canvas:null, engine:'' };
 const sleep = (ms, signal) => new Promise((res, rej) => { const t = setTimeout(res, ms); if(signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(new DOMException('aborted', 'AbortError')); }, {once:true}); });
@@ -1681,10 +1814,10 @@ function parseOFF(code, p){
   const n = p.nutriments || {}, g = k => num(n[k]);
   let kcal = g('energy-kcal_100g');
   if(kcal == null){ const kj = g('energy-kj_100g') ?? g('energy_100g'); if(kj != null) kcal = kj / 4.184; }
-  const sq = num(p.serving_quantity);
-  return { code, name:String(p.product_name_fi || p.product_name || '').trim(), brand:String(p.brands || '').split(',')[0].trim(),
+  const sq = num(p.serving_quantity), name = String(p.product_name_fi || p.product_name || '').trim();
+  return { code, name, cat:foodCat(name, Array.isArray(p.categories_tags) ? p.categories_tags : null), brand:String(p.brands || '').split(',')[0].trim(),
     per100:{kcal:kcal == null ? null : Math.round(kcal), p:r1(g('proteins_100g')), c:r1(g('carbohydrates_100g')), f:r1(g('fat_100g'))},
-    servingG:sq > 0 ? sq : null, servingSize:String(p.serving_size || ''), image:p.image_small_url || '', source:'off', updatedAt:Date.now() };
+    servingG:sq > 0 ? sq : null, servingSize:String(p.serving_size || ''), source:'off', updatedAt:Date.now() };
 }
 async function fetchOFF(code){
   const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 15000);
@@ -1745,7 +1878,7 @@ function showProduct(code, prod, origin, errMsg, initGrams){
     </div>`;
   const extraBtns = [origin === 'offline' || origin === 'error' ? `<button type="button" class="btn small" data-action="code-retry" data-code="${esc(code)}">Yritä uudelleen</button>` : '', box.dataset.mode === 'scan' ? '<button type="button" class="btn small" data-action="scan-again">Skannaa toinen</button>' : ''].join('');
   box.innerHTML = `<form id="prodForm" data-submit="prod-save" data-code="${esc(code)}" data-origin="${origin}" autocomplete="off">
-    ${manual ? `<div class="notice">${notices[origin] || notices.notfound}</div>` : `<div class="prod-head">${pr.image ? `<img src="${esc(pr.image)}" alt="" onerror="this.remove()">` : `<div class="prod-ph">${ICON_BARCODE}</div>`}
+    ${manual ? `<div class="notice">${notices[origin] || notices.notfound}</div>` : `<div class="prod-head">${iconHtml(productCat(pr), 'lg')}
       <div><div class="prod-name" id="prodName">${esc(pr.name || 'Nimetön tuote')}</div><div class="small muted">${pr.brand ? esc(pr.brand) + ' · ' : ''}${esc(code)}${pr.per100.kcal != null ? ` · ${fmtNum(pr.per100.kcal, 0)} kcal/100 g` : ''}</div><div class="small src">${srcTxt}</div></div></div>`}
     ${missing ? '<div class="notice">Tuotteen energiatieto puuttuu – täydennä arvot pakkauksesta.</div>' : ''}
     ${manual ? `<label class="f"><span>Tuotteen nimi</span><input type="text" name="pname" placeholder="esim. Maitorahka" value=""></label>
@@ -1778,8 +1911,10 @@ function saveProductEntry(f){
   if(per100.kcal == null){ toast('Anna energia (kcal / 100 g)', {error:true}); const d = f.k100.closest('details'); if(d) d.open = true; f.k100.focus(); return; }
   if(!grams || grams <= 0){ toast('Anna syöty määrä grammoina', {error:true}); f.grams.focus(); return; }
   const changed = !old || old.name !== name || ['kcal','p','c','f'].some(k => (old.per100[k] ?? null) !== per100[k]);
-  const prod = Object.assign({}, old || {code, brand:f.pbrand ? f.pbrand.value.trim() : '', image:'', servingSize:''}, {name, per100, updatedAt:Date.now()});
+  const prod = Object.assign({}, old || {code, brand:f.pbrand ? f.pbrand.value.trim() : '', servingSize:''}, {name, per100, updatedAt:Date.now()});
   if(!old) prod.servingG = f.serving ? (num(f.serving.value) || null) : null;
+  if(!FOOD_ICONS[prod.cat]) prod.cat = foodCat(name);
+  delete prod.image;
   if(!old || (changed && old.source === 'off')) prod.source = old ? 'muokattu' : 'oma';
   S.food.products[code] = prod;
   const meal = validMeal(f.pmeal ? f.pmeal.value : ui.kalMeal);
@@ -1796,11 +1931,11 @@ function localSearch(q){
   const match = t => words.every(w => t.includes(w));
   const out = [], seen = new Set();
   for(const p of Object.values(S.food.products).sort((a, b) => (b.updatedAt||0) - (a.updatedAt||0))){
-    if(p.name && match(lc(p.name + ' ' + (p.brand || '')))){ out.push({type:'product', code:p.code, name:p.name, brand:p.brand, kcal:p.per100 && p.per100.kcal, image:p.image, own:p.source !== 'off'}); seen.add(lc(p.name)); }
+    if(p.name && match(lc(p.name + ' ' + (p.brand || '')))){ out.push({type:'product', code:p.code, name:p.name, brand:p.brand, kcal:p.per100 && p.per100.kcal, cat:productCat(p), own:p.source !== 'off'}); seen.add(lc(p.name)); }
   }
   for(const e of knownFoods()){
     if(seen.has(lc(e.name)) || (e.code && S.food.products[e.code])) continue;
-    if(match(lc(e.name))){ out.push({type:'food', id:e.id, name:e.name, kcal:e.kcal, grams:e.grams}); seen.add(lc(e.name)); }
+    if(match(lc(e.name))){ out.push({type:'food', id:e.id, name:e.name, kcal:e.kcal, grams:e.grams, cat:entryIcon(e)}); seen.add(lc(e.name)); }
   }
   return out.slice(0, 8);
 }
@@ -1853,7 +1988,7 @@ async function runOffSearch(q, seq){
   } finally{ clearTimeout(to); clearTimeout(slow); if(searchCtl === ctl) searchCtl = null; }
 }
 function srItem(action, i, r, sub){
-  const img = r.image ? `<img src="${esc(r.image)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sr-ph'}))">` : r.type === 'food' ? '' : '<span class="sr-ph"></span>';
+  const img = iconHtml(r.cat, 'sm');
   return `<button type="button" class="sr-item" data-action="${action}" data-i="${i}">${img}<span class="sr-main"><span class="sr-name">${esc(r.name)}</span><span class="sr-sub">${sub}</span></span><span class="sr-kcal">${r.kcal != null ? `${fmtNum(r.kcal, 0)}<small>${r.type === 'food' ? ' kcal' : ' kcal/100 g'}</small>` : '<small>kcal ?</small>'}</span></button>`;
 }
 function renderSearch(st){
@@ -1877,7 +2012,7 @@ function renderSearch(st){
   else if(st.status === 'error') h += `<div class="sr-status warn">Haku epäonnistui (${esc(st.msg || '')}).<br>${retry}</div>`;
   else if(st.status === 'done'){
     const list = ui.searchOff || [];
-    h += list.length ? list.map((r, i) => srItem('sr-off', i, {name:r.name || 'Nimetön tuote', kcal:r.per100.kcal, image:r.image}, `${r.brand ? esc(r.brand) + ' · ' : ''}${esc(r.code)}`)).join('')
+    h += list.length ? list.map((r, i) => srItem('sr-off', i, {name:r.name || 'Nimetön tuote', kcal:r.per100.kcal, cat:r.cat}, `${r.brand ? esc(r.brand) + ' · ' : ''}${esc(r.code)}`)).join('')
       : `<div class="sr-status">Ei tuloksia haulle “${esc(q)}”. Kokeile toista hakusanaa tai skannaa viivakoodi.</div>`;
   }
   box.innerHTML = h;
@@ -1922,7 +2057,7 @@ function renderAsetukset(){
       <div class="danger-box"><h3>Vaarallinen alue</h3>
         <p class="small">Poistaa pysyvästi kaikki tämän laitteen Treeniappi-tiedot. Toimintoa ei voi perua.</p>
         <button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot…</button></div></details>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.4.0</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.4.1</p>`;
 }
 /* Koko tietojen tyhjennys: vahva vahvistus (kirjoita POISTA) */
 function openWipeDialog(){
@@ -2072,6 +2207,9 @@ const ACTIONS = {
     if(pr && pr.per100 && pr.per100.kcal != null && e.grams) fsProduct(e.code, pr, 'cache', e.grams); else fsAmount(e); },
   'fs-back': () => { if(ui.fs) fsPick(); else closeModal(); },
   'fs-copy': () => copyPrevDay(),
+  'icon-toggle': () => { const p = $('#iconPicker'); if(!p) return; p.hidden = !p.hidden; $('#iconBtn').setAttribute('aria-expanded', String(!p.hidden)); if(!p.hidden) p.scrollIntoView({block:'nearest', behavior:'smooth'}); },
+  'icon-pick': el => setAmtIcon(el.dataset.k, true),
+  'icon-auto': () => setAmtIcon(ui.amt.iconAuto, false),
   'amt-set': el => { $('#amtInput').value = inNum(+el.dataset.v); amtFromBase(); },
   'food-edit': el => { const e = S.food.entries.find(x => x.id === el.dataset.id); if(!e) return; ui.fs = {meal:validMeal(e.meal), q:''}; fsAmount(e, e.id); },
   'food-del': el => { const e = S.food.entries.find(x => x.id === el.dataset.id); if(!e) return; S.food.entries = S.food.entries.filter(x => x !== e); save(); closeModal(); render();
