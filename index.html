@@ -20,13 +20,13 @@
 <style>
 :root{
   --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280; --border:#e5e7eb; --soft:#f9fafb;
-  --accent:#0f766e; --accent-soft:#ccfbf1; --accent-text:#ffffff; --danger:#dc2626; --warn:#d97706; --goal:#7c3aed; --ok:#16a34a;
+  --accent:#0f766e; --accent-soft:#ccfbf1; --accent-text:#ffffff; --danger:#dc2626; --warn:#d97706; --goal:#7c3aed; --ok:#16a34a; --accent-ink:#0f766e;
   --k-gym:#2563eb; --k-run:#16a34a; --k-bike:#c026d3; --k-swim:#0891b2; --k-func:#ea580c;
   --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 1px 8px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme: dark){
   :root{ --bg:#0b0f14; --card:#151b23; --text:#e5e7eb; --muted:#9ca3af; --border:#273140; --soft:#1b2330;
-    --accent:#14b8a6; --accent-soft:#134e4a; --accent-text:#04201d; --shadow:none; --goal:#a78bfa; }
+    --accent:#14b8a6; --accent-soft:#134e4a; --accent-text:#04201d; --shadow:none; --goal:#a78bfa; --accent-ink:#5eead4; }
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -167,7 +167,7 @@ details summary.sum{cursor:pointer;color:var(--accent);font-weight:600;font-size
 .meal-card{padding:4px 6px 4px 4px}
 .meal-card .meal-body{padding:0 10px 6px 14px}
 .meal-tog{flex:1;width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:10px 6px 10px 8px;min-height:52px;border-radius:10px;cursor:pointer}
-.meal-tog:hover{background:var(--soft)}
+@media (hover:hover){ .meal-tog:hover{background:var(--soft)} }
 .meal-tog .chev,.meal-tog .chev-sp{width:18px;height:18px;flex:none;color:var(--muted);transition:transform .2s}
 .meal-card.collapsed .meal-tog .chev{transform:rotate(-90deg)}
 .meal-tog .mt{flex:1;min-width:0;display:flex;flex-direction:column}
@@ -175,11 +175,81 @@ details summary.sum{cursor:pointer;color:var(--accent);font-weight:600;font-size
 .meal-tog .mm{font-size:.78rem;color:var(--muted);font-weight:500}
 .meal-tog .mk{font-weight:700;white-space:nowrap}
 .meal-card.is-empty .mk,.meal-card.is-empty .mn{color:var(--muted)}
-.meal-plus{color:var(--accent);width:44px;height:44px}
-.meal-plus:hover{background:var(--accent-soft)}
-#addFoodCard{scroll-margin-top:8px}
-#addFoodCard.flash{animation:flash 1.2s ease}
-@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:var(--shadow)}}
+/* v0.4.0 Kalorit: yhteenveto, ateriat, lisäysarkki */
+.sum-card{cursor:pointer;transition:background .15s}
+.sum-card .kcal-big{flex-wrap:nowrap;align-items:center;margin-bottom:2px}
+.sum-card .kcal-big .v{font-size:1.9rem}
+.sum-card .left{text-align:right;font-weight:700;white-space:nowrap;line-height:1.2}
+.sum-card .left small{display:block;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sum-card .left.down small{color:inherit}
+.sum-card:active{background:var(--soft)}
+.sum-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sum-edit svg{width:14px;height:14px;color:var(--muted);vertical-align:-1px;margin-left:6px;opacity:.75}
+.accent{color:var(--accent-ink)}
+.macro .mg{color:var(--muted);font-weight:600}
+.meal-tog .ml{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.add-btn{flex:none;display:inline-flex;align-items:center;gap:3px;height:36px;padding:0 13px 0 9px;margin:0 6px 0 2px;border-radius:999px;border:0;background:var(--accent-soft);color:var(--accent-ink);font:inherit;font-weight:700;font-size:.86rem;cursor:pointer}
+.add-btn svg{width:16px;height:16px;stroke-width:2.6}
+.add-btn:active{filter:brightness(.95)}
+button.food-item{width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--border);color:inherit;font:inherit;cursor:pointer;min-height:54px;border-radius:0}
+button.food-item:active{background:var(--soft)}
+.food-item .n{display:flex;flex-direction:column}
+.food-item .fn{font-weight:600;overflow-wrap:anywhere}
+.food-item .go{width:16px;height:16px;color:var(--muted);flex:none;margin-right:-4px}
+.food-item.new{animation:newrow 1.8s ease}
+@keyframes newrow{0%,35%{background:color-mix(in srgb,var(--accent) 18%,transparent)}100%{background:transparent}}
+.meals-foot{display:flex;justify-content:center;margin:2px 0 8px}
+.meals-foot .btn svg{width:16px;height:16px}
+.sheet.full{height:100vh;height:100dvh;max-height:100dvh;border-radius:0}
+.sheet.full .sheet-head{padding-top:calc(8px + env(safe-area-inset-top))}
+.sheet.noanim{animation:none}
+.sheet-head h2{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet-head .back{margin-left:-10px;color:var(--text)}
+.sheet-foot[hidden]{display:none}
+.sheet-foot .grow{flex:1}
+.btn.danger-t{color:var(--danger);background:transparent;border-color:transparent;padding:0 10px}
+@media (min-width:700px){ .sheet.full{height:88vh;max-height:88vh;border-radius:18px} }
+.fs-top{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.fs-top .search-wrap{flex:1;margin:0}
+.scan-ic{flex:none;width:50px;height:44px;border-radius:12px;border:1px solid var(--accent);background:var(--card);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.scan-ic svg{width:24px;height:24px}
+.fs-sec{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 4px 6px}
+.rc{border:1px solid var(--border);border-radius:12px;background:var(--card);overflow:hidden}
+.rc-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;border-top:1px solid var(--border);background:transparent;color:inherit;font:inherit;padding:8px 10px 8px 14px;min-height:58px;cursor:pointer}
+.rc-item:first-child{border-top:0}
+.rc-item:active{background:var(--soft)}
+.rc-k{font-weight:700;white-space:nowrap;font-size:.92rem}
+.rc-plus{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.rc-plus svg{width:17px;height:17px;stroke-width:2.6}
+.rc-ic{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.rc-ic svg{width:18px;height:18px}
+.rc-item.copy .sr-name{color:var(--accent-ink)}
+.fs-empty{text-align:center;padding:18px 12px;line-height:1.5}
+.fs-manual{margin-top:16px;border:1px solid var(--border);border-radius:12px;background:var(--card);scroll-margin-top:8px}
+.fs-manual>summary{list-style:none;display:flex;align-items:center;gap:8px;padding:0 14px;min-height:52px;font-weight:600;color:var(--accent-ink);cursor:pointer}
+.fs-manual>summary::-webkit-details-marker{display:none}
+.fs-manual>summary span{flex:1}
+.fs-manual>summary svg{width:18px;height:18px}
+.fs-manual>summary .chev{color:var(--muted);transition:transform .2s}
+.fs-manual[open]>summary .chev{transform:rotate(180deg)}
+.fs-manual form{padding:2px 14px 14px}
+.amt-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px 10px;margin-bottom:12px}
+.amt-box label.f{margin-bottom:8px}
+.amt-row{display:flex;align-items:center;gap:10px}
+.amt-row input{max-width:120px;font-size:1.35rem;font-weight:700;text-align:right}
+.amt-row .unit{font-weight:600;color:var(--muted)}
+.meal-sel{display:flex;align-items:center;gap:10px;margin:0 0 12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px 6px 4px 14px}
+.meal-sel>span{font-size:.85rem;font-weight:600;color:var(--muted)}
+.meal-sel select{flex:1;border:0;background:transparent;font-weight:700;min-height:44px;text-align:right;text-align-last:right;padding-right:6px}
+.meal-sel select:focus{outline:none}
+.meal-sel:focus-within{outline:2px solid color-mix(in srgb,var(--accent) 60%,transparent)}
+details.vals{margin:2px 0 8px}
+details.vals>summary{list-style:none;display:inline-flex;align-items:center;gap:8px;min-height:40px}
+details.vals>summary::-webkit-details-marker{display:none}
+details.vals>summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .2s;margin:0 2px}
+details.vals[open]>summary::before{transform:rotate(45deg)}
+details.vals[open] > summary{margin-bottom:8px}
+.prod-btns{display:flex;gap:8px;margin-top:6px}
 details.sec{padding:0;overflow:hidden}
 details.sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px}
 details.sec>summary::-webkit-details-marker{display:none}
@@ -210,7 +280,7 @@ nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:re
 .sheet-foot{display:flex;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--card)}
 .sheet-foot .spacer{flex:1}
 @media (min-width:700px){ #modal{align-items:center} .sheet{border-radius:18px;max-height:90vh} main{padding-top:20px} }
-#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-size:.92rem;box-shadow:0 6px 24px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center;max-width:92vw}
+#toast{position:fixed;left:50%;width:max-content;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-size:.92rem;box-shadow:0 6px 24px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center;max-width:92vw}
 #toast[hidden]{display:none!important}
 #toast.err{background:var(--danger)}
 #toast button{background:transparent;border:0;color:#5eead4;font-weight:700;cursor:pointer;padding:0}
@@ -261,6 +331,27 @@ nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:re
 .check-row input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--accent)}
 .hr-warn{font-size:.82rem;background:#fef3c7;color:#78350f;border-radius:8px;padding:6px 10px;margin:-6px 0 12px}
 .hr-warn.err{background:#fee2e2;color:#991b1b}
+.wk-strip{padding:10px 12px 8px}
+.wk-head{display:flex;align-items:baseline;justify-content:space-between;gap:2px 10px;flex-wrap:wrap;font-size:.88rem;margin:0 2px 6px}
+.wk-t{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
+.wk-range{color:var(--muted);font-size:.78rem}
+.wk-tot{color:var(--muted);font-size:.8rem;font-weight:600}
+.wk-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.wk-day{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:inherit;font:inherit;padding:3px 0 4px;border-radius:10px;cursor:pointer;min-height:56px}
+.wk-day:disabled{cursor:default}
+.wk-day .wd{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.wk-day.today .wd{color:var(--accent-ink);font-weight:800}
+.wk-day.sel{background:var(--soft);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.wk-mark{position:relative;width:28px;height:28px;border-radius:50%;background:var(--k);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.wk-mark svg{width:16px;height:16px;stroke-width:2.2}
+.wk-n{position:absolute;right:-5px;top:-4px;min-width:15px;height:15px;padding:0 3px;border-radius:999px;background:var(--text);color:var(--card);font-size:.62rem;font-weight:800;line-height:15px;text-align:center}
+.wk-more{display:flex;gap:2px;height:5px}
+.wk-more i{width:5px;height:5px;border-radius:50%;background:var(--k)}
+.wk-empty{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border)}
+.wk-day.today .wk-empty{border-color:var(--accent);border-style:solid}
+.wk-day.future .wk-empty{opacity:.45}
+.day-filter{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.88rem;margin:-2px 2px 8px}
+.day-filter .btn svg{width:14px;height:14px}
 .legend{display:flex;gap:14px;justify-content:center;font-size:.78rem;color:var(--muted);margin-top:2px}
 .legend .lg{display:inline-flex;align-items:center;gap:5px}
 .burned-note{display:flex;gap:5px;align-items:center;font-size:.78rem;color:var(--muted);margin:6px 0 0}
@@ -462,7 +553,7 @@ const PREF_KEY = 'treeniappi.ui';
 function loadPrefs(){
   let p = {}; try{ p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; }catch(e){}
   const obj = o => (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
-  return {mealsCollapsed: p.mealsCollapsed !== false, meals: obj(p.meals), setsOpen: p.setsOpen === true, sets: obj(p.sets), wRange: typeof p.wRange === 'string' ? p.wRange : '3m'};
+  return {mealsCollapsed: p.mealsCollapsed !== false, meals: obj(p.meals), setsOpen: p.setsOpen === true, sets: obj(p.sets), wRange: typeof p.wRange === 'string' ? p.wRange : '3m', histWeek: p.histWeek !== false};
 }
 let PREFS = loadPrefs();
 function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(PREFS)); }catch(e){} }
@@ -484,7 +575,7 @@ function openModal(title, body, foot){
     <div class="sheet-body">${body}</div>${foot ? `<div class="sheet-foot">${foot}</div>` : ''}</div>`;
   m.hidden = false; document.body.classList.add('modal-open');
 }
-function closeModal(){ if(typeof stopScanner === 'function') stopScanner(); const m = $('#modal'); m.hidden = true; m.innerHTML = ''; document.body.classList.remove('modal-open'); }
+function closeModal(){ if(typeof stopScanner === 'function') stopScanner(); ui.fs = null; const m = $('#modal'); m.hidden = true; m.innerHTML = ''; document.body.classList.remove('modal-open'); }
 
 /* ====================== Reititys ====================== */
 const PAGES = { treenit:()=>renderTreenit(), kehitys:()=>renderKehitys(), historia:()=>renderHistoria(), kalorit:()=>renderKalorit(), paino:()=>renderPaino(), asetukset:()=>renderAsetukset() };
@@ -1046,6 +1137,25 @@ function kehFunc(all){
 }
 
 /* ====================== HISTORIA ====================== */
+/* Kuluva kalenteriviikko (ma–su, ISO-viikko) Historian yläosassa */
+const WD_SHORT = ['ma','ti','ke','to','pe','la','su'];
+function fmtMinutes(sec){ const m = Math.round(sec / 60), h = Math.floor(m / 60); return h ? `${h} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`; }
+function weekStripHtml(){
+  const T = todayISO(), mon = mondayOf(T), days = WD_SHORT.map((_, i) => addDays(mon, i)), sun = days[6];
+  const wk = S.sessions.filter(x => x.date >= mon && x.date <= sun);
+  const secs = wk.reduce((a, x) => a + (x.durationSec || 0), 0);
+  const km = wk.filter(x => x.kind === 'run' || x.kind === 'bike').reduce((a, x) => a + (x.distanceKm || 0), 0);
+  const swimM = wk.filter(x => x.kind === 'swim').reduce((a, x) => a + (x.distanceM || 0), 0);
+  const tot = wk.length ? [`${wk.length} ${wk.length === 1 ? 'treeni' : 'treeniä'}`, secs ? fmtMinutes(secs) : '', km ? `${fmtNum(km, km >= 10 ? 0 : 1)} km` : '', swimM ? `${fmtNum(swimM, 0)} m uintia` : ''].filter(Boolean).join(' · ') : 'Ei vielä treenejä tällä viikolla';
+  const dayHtml = (d, i) => {
+    const list = wk.filter(x => x.date === d), kinds = KIND_ORDER.filter(k => list.some(x => x.kind === k));
+    const cls = ['wk-day', d === T ? 'today' : '', d > T ? 'future' : '', list.length ? 'has' : '', ui.histDay === d ? 'sel' : ''].filter(Boolean).join(' ');
+    const tip = list.length ? `${weekday(d)} ${fmtDate(d)}: ${list.map(x => x.title || KINDS[x.kind].label).join(', ')}` : `${weekday(d)} ${fmtDate(d)}: ei treenejä`;
+    const mark = list.length ? `<span class="wk-mark k-${kinds[0]}"><svg class="i" viewBox="0 0 24 24">${KIND_ICONS[kinds[0]]}</svg>${list.length > 1 ? `<span class="wk-n">${list.length}</span>` : ''}</span>${kinds.length > 1 ? `<span class="wk-more">${kinds.slice(1).map(k => `<i class="k-${k}"></i>`).join('')}</span>` : ''}` : '<span class="wk-empty"></span>';
+    return `<button type="button" class="${cls}" ${list.length ? `data-action="hist-day" data-d="${d}"` : 'disabled'} aria-label="${esc(tip)}" title="${esc(tip)}"><span class="wd">${WD_SHORT[i]}</span>${mark}</button>`;
+  };
+  return `<section class="card wk-strip" id="weekStrip"><div class="wk-head"><span class="wk-t" title="${fmtDateShort(mon)}–${fmtDateShort(sun)}"><b>Viikko ${isoWeek(T)}</b></span><span class="wk-tot" id="weekTotal">${tot}</span></div><div class="wk-days">${days.map(dayHtml).join('')}</div></section>`;
+}
 function renderHistoria(){
   const mStart = todayISO().slice(0, 8) + '01';
   const month = S.sessions.filter(s => s.date >= mStart && s.date <= todayISO());
@@ -1053,6 +1163,7 @@ function renderHistoria(){
   const m = month.filter(s => s.kind === 'swim').reduce((a, s) => a + (s.distanceM||0), 0);
   const bkm = month.filter(s => s.kind === 'bike').reduce((a, s) => a + (s.distanceKm||0), 0);
   let h = `<div class="page-head"><h1>Historia</h1></div>
+    ${PREFS.histWeek ? weekStripHtml() : ''}
     <section class="card"><h2>${monthLabel(todayISO())}</h2><div class="stats"><span><b>${month.length}</b> treeniä</span><span>Sali: <b>${month.filter(s => s.kind === 'gym').length}</b> krt</span><span>Juoksu: <b>${fmtNum(km, 1)}</b> km</span><span>Pyöräily: <b>${fmtNum(bkm, 1)}</b> km</span><span>Uinti: <b>${fmtNum(m, 0)}</b> m</span><span>Toiminnallinen: <b>${month.filter(s => s.kind === 'func').length}</b> krt</span><span>Kulutus: <b>${fmtNum(month.reduce((a, s) => a + (s.kcalBurned || 0), 0), 0)}</b> kcal</span></div></section>
     <div class="scroll-x" style="margin-bottom:10px"><button type="button" class="chip-btn ${ui.histKind === 'all' ? 'on' : ''}" data-action="hist-kind" data-k="all">Kaikki</button>${KIND_ORDER.map(k => `<button type="button" class="chip-btn ${ui.histKind === k ? 'on' : ''}" data-action="hist-kind" data-k="${k}">${KINDS[k].label}</button>`).join('')}</div>`;
   let list = sortedSessions();
@@ -1063,7 +1174,12 @@ function renderHistoria(){
     if(types.length) h += `<label class="f"><span>Tyyppi</span><select data-change="hist-type" id="histType"><option value="">Kaikki tyypit</option>${types.map(t => `<option ${t === ui.histType ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>`;
     if(ui.histType) list = list.filter(s => s.type === ui.histType);
   }
-  if(!list.length) return h + `<div class="card empty">Ei kirjauksia${ui.histKind !== 'all' ? ' tällä suodatuksella' : ''}.</div>`;
+  if(ui.histDay && !PREFS.histWeek) ui.histDay = null;
+  if(ui.histDay){
+    list = list.filter(s => s.date === ui.histDay);
+    h += `<div class="day-filter" id="dayFilter"><span>Näytetään: <b>${weekday(ui.histDay)} ${fmtDate(ui.histDay)}</b></span><button type="button" class="btn small ghost" data-action="hist-day-clear">${ICON_X} Näytä kaikki</button></div>`;
+  }
+  if(!list.length) return h + `<div class="card empty">Ei kirjauksia${ui.histKind !== 'all' || ui.histDay ? ' tällä suodatuksella' : ''}.</div>`;
   let cur = '';
   for(const s of list){
     const mk = s.date.slice(0, 7);
@@ -1078,8 +1194,23 @@ function renderHistoria(){
 const meals = () => S.food.meals;
 const mealName = id => (S.food.meals.find(m => m.id === id) || {}).name;
 function validMeal(id){ const ms = S.food.meals; if(ms.some(m => m.id === id)) return id; const d = defaultMeal(); return ms.some(m => m.id === d) ? d : ms[0].id; }
-function mealChips(name, selected){ return S.food.meals.map(m => `<label class="chip"><input type="radio" name="${name}" value="${esc(m.id)}" ${selected === m.id ? 'checked' : ''}><span>${esc(m.name)}</span></label>`).join(''); }
-function recentLabel(){ return `Viimeksi käytetyt – napauta lisätäksesi (${(mealName(ui.kalMeal) || '').toLowerCase()})`; }
+function mealSelectHtml(name, selected){ return `<label class="meal-sel"><span>Ateria</span><select name="${name}" data-change="fs-meal" aria-label="Ateria">${S.food.meals.map(m => `<option value="${esc(m.id)}"${m.id === selected ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>`; }
+/* Aterian nimen taivutus (illatiivi "aamiaiseen", adessiivi "aamiaisella"). Omille nimille, joita ei osata taivuttaa, käytetään muotoa "Lisää: Nimi". */
+function inflect(name, form){
+  const w = String(name || '').trim().toLowerCase();
+  if(w.length < 3 || !/^[a-zåäö-]+$/.test(w)) return null;
+  const back = /[aou]/.test(w.replace(/.*-/, ''));
+  let stem, ill;
+  if(/nen$/.test(w)){ stem = w.slice(0, -3) + 'se'; ill = stem + 'en'; }                       // aamiainen → aamiaiseen / aamiaisella
+  else if(/[aeiouyäö]s$/.test(w)){ stem = w.slice(0, -1) + w.slice(-2, -1); ill = stem + 'seen'; } // lounas → lounaaseen / lounaalla
+  else if(/[aeiouyäö]$/.test(w) && !/([aeiouyäö])\1$/.test(w)){ stem = w; ill = w + w.slice(-1) + 'n'; } // välipala → välipalaan / välipalalla
+  else return null;
+  return form === 'ill' ? ill : stem + (back ? 'lla' : 'llä');
+}
+const mealIll = id => inflect(mealName(id), 'ill');
+const addToTitle = id => mealIll(id) ? `Lisää ${mealIll(id)}` : `Lisää: ${mealName(id)}`;
+const addedMsg = id => mealIll(id) ? `Lisätty ${mealIll(id)}` : `Lisätty: ${mealName(id)}`;
+const movedMsg = id => mealIll(id) ? `Siirretty ${mealIll(id)}` : `Siirretty: ${mealName(id)}`;
 function knownFoods(){
   const seen = new Map();
   for(const e of S.food.entries.slice().sort((a, b) => (b.t||0) - (a.t||0) || b.date.localeCompare(a.date))){
@@ -1087,9 +1218,21 @@ function knownFoods(){
   }
   return [...seen.values()];
 }
+/* Viimeksi käytetyt: ensin tämän aterian omat (uusin ensin), sitten muut */
+function recentFor(meal){
+  const sorted = S.food.entries.slice().sort((a, b) => (b.t||0) - (a.t||0) || b.date.localeCompare(a.date));
+  const seen = new Set(), inMeal = [], other = [];
+  for(const e of sorted){ if(e.meal !== meal) continue; const k = lc(e.name.trim()); if(seen.has(k)) continue; seen.add(k); inMeal.push(e); if(inMeal.length >= 8) break; }
+  for(const e of sorted){ const k = lc(e.name.trim()); if(seen.has(k)) continue; seen.add(k); other.push(e); if(other.length >= 10) break; }
+  return {inMeal, other};
+}
+const macroLine = e => [e.p != null ? `P ${fmtNum(e.p)}` : '', e.c != null ? `H ${fmtNum(e.c)}` : '', e.f != null ? `R ${fmtNum(e.f)}` : ''].filter(Boolean).join(' · ');
+const ICON_GO = '<svg class="i go" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
+const ICON_PEN = '<svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/></svg>';
+const ICON_COPY = '<svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>';
 function foodItemHtml(e){
-  const sub = [e.grams ? `${fmtNum(e.grams)} g` : '', e.p != null ? `P ${fmtNum(e.p)} g` : '', e.c != null ? `H ${fmtNum(e.c)} g` : '', e.f != null ? `R ${fmtNum(e.f)} g` : ''].filter(Boolean).join(' · ');
-  return `<div class="food-item"><div class="n"><div>${esc(e.name)}${e.sample ? ' <span class="badge">esim.</span>' : ''}${e.code ? ' <span class="code-ic" title="Viivakoodilla lisätty">' + ICON_BARCODE + '</span>' : ''}</div><div class="small muted">${sub || '&nbsp;'}</div></div><span class="k">${fmtNum(e.kcal, 0)} kcal</span><button type="button" class="icon-btn" data-action="food-del" data-id="${e.id}" aria-label="Poista ${esc(e.name)}">${ICON_X}</button></div>`;
+  const sub = [e.grams ? `${fmtNum(e.grams)} g` : '', macroLine(e) ? macroLine(e) + ' g' : ''].filter(Boolean).join(' · ');
+  return `<button type="button" class="food-item${ui.newFood === e.id ? ' new' : ''}" data-action="food-edit" data-id="${e.id}" aria-label="Muokkaa: ${esc(e.name)}"><span class="n"><span class="fn">${esc(e.name)}${e.sample ? ' <span class="badge">esim.</span>' : ''}${e.code ? ' <span class="code-ic" title="Viivakoodilla lisätty">' + ICON_BARCODE + '</span>' : ''}</span><span class="small muted">${sub || '&nbsp;'}</span></span><span class="k">${fmtNum(e.kcal, 0)} kcal</span>${ICON_GO}</button>`;
 }
 function renderKalorit(){
   ui.kalMeal = validMeal(ui.kalMeal);
@@ -1097,53 +1240,31 @@ function renderKalorit(){
   const entries = S.food.entries.filter(e => e.date === d);
   const sum = k => entries.reduce((a, e) => a + (e[k]||0), 0);
   const kcal = sum('kcal'), p = sum('p'), c = sum('c'), f = sum('f');
-  const daySess = S.sessions.filter(x => x.date === d && x.kcalBurned);
-  const burned = daySess.reduce((a, x) => a + x.kcalBurned, 0);
+  const burned = S.sessions.filter(x => x.date === d && x.kcalBurned).reduce((a, x) => a + x.kcalBurned, 0);
   const addB = S.food.addBurnedToGoal && burned > 0 && g.kcal;
   const goalK = g.kcal ? g.kcal + (addB ? burned : 0) : null;
   const pct = goalK ? Math.min(100, kcal / goalK * 100) : 0, over = goalK && kcal > goalK;
   const isToday = d === todayISO();
-  const known = knownFoods(); ui.recent = known.slice(0, 14);
-  const macro = (lbl, val, goal, color) => `<div class="macro" style="--mc:${color}"><div class="lbl">${lbl}</div><div class="val">${fmtNum(val, 0)}${goal ? ` / ${fmtNum(goal, 0)}` : ''} g</div>${goal ? `<div class="bar thin"><i style="width:${Math.min(100, val/goal*100)}%"></i></div>` : ''}</div>`;
-  let h = `<div class="page-head"><h1>Kalorit</h1><button type="button" class="btn small" data-action="goals-edit">Tavoitteet</button></div>
+  const macro = (lbl, val, goal, color) => `<div class="macro" style="--mc:${color}"><div class="lbl">${lbl}</div><div class="val">${fmtNum(val, 0)}${goal ? `<span class="mg"> / ${fmtNum(goal, 0)}</span>` : ''} g</div>${goal ? `<div class="bar thin"><i style="width:${Math.min(100, val/goal*100)}%"></i></div>` : ''}</div>`;
+  let h = `<div class="page-head"><h1>Kalorit</h1></div>
     <div class="datenav"><button type="button" class="icon-btn" data-action="kal-day" data-d="-1" aria-label="Edellinen päivä"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
       <div class="d">${weekday(d)} ${fmtDate(d)}<small>${isToday ? 'Tänään' : `<a href="#kalorit" data-action="kal-today">Takaisin tähän päivään</a>`}</small></div>
       <button type="button" class="icon-btn" data-action="kal-day" data-d="1" aria-label="Seuraava päivä"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></div>
-    <section class="card">
-      <div class="kcal-big"><div><span class="v">${fmtNum(kcal, 0)}</span> <span class="g" id="goalK">${goalK ? `/ ${fmtNum(goalK, 0)} ` : ''}kcal</span></div>
-        <div class="${over ? 'down' : 'muted'}" style="font-weight:700" id="kcalLeft">${goalK ? (over ? `Yli ${fmtNum(kcal - goalK, 0)} kcal` : `Jäljellä ${fmtNum(goalK - kcal, 0)} kcal`) : ''}</div></div>
+    <section class="card sum-card" id="sumCard" data-action="goals-edit" role="button" tabindex="0" aria-label="Päivän yhteenveto – napauta muokataksesi tavoitteita">
+      <div class="kcal-big"><div><span class="v">${fmtNum(kcal, 0)}</span> <span class="g" id="goalK">${goalK ? `/ ${fmtNum(goalK, 0)} ` : ''}kcal</span><span class="sum-edit" title="Muokkaa tavoitteita">${ICON_PEN}</span></div>
+        <div class="left ${over ? 'down' : goalK ? '' : 'accent'}" id="kcalLeft">${goalK ? (over ? `<small>Yli</small> ${fmtNum(kcal - goalK, 0)} kcal` : `<small>Jäljellä</small> ${fmtNum(goalK - kcal, 0)} kcal`) : 'Aseta tavoite'}</div></div>
       ${goalK ? `<div class="bar ${over ? 'over' : ''}"><i style="width:${pct}%"></i></div>` : ''}
       ${addB ? `<div class="burned-note" id="burnedNote"><svg class="i" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>Kulutus laskettu tavoitteeseen</span></div>` : ''}
       <div class="macros">${macro('Proteiini', p, g.protein, '#7c3aed')}${macro('Hiilihydraatit', c, g.carbs, '#d97706')}${macro('Rasva', f, g.fat, '#0891b2')}</div>
-    </section>
-    <section class="card" id="addFoodCard"><h2>Lisää ruoka</h2>
-      <form id="searchForm" data-submit="food-search" role="search" autocomplete="off"><div class="search-wrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="foodSearch" placeholder="Hae tuotetta nimellä" aria-label="Hae tuotetta nimellä" enterkeyhint="search"></div></form>
-      <div id="searchResults" class="sr" hidden></div>
-      <button type="button" class="btn block scan-btn" data-action="scan-open">${ICON_BARCODE} Skannaa viivakoodi</button>
-      <div class="or"><span>tai lisää käsin</span></div>
-      <form id="foodForm" data-submit="food-add" autocomplete="off">
-        <label class="f"><span>Ruoka</span><input type="text" name="fname" id="foodName" list="foodList" placeholder="esim. Kaurapuuro marjoilla"></label>
-        <datalist id="foodList">${known.map(e => `<option value="${esc(e.name)}">`).join('')}</datalist>
-        <div class="row4">
-          <label class="f"><span>kcal</span><input type="text" name="kcal" inputmode="decimal" placeholder="0"></label>
-          <label class="f"><span>Prot. g</span><input type="text" name="p" inputmode="decimal" placeholder="–"></label>
-          <label class="f"><span>Hiilih. g</span><input type="text" name="c" inputmode="decimal" placeholder="–"></label>
-          <label class="f"><span>Rasva g</span><input type="text" name="fat" inputmode="decimal" placeholder="–"></label>
-        </div>
-        <div class="chips" style="margin-bottom:4px">${mealChips('meal', ui.kalMeal)}</div>
-        <div style="margin-bottom:8px"><button type="button" class="btn small ghost" style="padding:0 4px" data-action="meals-edit">Muokkaa aterioita</button></div>
-        <button type="submit" class="btn primary block">Lisää</button>
-      </form>
-      ${ui.recent.length ? `<div class="f-label" id="recentLbl" style="margin-top:14px">${esc(recentLabel())}</div>
-        <div class="chips">${ui.recent.map((e, i) => `<button type="button" class="chip-btn" data-action="food-quick" data-i="${i}">${esc(e.name)}${e.grams ? ` <span class="muted">${fmtNum(e.grams)} g</span>` : ''} <span class="muted">${fmtNum(e.kcal, 0)}</span></button>`).join('')}</div>` : ''}
     </section>`;
   const groups = S.food.meals.map(m => ({id:m.id, name:m.name, list:entries.filter(e => e.meal === m.id)}));
   const orphans = entries.filter(e => !S.food.meals.some(m => m.id === e.meal));
   if(orphans.length) groups.push({id:'_muut', name:'Muut merkinnät', list:orphans, noAdd:true});
   const anyOpen = groups.some(gr => gr.list.length && !mealCollapsed(gr.id));
   h += `<div class="meals-bar" id="mealsBar"><h2>Ateriat</h2>${entries.length ? `<button type="button" class="btn small ghost" id="mealsToggleAll" data-action="meals-toggle-all">${anyOpen ? 'Pienennä kaikki' : 'Avaa kaikki'}</button>` : ''}</div>`;
-  if(!entries.length) h += `<p class="hint meals-empty">Ei merkintöjä tälle päivälle – lisää ruoka yllä tai aterian +-painikkeella.</p>`;
   for(const gr of groups) h += mealCardHtml(gr);
+  h += `<div class="meals-foot"><button type="button" class="btn small ghost" data-action="meals-edit">${ICON_PEN} Muokkaa aterioita</button></div>`;
+  ui.newFood = null;
   return h;
 }
 function mealCardHtml(gr){
@@ -1152,8 +1273,8 @@ function mealCardHtml(gr){
   const hasM = gr.list.some(e => e.p != null || e.c != null || e.f != null);
   const sub = empty ? 'Ei merkintöjä' : (hasM ? `P ${fmtNum(t('p'), 0)} g · H ${fmtNum(t('c'), 0)} g · R ${fmtNum(t('f'), 0)} g` : `${gr.list.length} ${gr.list.length === 1 ? 'ruoka' : 'ruokaa'}`);
   return `<section class="card meal-card${empty ? ' is-empty' : ''}${col ? ' collapsed' : ''}" data-meal="${id}">
-    <div class="meal-h"><h3><button type="button" class="meal-tog" data-action="${empty ? (gr.noAdd ? '' : 'meal-plus') : 'meal-toggle'}" data-id="${id}"${empty ? '' : ` aria-expanded="${!col}" aria-controls="mb-${id}"`}>${empty ? '<span class="chev-sp"></span>' : ICON_CHEV}<span class="mt"><span class="mn">${esc(gr.name)}</span><span class="mm">${sub}</span></span><span class="mk">${fmtNum(t('kcal'), 0)} kcal</span></button></h3>
-      ${gr.noAdd ? '' : `<button type="button" class="icon-btn meal-plus" data-action="meal-plus" data-id="${id}" aria-label="Lisää ruoka: ${esc(gr.name)}">${ICON_PLUS}</button>`}</div>
+    <div class="meal-h"><h3><button type="button" class="meal-tog" data-action="${empty ? (gr.noAdd ? '' : 'meal-plus') : 'meal-toggle'}" data-id="${id}"${empty ? '' : ` aria-expanded="${!col}" aria-controls="mb-${id}"`}>${empty ? '<span class="chev-sp"></span>' : ICON_CHEV}<span class="mt"><span class="ml"><span class="mn">${esc(gr.name)}</span><span class="mk">${fmtNum(t('kcal'), 0)} kcal</span></span><span class="mm">${sub}</span></span></button></h3>
+      ${gr.noAdd ? '' : `<button type="button" class="add-btn meal-plus" data-action="meal-plus" data-id="${id}" aria-label="Lisää ruoka: ${esc(gr.name)}">${ICON_PLUS}<span>Lisää</span></button>`}</div>
     ${empty ? '' : `<div class="meal-body" id="mb-${id}"${col ? ' hidden' : ''}>${gr.list.map(foodItemHtml).join('')}</div>`}</section>`;
 }
 function syncMealsToggle(){
@@ -1164,10 +1285,154 @@ function setMealOpen(card, open){
   body.hidden = !open; card.classList.toggle('collapsed', !open);
   const b = card.querySelector('.meal-tog'); if(b) b.setAttribute('aria-expanded', String(open));
 }
+/* Palaa Kalorit-sivulle: ateria auki, uusi/muokattu rivi korostettuna näkyvissä */
+function backToMeal(meal, rowId){
+  PREFS.meals[meal] = false; savePrefs();
+  closeModal(); ui.newFood = rowId || null; render();
+  const card = $(`.meal-card[data-meal="${CSS.escape(meal)}"]`); if(card) card.scrollIntoView({block:'nearest'});
+}
 function addFood(name, kcal, p, c, f, meal, extra){
+  meal = validMeal(meal);
   const e = Object.assign({id:uid(), date:ui.kalDate, name, kcal, p, c, f, meal, t:Date.now()}, extra || {});
-  S.food.entries.push(e); save(); render();
-  toast(`Lisätty: ${name} (${fmtNum(kcal, 0)} kcal)`, {undo:() => { S.food.entries = S.food.entries.filter(x => x.id !== e.id); save(); render(); }});
+  S.food.entries.push(e); save(); ui.kalMeal = meal;
+  backToMeal(meal, e.id);
+  toast(addedMsg(meal), {undo:() => { S.food.entries = S.food.entries.filter(x => x.id !== e.id); save(); render(); }});
+}
+
+/* ---------- Lisää ruoka -näkymä (koko näytön arkki): valinta → määrä → tallenna ---------- */
+const ICON_BACK = '<svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>';
+function fsShell(title, body, foot, back){
+  const m = $('#modal'), again = !m.hidden && !!$('#foodSheet');
+  m.innerHTML = `<div class="sheet full${again ? ' noanim' : ''}" id="foodSheet" role="dialog" aria-modal="true" aria-labelledby="fsTitle">
+    <div class="sheet-head">${back ? `<button type="button" class="icon-btn back" data-action="fs-back" aria-label="Takaisin">${ICON_BACK}</button>` : ''}<h2 id="fsTitle">${esc(title)}</h2><button type="button" class="icon-btn" data-action="modal-close" aria-label="Sulje">${ICON_X}</button></div>
+    <div class="sheet-body">${body}</div><div class="sheet-foot"${foot ? '' : ' hidden'}>${foot || ''}</div></div>`;
+  m.hidden = false; document.body.classList.add('modal-open');
+}
+function fsFoot(html){ const f = $('#foodSheet .sheet-foot'); if(!f) return; f.innerHTML = html || ''; f.hidden = !html; }
+const saveFoot = form => `<button type="submit" form="${form}" class="btn primary grow">Tallenna</button>`;
+function fsOpen(meal){ ui.fs = {meal:validMeal(meal), q:''}; ui.kalMeal = ui.fs.meal; fsPick(); }
+function rcItem(e, i){
+  const sub = [e.grams ? `${fmtNum(e.grams)} g` : '', macroLine(e) ? macroLine(e) + ' g' : ''].filter(Boolean).join(' · ') || 'annos';
+  return `<button type="button" class="rc-item" data-action="fs-recent" data-i="${i}"><span class="sr-main"><span class="sr-name">${esc(e.name)}</span><span class="sr-sub">${sub}</span></span><span class="rc-k">${fmtNum(e.kcal, 0)} kcal</span><span class="rc-plus" aria-hidden="true">${ICON_PLUS}</span></button>`;
+}
+function fsPick(){
+  stopScanner();
+  const fs = ui.fs, meal = fs.meal; fs.step = 'pick';
+  const {inMeal, other} = recentFor(meal); fs.list = inMeal.concat(other);
+  const prev = addDays(ui.kalDate, -1), yList = S.food.entries.filter(e => e.date === prev && e.meal === meal);
+  const ade = inflect(mealName(meal), 'ade');
+  let lists = '';
+  if(yList.length) lists += `<div class="rc"><button type="button" class="rc-item copy" data-action="fs-copy"><span class="rc-ic">${ICON_COPY}</span><span class="sr-main"><span class="sr-name">${ui.kalDate === todayISO() ? 'Kopioi eilisestä' : 'Kopioi edellisestä päivästä'}</span><span class="sr-sub">${esc(mealName(meal))} ${fmtDate(prev)} · ${yList.length} ${yList.length === 1 ? 'ruoka' : 'ruokaa'} · ${fmtNum(yList.reduce((a, e) => a + (e.kcal||0), 0), 0)} kcal</span></span></button></div>`;
+  if(inMeal.length) lists += `<div class="fs-sec">${ade ? `Viimeksi ${ade}` : `Viimeksi: ${esc(mealName(meal))}`}</div><div class="rc" id="rcMeal">${inMeal.map((e, i) => rcItem(e, i)).join('')}</div>`;
+  if(other.length) lists += `<div class="fs-sec">${inMeal.length ? 'Muut viimeksi käytetyt' : 'Viimeksi käytetyt'}</div><div class="rc" id="rcOther">${other.map((e, i) => rcItem(e, inMeal.length + i)).join('')}</div>`;
+  if(!fs.list.length && !yList.length) lists += `<p class="hint fs-empty">Täällä näkyvät viimeksi käyttämäsi ruoat – yksi napautus lisää ne uudelleen. Hae ruokaa, skannaa viivakoodi tai lisää käsin.</p>`;
+  fsShell(addToTitle(meal), `<div class="fs-top">
+      <form id="searchForm" class="search-wrap" data-submit="food-search" role="search" autocomplete="off"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="foodSearch" placeholder="Hae ruokaa tai tuotetta" aria-label="Hae ruokaa tai tuotetta" enterkeyhint="search" value="${esc(fs.q || '')}"></form>
+      <button type="button" class="scan-ic" data-action="scan-open" aria-label="Skannaa viivakoodi" title="Skannaa viivakoodi">${ICON_BARCODE}</button></div>
+    <div id="searchResults" class="sr" hidden></div>
+    <div id="fsLists">${lists}</div>
+    <details class="fs-manual" id="manualBox"><summary>${ICON_PLUS}<span>Lisää käsin</span>${ICON_CHEV}</summary>
+      <form id="foodForm" data-submit="food-add" autocomplete="off">
+        <label class="f"><span>Ruoka</span><input type="text" name="fname" id="foodName" list="foodList" placeholder="esim. Kaurapuuro marjoilla"></label>
+        <datalist id="foodList">${knownFoods().map(e => `<option value="${esc(e.name)}">`).join('')}</datalist>
+        <div class="row4">
+          <label class="f"><span>kcal</span><input type="text" name="kcal" inputmode="decimal" placeholder="0"></label>
+          <label class="f"><span>Prot. g</span><input type="text" name="p" inputmode="decimal" placeholder="–"></label>
+          <label class="f"><span>Hiilih. g</span><input type="text" name="c" inputmode="decimal" placeholder="–"></label>
+          <label class="f"><span>Rasva g</span><input type="text" name="fat" inputmode="decimal" placeholder="–"></label>
+        </div>
+        <button type="submit" class="btn primary block">Tallenna</button>
+      </form></details>`, '', false);
+  if(fs.q) onSearchInput(true);
+}
+function fsScan(){
+  ui.fs.step = 'scan';
+  fsShell(addToTitle(ui.fs.meal), `<div id="scanBox">
+      <div class="scan-view" id="scanView" hidden><video id="scanVideo" playsinline webkit-playsinline muted autoplay></video><div class="scan-guide"><i></i></div></div>
+      <div class="scan-status" id="scanStatus">Käynnistetään kameraa…</div>
+      <div style="text-align:center;margin-top:8px"><button type="button" id="scanRetry" class="btn small" data-action="scan-start" hidden>Yritä kameraa uudelleen</button></div>
+      <div class="or"><span>tai syötä numero</span></div>
+      <form id="codeForm" data-submit="code-lookup" class="add-inline" autocomplete="off"><input type="text" name="code" id="codeInput" inputmode="numeric" placeholder="Viivakoodin numero" aria-label="Viivakoodin numero" maxlength="14"><button type="submit" class="btn small primary">Hae</button></form>
+      <div class="hint">EAN-13, EAN-8 tai UPC – numero löytyy viivakoodin alta.</div>
+    </div><div id="productBox" data-mode="scan" hidden></div>`, '', true);
+  startScanner();
+}
+function fsProduct(code, prod, origin, grams){
+  ui.fs.step = 'product';
+  fsShell(addToTitle(ui.fs.meal), `<div id="scanBox" hidden></div><div id="productBox" data-mode="search"></div>`, '', true);
+  showProduct(code, prod, origin, null, grams);
+}
+/* Määrävaihe aiemmalle ruoalle (ei per 100 g -tietoja) ja olemassa olevan merkinnän muokkaus */
+function fsAmount(src, editId){
+  const edit = editId ? S.food.entries.find(x => x.id === editId) : null;
+  const meal = edit ? validMeal(edit.meal) : ui.fs.meal;
+  const gm = src.grams > 0, amount = gm ? src.grams : 1;
+  const per = v => v == null ? null : v / amount;
+  ui.amt = {gm, editId:edit ? edit.id : null, code:src.code || null, base:{kcal:per(src.kcal), p:per(src.p), c:per(src.c), f:per(src.f)}};
+  ui.fs.step = edit ? 'edit' : 'amount';
+  const prod = src.code && S.food.products[src.code];
+  const chips = gm ? `${prod && prod.servingG ? `<button type="button" class="chip-btn" data-action="amt-set" data-v="${prod.servingG}">1 annos (${fmtNum(prod.servingG)} g)</button>` : ''}<button type="button" class="chip-btn" data-action="amt-set" data-v="100">100 g</button>${edit ? '' : `<button type="button" class="chip-btn" data-action="amt-set" data-v="${amount}">Edellinen (${fmtNum(amount)} g)</button>`}`
+    : [0.5, 1, 1.5, 2].map(v => `<button type="button" class="chip-btn" data-action="amt-set" data-v="${v}">${fmtNum(v)}</button>`).join('');
+  const sub = edit ? `${weekday(edit.date)} ${fmtDate(edit.date)}${edit.code ? ' · viivakoodituote' : ''}` : `Aiempi merkintä · ${gm ? `${fmtNum(amount)} g` : '1 annos'} = ${fmtNum(src.kcal, 0)} kcal`;
+  const v = k => inNum(src[k]);
+  fsShell(edit ? 'Muokkaa merkintää' : addToTitle(meal), `<form id="amtForm" data-submit="amt-save" autocomplete="off">
+      <div class="prod-head">${prod && prod.image ? `<img src="${esc(prod.image)}" alt="" onerror="this.remove()">` : ''}<div><div class="prod-name" id="amtName">${esc(src.name)}</div><div class="small muted">${sub}</div></div></div>
+      <div class="amt-box"><label class="f"><span>Määrä</span><span class="amt-row"><input type="text" name="amount" id="amtInput" inputmode="decimal" value="${inNum(amount)}" aria-label="Määrä ${gm ? 'grammoina' : 'annoksina'}"><span class="unit">${gm ? 'g' : 'annosta'}</span></span></label>
+        <div class="chips">${chips}</div></div>
+      <div class="calc col"><span>Yhteensä</span><b id="amtCalc">–</b></div>
+      ${mealSelectHtml('pmeal', meal)}
+      <details class="more vals"${edit ? ' open' : ''}><summary class="sum">${edit ? 'Nimi ja ravintoarvot' : 'Muokkaa nimeä tai arvoja'}</summary>
+        <label class="f"><span>Ruoka</span><input type="text" name="fname" value="${esc(src.name)}"></label>
+        <div class="f-label">Ravintoarvot (koko määrä)</div>
+        <div class="row4">
+          <label class="f"><span>kcal</span><input type="text" name="kcal" data-v="kcal" inputmode="decimal" value="${v('kcal')}"></label>
+          <label class="f"><span>Prot. g</span><input type="text" name="p" data-v="p" inputmode="decimal" value="${v('p')}" placeholder="–"></label>
+          <label class="f"><span>Hiilih. g</span><input type="text" name="c" data-v="c" inputmode="decimal" value="${v('c')}" placeholder="–"></label>
+          <label class="f"><span>Rasva g</span><input type="text" name="fat" data-v="f" inputmode="decimal" value="${v('f')}" placeholder="–"></label>
+        </div></details>
+    </form>`, edit ? `<button type="button" class="btn danger-t" data-action="food-del" data-id="${edit.id}">Poista</button><span class="spacer"></span><button type="submit" form="amtForm" class="btn primary">Tallenna</button>` : saveFoot('amtForm'), !edit);
+  updateAmtCalc();
+}
+const AMT_FIELDS = [['kcal', 'kcal'], ['p', 'p'], ['c', 'c'], ['f', 'fat']];
+function amtFromBase(){
+  const f = $('#amtForm'), a = num(f.amount.value); if(a == null || a <= 0) return;
+  for(const [k, n] of AMT_FIELDS){ const b = ui.amt.base[k]; f[n].value = b == null ? '' : inNum(k === 'kcal' ? Math.round(b * a) : r1(b * a)); }
+  updateAmtCalc();
+}
+function amtToBase(input){
+  const f = $('#amtForm'), a = num(f.amount.value), x = num(input.value);
+  if(a > 0) ui.amt.base[input.dataset.v] = x == null ? null : x / a;
+  updateAmtCalc();
+}
+function updateAmtCalc(){
+  const f = $('#amtForm'); if(!f) return;
+  const k = num(f.kcal.value), out = $('#amtCalc');
+  if(k == null){ out.textContent = '–'; return; }
+  const m = macroLine({p:num(f.p.value), c:num(f.c.value), f:num(f.fat.value)});
+  out.textContent = `${fmtNum(k, 0)} kcal${m ? ' · ' + m + ' g' : ''}`;
+}
+function saveAmount(f){
+  const name = f.fname.value.trim(), kcal = num(f.kcal.value), a = num(f.amount.value), meal = validMeal(f.pmeal.value);
+  if(a == null || a <= 0){ toast(ui.amt.gm ? 'Anna määrä grammoina' : 'Anna annosten määrä', {error:true}); f.amount.focus(); return; }
+  if(!name || kcal == null || kcal < 0){ toast('Anna ruoan nimi ja kalorit', {error:true}); f.querySelector('details.vals').open = true; (name ? f.kcal : f.fname).focus(); return; }
+  const vals = {name, kcal:Math.round(kcal), p:num(f.p.value), c:num(f.c.value), f:num(f.fat.value)};
+  if(ui.amt.editId){
+    const e = S.food.entries.find(x => x.id === ui.amt.editId); if(!e){ closeModal(); return; }
+    const moved = e.meal !== meal;
+    Object.assign(e, vals, {meal}); if(ui.amt.gm) e.grams = r1(a);
+    save(); backToMeal(meal, e.id); toast(moved ? movedMsg(meal) : 'Muutokset tallennettu');
+    return;
+  }
+  const extra = {}; if(ui.amt.code) extra.code = ui.amt.code; if(ui.amt.gm) extra.grams = r1(a);
+  addFood(vals.name, vals.kcal, vals.p, vals.c, vals.f, meal, extra);
+}
+function copyPrevDay(){
+  const meal = ui.fs.meal, prev = addDays(ui.kalDate, -1);
+  const src = S.food.entries.filter(e => e.date === prev && e.meal === meal); if(!src.length) return;
+  const now = Date.now(), ids = [];
+  src.forEach((e, i) => { const c = Object.assign({}, e, {id:uid() + i, date:ui.kalDate, t:now + i}); delete c.sample; ids.push(c.id); S.food.entries.push(c); });
+  save(); backToMeal(meal);
+  toast(`${mealIll(meal) ? `Kopioitu ${mealIll(meal)}` : `Kopioitu: ${mealName(meal)}`} (${src.length} ${src.length === 1 ? 'ruoka' : 'ruokaa'})`, {undo:() => { S.food.entries = S.food.entries.filter(x => !ids.includes(x.id)); save(); render(); }});
 }
 
 /* ====================== Paino ====================== */
@@ -1336,18 +1601,6 @@ function gtinValid(code){
   d.reverse().forEach((x, i) => sum += x * (i % 2 === 0 ? 3 : 1));
   return (10 - sum % 10) % 10 === check;
 }
-function openScanner(){
-  openModal('Skannaa viivakoodi', `<div id="scanBox">
-      <div class="scan-view" id="scanView" hidden><video id="scanVideo" playsinline webkit-playsinline muted autoplay></video><div class="scan-guide"><i></i></div></div>
-      <div class="scan-status" id="scanStatus">Käynnistetään kameraa…</div>
-      <div style="text-align:center;margin-top:8px"><button type="button" id="scanRetry" class="btn small" data-action="scan-start" hidden>Yritä kameraa uudelleen</button></div>
-      <div class="or"><span>tai syötä numero</span></div>
-      <form id="codeForm" data-submit="code-lookup" class="add-inline" autocomplete="off"><input type="text" name="code" id="codeInput" inputmode="numeric" placeholder="Viivakoodin numero" aria-label="Viivakoodin numero" maxlength="14"><button type="submit" class="btn small primary">Hae</button></form>
-      <div class="hint">EAN-13, EAN-8 tai UPC – numero löytyy viivakoodin alta.</div>
-    </div><div id="productBox" hidden></div>`,
-    `<span class="spacer"></span><button type="button" class="btn" data-action="modal-close">Sulje</button>`);
-  startScanner();
-}
 function setScanStatus(msg, cls){ const st = $('#scanStatus'); if(st){ st.innerHTML = msg; st.className = 'scan-status ' + (cls || ''); } }
 function cameraErrorText(e){
   const n = e && e.name;
@@ -1469,13 +1722,13 @@ async function lookupProduct(code){
     showProduct(code, p, 'off');
   } catch(e){ if(!$('#productBox')) return; showProduct(code, null, e.offline ? 'offline' : 'error', e.message); }
 }
-function showProduct(code, prod, origin, errMsg){
+function showProduct(code, prod, origin, errMsg, initGrams){
   stopScanner();
   const box = $('#productBox'); if(!box) return;
   $('#scanBox').hidden = true; box.hidden = false;
   const manual = !prod;
   const pr = prod || {name:'', brand:'', per100:{kcal:null, p:null, c:null, f:null}, servingG:null};
-  const grams = pr.servingG || 100;
+  const grams = initGrams || pr.servingG || 100;
   const notices = {
     notfound:`<b>Tuotetta ei löytynyt.</b> Viivakoodia ${esc(code)} ei ole Open Food Factsissa. Syötä tiedot pakkauksesta (per 100 g) – tuote tallentuu tälle viivakoodille, joten seuraavalla skannauksella se löytyy suoraan.`,
     offline:`<b>Ei verkkoyhteyttä.</b> Tuotetta ${esc(code)} ei ole vielä tallennettu laitteelle. Voit syöttää tiedot pakkauksesta käsin (tallentuu tälle viivakoodille) tai yrittää myöhemmin uudelleen.`,
@@ -1484,29 +1737,29 @@ function showProduct(code, prod, origin, errMsg){
   };
   const srcTxt = origin === 'off' ? 'Lähde: Open Food Facts' : origin === 'cache' ? (pr.source === 'off' ? 'Tallennettu laitteelle (Open Food Facts)' : 'Oma tallennettu tuote') : '';
   const missing = !manual && pr.per100.kcal == null;
-  box.innerHTML = `<form id="prodForm" data-submit="prod-save" data-code="${esc(code)}" data-origin="${origin}" autocomplete="off">
-    ${manual ? `<div class="notice">${notices[origin] || notices.notfound}</div>` : `<div class="prod-head">${pr.image ? `<img src="${esc(pr.image)}" alt="" onerror="this.remove()">` : `<div class="prod-ph">${ICON_BARCODE}</div>`}
-      <div><div class="prod-name" id="prodName">${esc(pr.name || 'Nimetön tuote')}</div><div class="small muted">${pr.brand ? esc(pr.brand) + ' · ' : ''}${esc(code)}</div><div class="small src">${srcTxt}</div></div></div>`}
-    ${missing ? '<div class="notice">Tuotteen energiatieto puuttuu – täydennä arvot pakkauksesta.</div>' : ''}
-    ${manual ? `<label class="f"><span>Tuotteen nimi</span><input type="text" name="pname" placeholder="esim. Maitorahka" value=""></label>
-      <label class="f"><span>Merkki (valinnainen)</span><input type="text" name="pbrand" value=""></label>`
-      : `<details class="more"><summary class="sum">Muokkaa nimeä</summary><label class="f"><span>Tuotteen nimi</span><input type="text" name="pname" value="${esc(pr.name)}"></label></details>`}
-    <div class="f-label">Ravintoarvot / 100 g</div>
-    <div class="row4">
+  const per100 = `<div class="row4">
       <label class="f"><span>kcal</span><input type="text" name="k100" inputmode="decimal" value="${inNum(pr.per100.kcal)}"></label>
       <label class="f"><span>Prot. g</span><input type="text" name="p100" inputmode="decimal" value="${inNum(pr.per100.p)}"></label>
       <label class="f"><span>Hiilih. g</span><input type="text" name="c100" inputmode="decimal" value="${inNum(pr.per100.c)}"></label>
       <label class="f"><span>Rasva g</span><input type="text" name="f100" inputmode="decimal" value="${inNum(pr.per100.f)}"></label>
-    </div>
-    ${manual ? `<label class="f"><span>Annoskoko g (valinnainen)</span><input type="text" name="serving" inputmode="decimal" placeholder="esim. 150"></label>` : ''}
-    <label class="f"><span>Syöty määrä (g)</span><input type="text" name="grams" id="gramsInput" inputmode="decimal" value="${inNum(grams)}"></label>
-    <div class="chips" style="margin:-4px 0 12px">${pr.servingG ? `<button type="button" class="chip-btn" data-action="grams-set" data-g="${pr.servingG}">1 annos (${fmtNum(pr.servingG)} g)</button><button type="button" class="chip-btn" data-action="grams-set" data-g="${pr.servingG*2}">2 annosta</button>` : ''}<button type="button" class="chip-btn" data-action="grams-set" data-g="100">100 g</button></div>
-    <div class="calc col"><span>Yhteensä (syöty määrä)</span><b id="prodCalc">–</b></div>
-    <div class="f-label">Ateria</div>
-    <div class="chips" style="margin-bottom:14px">${mealChips('pmeal', validMeal(ui.kalMeal))}</div>
-    <button type="submit" class="btn primary block">Tallenna merkintä</button>
-    <div style="display:flex;gap:8px;margin-top:8px">${origin === 'offline' || origin === 'error' ? `<button type="button" class="btn small" data-action="code-retry" data-code="${esc(code)}">Yritä uudelleen</button>` : ''}${box.dataset.mode === 'search' ? '<button type="button" class="btn small" data-action="modal-close">Takaisin hakuun</button>' : '<button type="button" class="btn small" data-action="scan-again">Skannaa toinen</button>'}</div>
+    </div>`;
+  const extraBtns = [origin === 'offline' || origin === 'error' ? `<button type="button" class="btn small" data-action="code-retry" data-code="${esc(code)}">Yritä uudelleen</button>` : '', box.dataset.mode === 'scan' ? '<button type="button" class="btn small" data-action="scan-again">Skannaa toinen</button>' : ''].join('');
+  box.innerHTML = `<form id="prodForm" data-submit="prod-save" data-code="${esc(code)}" data-origin="${origin}" autocomplete="off">
+    ${manual ? `<div class="notice">${notices[origin] || notices.notfound}</div>` : `<div class="prod-head">${pr.image ? `<img src="${esc(pr.image)}" alt="" onerror="this.remove()">` : `<div class="prod-ph">${ICON_BARCODE}</div>`}
+      <div><div class="prod-name" id="prodName">${esc(pr.name || 'Nimetön tuote')}</div><div class="small muted">${pr.brand ? esc(pr.brand) + ' · ' : ''}${esc(code)}${pr.per100.kcal != null ? ` · ${fmtNum(pr.per100.kcal, 0)} kcal/100 g` : ''}</div><div class="small src">${srcTxt}</div></div></div>`}
+    ${missing ? '<div class="notice">Tuotteen energiatieto puuttuu – täydennä arvot pakkauksesta.</div>' : ''}
+    ${manual ? `<label class="f"><span>Tuotteen nimi</span><input type="text" name="pname" placeholder="esim. Maitorahka" value=""></label>
+      <label class="f"><span>Merkki (valinnainen)</span><input type="text" name="pbrand" value=""></label>
+      <div class="f-label">Ravintoarvot / 100 g</div>${per100}
+      <label class="f"><span>Annoskoko g (valinnainen)</span><input type="text" name="serving" inputmode="decimal" placeholder="esim. 150"></label>` : ''}
+    <div class="amt-box"><label class="f"><span>Määrä</span><span class="amt-row"><input type="text" name="grams" id="gramsInput" inputmode="decimal" value="${inNum(grams)}" aria-label="Määrä grammoina"><span class="unit">g</span></span></label>
+      <div class="chips">${pr.servingG ? `<button type="button" class="chip-btn" data-action="grams-set" data-g="${pr.servingG}">1 annos (${fmtNum(pr.servingG)} g)</button><button type="button" class="chip-btn" data-action="grams-set" data-g="${pr.servingG*2}">2 annosta</button>` : ''}<button type="button" class="chip-btn" data-action="grams-set" data-g="100">100 g</button></div></div>
+    <div class="calc col"><span>Yhteensä</span><b id="prodCalc">–</b></div>
+    ${mealSelectHtml('pmeal', validMeal(ui.fs ? ui.fs.meal : ui.kalMeal))}
+    ${manual ? '' : `<details class="more vals"${missing ? ' open' : ''}><summary class="sum">Muokkaa nimeä tai arvoja / 100 g</summary><label class="f"><span>Tuotteen nimi</span><input type="text" name="pname" value="${esc(pr.name)}"></label><div class="f-label">Ravintoarvot / 100 g</div>${per100}</details>`}
+    ${extraBtns ? `<div class="prod-btns">${extraBtns}</div>` : ''}
   </form>`;
+  fsFoot(saveFoot('prodForm'));
   updateProdCalc();
 }
 function updateProdCalc(){
@@ -1522,17 +1775,15 @@ function saveProductEntry(f){
   const per100 = {kcal:num(f.k100.value), p:num(f.p100.value), c:num(f.c100.value), f:num(f.f100.value)};
   const grams = num(f.grams.value);
   if(!name){ toast('Anna tuotteelle nimi', {error:true}); if(f.pname){ const d = f.pname.closest('details'); if(d) d.open = true; f.pname.focus(); } return; }
-  if(per100.kcal == null){ toast('Anna energia (kcal / 100 g)', {error:true}); f.k100.focus(); return; }
+  if(per100.kcal == null){ toast('Anna energia (kcal / 100 g)', {error:true}); const d = f.k100.closest('details'); if(d) d.open = true; f.k100.focus(); return; }
   if(!grams || grams <= 0){ toast('Anna syöty määrä grammoina', {error:true}); f.grams.focus(); return; }
   const changed = !old || old.name !== name || ['kcal','p','c','f'].some(k => (old.per100[k] ?? null) !== per100[k]);
   const prod = Object.assign({}, old || {code, brand:f.pbrand ? f.pbrand.value.trim() : '', image:'', servingSize:''}, {name, per100, updatedAt:Date.now()});
   if(!old) prod.servingG = f.serving ? (num(f.serving.value) || null) : null;
   if(!old || (changed && old.source === 'off')) prod.source = old ? 'muokattu' : 'oma';
   S.food.products[code] = prod;
-  const meal = (f.querySelector('input[name=pmeal]:checked') || {}).value || validMeal(ui.kalMeal);
-  ui.kalMeal = meal;
+  const meal = validMeal(f.pmeal ? f.pmeal.value : ui.kalMeal);
   const m = v => v == null ? null : r1(v * grams / 100);
-  closeModal();
   addFood(name, Math.round(per100.kcal * grams / 100), m(per100.p), m(per100.c), m(per100.f), meal, {code, grams});
 }
 /* ---------- Tuotehaku nimellä (omat + Open Food Facts) ---------- */
@@ -1577,6 +1828,8 @@ function onSearchInput(immediate){
   const q = inp.value.trim();
   clearTimeout(searchTimer); if(searchCtl){ searchCtl.abort(); searchCtl = null; }
   const seq = ++searchSeq;
+  if(ui.fs) ui.fs.q = q;
+  const lists = $('#fsLists'); if(lists) lists.hidden = !!q;
   if(!q){ box.hidden = true; box.innerHTML = ''; return; }
   ui.searchQ = q; ui.searchLocal = localSearch(q); ui.searchOff = null;
   if(q.length < 3){ renderSearch({status:'short'}); return; }
@@ -1600,7 +1853,7 @@ async function runOffSearch(q, seq){
   } finally{ clearTimeout(to); clearTimeout(slow); if(searchCtl === ctl) searchCtl = null; }
 }
 function srItem(action, i, r, sub){
-  const img = r.image ? `<img src="${esc(r.image)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sr-ph'}))">` : '<span class="sr-ph"></span>';
+  const img = r.image ? `<img src="${esc(r.image)}" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'sr-ph'}))">` : r.type === 'food' ? '' : '<span class="sr-ph"></span>';
   return `<button type="button" class="sr-item" data-action="${action}" data-i="${i}">${img}<span class="sr-main"><span class="sr-name">${esc(r.name)}</span><span class="sr-sub">${sub}</span></span><span class="sr-kcal">${r.kcal != null ? `${fmtNum(r.kcal, 0)}<small>${r.type === 'food' ? ' kcal' : ' kcal/100 g'}</small>` : '<small>kcal ?</small>'}</span></button>`;
 }
 function renderSearch(st){
@@ -1628,10 +1881,6 @@ function renderSearch(st){
       : `<div class="sr-status">Ei tuloksia haulle “${esc(q)}”. Kokeile toista hakusanaa tai skannaa viivakoodi.</div>`;
   }
   box.innerHTML = h;
-}
-function openProductModal(code, prod, origin){
-  openModal('Lisää tuote', `<div id="scanBox" hidden></div><div id="productBox" data-mode="search"></div>`, `<span class="spacer"></span><button type="button" class="btn" data-action="modal-close">Sulje</button>`);
-  showProduct(code, prod, origin);
 }
 
 function openGoals(){
@@ -1664,6 +1913,7 @@ function renderAsetukset(){
     ${secHtml('ateriat', 'Ateriat', esc(mealsSummary()), mealEditorHtml())}
     ${secHtml('paino', 'Paino', `${S.weight.entries.length} painomerkintää · ${S.weight.goal != null ? `tavoite ${kgFmt(S.weight.goal)} kg` : 'ei tavoitepainoa'}`, `<form data-submit="w-goal-set" autocomplete="off"><label class="f"><span>Tavoitepaino (kg) – näkyy Paino-sivun kaaviossa katkoviivana</span>
       <div class="add-inline" style="margin-top:0"><input type="text" name="wgoal" inputmode="decimal" placeholder="esim. 78 (tyhjä = ei tavoitetta)" value="${S.weight.goal != null ? kgFmt(S.weight.goal) : ''}"><button type="submit" class="btn small">Tallenna</button></div></label></form>`)}
+    ${secHtml('historia', 'Historia', `Kuluva viikko: ${PREFS.histWeek ? 'näkyy' : 'piilotettu'}`, `<label class="check-row"><input type="checkbox" id="histWeekToggle" data-change="hist-week" ${PREFS.histWeek ? 'checked' : ''}><span><b>Näytä kuluva viikko Historiassa</b><br><span class="small muted">Historia-sivun yläosaan tiivis viikkonäkymä (ma–su): viikkonumero, treenipäivät lajivärein ja viikon yhteenveto. Oletuksena päällä.</span></span></label>`)}
     ${secHtml('tyypit', 'Treenityypit', `${KIND_ORDER.reduce((a, k) => a + S.types[k].length, 0)} treenityyppiä · ${S.strokes.length} uintityyliä`, `<p class="hint" style="margin-top:0">Näistä valitaan tyyppi kirjatessa. Tyypin poistaminen ei muuta vanhoja kirjauksia.</p>
       ${KIND_ORDER.map(k => typeEditor(k, KINDS[k].label, S.types[k])).join('')}
       ${typeEditor('strokes', 'Uintityylit', S.strokes)}
@@ -1672,7 +1922,7 @@ function renderAsetukset(){
       <div class="danger-box"><h3>Vaarallinen alue</h3>
         <p class="small">Poistaa pysyvästi kaikki tämän laitteen Treeniappi-tiedot. Toimintoa ei voi perua.</p>
         <button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot…</button></div></details>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.5</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.4.0</p>`;
 }
 /* Koko tietojen tyhjennys: vahva vahvistus (kirjoita POISTA) */
 function openWipeDialog(){
@@ -1813,10 +2063,18 @@ const ACTIONS = {
   'keh-metric': el => { ui.kehMetric = el.dataset.m; render(); },
   'keh-type': el => { ui.kehType = el.dataset.t; render(); },
   'hist-kind': el => { ui.histKind = el.dataset.k; ui.histType = ''; render(); },
+  'hist-day': el => { ui.histDay = ui.histDay === el.dataset.d ? null : el.dataset.d; render(); const f = $('#dayFilter'); if(f) f.scrollIntoView({block:'nearest'}); },
+  'hist-day-clear': () => { ui.histDay = null; render(); },
   'kal-day': el => { ui.kalDate = addDays(ui.kalDate, +el.dataset.d); render(); },
   'kal-today': (el, e) => { e.preventDefault(); ui.kalDate = todayISO(); render(); },
-  'food-quick': el => { const e = ui.recent[+el.dataset.i]; if(e) addFood(e.name, e.kcal, e.p ?? null, e.c ?? null, e.f ?? null, ui.kalMeal); },
-  'food-del': el => { const e = S.food.entries.find(x => x.id === el.dataset.id); if(!e) return; S.food.entries = S.food.entries.filter(x => x !== e); save(); render();
+  'fs-recent': el => { const e = (ui.fs && ui.fs.list || [])[+el.dataset.i]; if(!e) return;
+    const pr = e.code && S.food.products[e.code];
+    if(pr && pr.per100 && pr.per100.kcal != null && e.grams) fsProduct(e.code, pr, 'cache', e.grams); else fsAmount(e); },
+  'fs-back': () => { if(ui.fs) fsPick(); else closeModal(); },
+  'fs-copy': () => copyPrevDay(),
+  'amt-set': el => { $('#amtInput').value = inNum(+el.dataset.v); amtFromBase(); },
+  'food-edit': el => { const e = S.food.entries.find(x => x.id === el.dataset.id); if(!e) return; ui.fs = {meal:validMeal(e.meal), q:''}; fsAmount(e, e.id); },
+  'food-del': el => { const e = S.food.entries.find(x => x.id === el.dataset.id); if(!e) return; S.food.entries = S.food.entries.filter(x => x !== e); save(); closeModal(); render();
     toast(`Poistettu: ${e.name}`, {undo:() => { S.food.entries.push(e); save(); render(); }}); },
   'goals-edit': () => openGoals(),
   'meals-edit': () => openMealEditor(),
@@ -1836,12 +2094,7 @@ const ACTIONS = {
     PREFS.mealsCollapsed = collapse; PREFS.meals = {}; savePrefs();
     $$('.meal-card').forEach(c => setMealOpen(c, !collapse)); syncMealsToggle();
     toast(collapse ? 'Ateriat pienennetty – napauta ateriaa avataksesi' : 'Kaikki ateriat avattu'); },
-  'meal-plus': el => {
-    const m = S.food.meals.find(x => x.id === el.dataset.id); if(!m) return;
-    ui.kalMeal = m.id; render();
-    const card = $('#addFoodCard'); card.scrollIntoView({behavior:'smooth', block:'start'});
-    card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
-    toast(`Lisätään aterialle ${m.name} – hae, skannaa tai lisää käsin`); },
+  'meal-plus': el => { const m = S.food.meals.find(x => x.id === el.dataset.id); if(m) fsOpen(m.id); },
   'meal-move': el => { const ms = S.food.meals, i = ms.findIndex(m => m.id === el.dataset.id), j = i + (+el.dataset.dir);
     if(i < 0 || j < 0 || j >= ms.length) return; [ms[i], ms[j]] = [ms[j], ms[i]]; save(); refreshMealUI();
     const b = $(`#mealEditor [data-action=meal-move][data-id="${CSS.escape(ms[j].id)}"][data-dir="${el.dataset.dir}"]`); if(b && !b.disabled) b.focus(); },
@@ -1851,18 +2104,16 @@ const ACTIONS = {
     if(!confirm(n ? `Poistetaanko ateria “${m.name}”?\n\nSen ${n} merkintää siirretään aterialle “${target.name}”.` : `Poistetaanko ateria “${m.name}”?`)) return;
     S.food.entries.forEach(e => { if(e.meal === m.id) e.meal = target.id; }); ms.splice(i, 1);
     if(ui.kalMeal === m.id) ui.kalMeal = target.id; save(); refreshMealUI(); toast(n ? `Ateria poistettu – ${n} merkintää siirretty: ${target.name}` : 'Ateria poistettu'); },
-  'scan-open': () => openScanner(),
+  'scan-open': () => { if(!ui.fs) ui.fs = {meal:validMeal(ui.kalMeal), q:''}; fsScan(); },
   'sr-retry': () => { searchCache.delete(lc(ui.searchQ)); onSearchInput(true); },
   'sr-off': el => { const r = (ui.searchOff || [])[+el.dataset.i]; if(!r) return; const own = S.food.products[r.code];
-    if(own && own.source !== 'off'){ openProductModal(r.code, own, 'cache'); return; }
-    const p = Object.assign({}, r, {updatedAt:Date.now()}); S.food.products[r.code] = p; save(); openProductModal(r.code, p, 'off'); },
+    if(own && own.source !== 'off'){ fsProduct(r.code, own, 'cache'); return; }
+    const p = Object.assign({}, r, {updatedAt:Date.now()}); S.food.products[r.code] = p; save(); fsProduct(r.code, p, 'off'); },
   'sr-local': el => { const r = (ui.searchLocal || [])[+el.dataset.i]; if(!r) return;
-    if(r.type === 'product'){ openProductModal(r.code, S.food.products[r.code], 'cache'); return; }
-    const e = S.food.entries.find(x => x.id === r.id); const f = $('#foodForm'); if(!e || !f) return;
-    f.fname.value = e.name; f.kcal.value = inNum(e.kcal); f.p.value = inNum(e.p); f.c.value = inNum(e.c); f.fat.value = inNum(e.f);
-    $('#searchResults').hidden = true; $('#foodSearch').value = ''; f.scrollIntoView({behavior:'smooth', block:'center'}); toast('Tiedot täytetty – tarkista ja paina Lisää'); },
+    if(r.type === 'product'){ fsProduct(r.code, S.food.products[r.code], 'cache'); return; }
+    const e = S.food.entries.find(x => x.id === r.id); if(e) fsAmount(e); },
   'scan-start': () => startScanner(),
-  'scan-again': () => { const pb = $('#productBox'), sb = $('#scanBox'); if(!pb) return; pb.hidden = true; pb.innerHTML = ''; sb.hidden = false; $('#codeInput').value = ''; startScanner(); },
+  'scan-again': () => { const pb = $('#productBox'), sb = $('#scanBox'); if(!pb) return; pb.hidden = true; pb.innerHTML = ''; sb.hidden = false; fsFoot(''); $('#codeInput').value = ''; startScanner(); },
   'code-retry': el => lookupProduct(el.dataset.code),
   'grams-set': el => { const f = $('#prodForm'); f.grams.value = inNum(+el.dataset.g); updateProdCalc(); },
   'type-del': el => { const k = el.dataset.k, nm = el.dataset.name; const list = k === 'strokes' ? S.strokes : S.types[k];
@@ -1895,8 +2146,8 @@ const SUBMITS = {
   'session-save': f => saveSession(f),
   'food-add': f => { const name = f.fname.value.trim(), kcal = num(f.kcal.value);
     if(!name || kcal == null){ toast('Anna ruoan nimi ja kalorit', {error:true}); return; }
-    ui.kalMeal = (f.querySelector('input[name=meal]:checked') || {}).value || ui.kalMeal;
-    addFood(name, kcal, num(f.p.value), num(f.c.value), num(f.fat.value), ui.kalMeal); },
+    addFood(name, kcal, num(f.p.value), num(f.c.value), num(f.fat.value), ui.fs ? ui.fs.meal : ui.kalMeal); },
+  'amt-save': f => saveAmount(f),
   'meal-add': f => { const nm = f.mname.value.trim(); if(!nm) return;
     if(S.food.meals.some(x => x.name.toLowerCase() === nm.toLowerCase())){ toast('Samanniminen ateria on jo olemassa', {error:true}); return; }
     S.food.meals.push({id:'m' + uid(), name:nm}); save(); refreshMealUI(); toast(`Ateria lisätty: ${nm}`);
@@ -1916,7 +2167,8 @@ document.addEventListener('click', e => {
   const fn = ACTIONS[el.dataset.action]; if(fn) fn(el, e);
 });
 document.addEventListener('toggle', e => {
-  const d = e.target; if(!(d instanceof HTMLElement) || !d.matches('details.sec[data-sec]')) return;
+  const d = e.target;
+  if(d.id === 'manualBox' && d.open){ setTimeout(() => d.scrollIntoView({behavior:'smooth', block:'start'}), 30); const n = $('#foodName'); if(n) n.focus({preventScroll:true}); return; } if(!(d instanceof HTMLElement) || !d.matches('details.sec[data-sec]')) return;
   if(secOpen(d.dataset.sec) === d.open) return;
   PREFS.sets[d.dataset.sec] = d.open; savePrefs();
 }, true);
@@ -1926,6 +2178,7 @@ document.addEventListener('change', e => {
   if(t.dataset.change === 'keh-sel'){ ui.kehSel = t.value; ui.kehType = 'all'; render(); }
   else if(t.dataset.change === 'hist-type'){ ui.histType = t.value; render(); }
   else if(t.closest('#wForm') && t.name === 'date'){ const w = $('#wExists'); const tx = wDateHint(t.value); w.hidden = !tx; w.textContent = tx; }
+  else if(t.dataset.change === 'hist-week'){ PREFS.histWeek = t.checked; savePrefs(); const ss = t.closest('details') && t.closest('details').querySelector('.sec-sum'); if(ss) ss.textContent = `Kuluva viikko: ${t.checked ? 'näkyy' : 'piilotettu'}`; toast(t.checked ? 'Kuluva viikko näytetään Historiassa' : 'Kuluva viikko piilotettu Historiasta'); }
   else if(t.dataset.change === 'add-burned'){ S.food.addBurnedToGoal = t.checked; save(); const ss = t.closest('details') && t.closest('details').querySelector('.sec-sum'); if(ss) ss.textContent = `Treenikulutus tavoitteeseen: ${t.checked ? 'päällä' : 'pois'}`; toast(t.checked ? 'Treenikulutus lisätään päivän tavoitteeseen' : 'Treenikulutusta ei lisätä tavoitteeseen'); }
   else if(t.name === 'asTpl'){ const n = $('#logForm input[name=stitle]'); if(n && t.checked && !n.value.trim()) n.focus(); }
   else if(t.name === 'kind' && t.closest('#tplForm')) updateKindVisibility(t.closest('form'));
@@ -1936,8 +2189,8 @@ document.addEventListener('change', e => {
     const setInputs = $$('.set-row input', b);
     if(prev && setInputs.every(i => !i.value.trim())) b.querySelector('.sets').innerHTML = prev.sets.map((x, i) => setRowHtml(i + 1, {reps:x.reps, kg:x.kg})).join('');
   }
-  else if(t.name === 'meal' && t.closest('#foodForm')){
-    ui.kalMeal = t.value; const lbl = $('#recentLbl'); if(lbl) lbl.textContent = recentLabel(); }
+  else if(t.dataset.change === 'fs-meal'){
+    if(ui.fs && ui.fs.step !== 'edit'){ ui.fs.meal = ui.kalMeal = validMeal(t.value); const h = $('#fsTitle'); if(h) h.textContent = addToTitle(ui.fs.meal); } }
   else if(t.classList.contains('meal-name')){
     const m = S.food.meals.find(x => x.id === t.dataset.mealId); if(!m) return; const nm = t.value.trim();
     if(!nm){ t.value = m.name; toast('Nimi ei voi olla tyhjä', {error:true}); return; }
@@ -1948,8 +2201,10 @@ document.addEventListener('change', e => {
   else if(t.id === 'foodName'){ const k = t.value.trim().toLowerCase(); const m = knownFoods().find(x => x.name.trim().toLowerCase() === k); const f = t.form;
     if(m && !f.kcal.value){ f.kcal.value = inNum(m.kcal); f.p.value = inNum(m.p); f.c.value = inNum(m.c); f.fat.value = inNum(m.f); } }
 });
-document.addEventListener('input', e => { if(e.target.id === 'wipeConfirm'){ $('#wipeGo').disabled = e.target.value.trim() !== 'POISTA'; return; } if(e.target.id === 'foodSearch') onSearchInput(false); else if(e.target.closest('#logForm')) updateCalc(); else if(e.target.closest('#prodForm')) updateProdCalc(); else if(e.target.id === 'codeInput') e.target.value = e.target.value.replace(/\D/g, ''); });
+document.addEventListener('input', e => { if(e.target.id === 'wipeConfirm'){ $('#wipeGo').disabled = e.target.value.trim() !== 'POISTA'; return; } if(e.target.id === 'foodSearch') onSearchInput(false); else if(e.target.closest('#logForm')) updateCalc(); else if(e.target.closest('#prodForm')) updateProdCalc(); else if(e.target.id === 'amtInput') amtFromBase(); else if(e.target.dataset.v && e.target.closest('#amtForm')) amtToBase(e.target); else if(e.target.id === 'codeInput') e.target.value = e.target.value.replace(/\D/g, ''); });
 document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && !$('#modal').hidden){ e.preventDefault(); if($('#foodSheet [data-action=fs-back]')) ACTIONS['fs-back'](); else closeModal(); return; }
+  if((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-action]')){ e.preventDefault(); e.target.click(); return; }
   if(e.key === 'Enter' && e.target.matches('input[data-addfor]')){ e.preventDefault(); ACTIONS['type-add']({dataset:{k:e.target.dataset.addfor}}); }
   if(e.key === 'Enter' && e.target.id === 'customType'){ e.preventDefault(); ACTIONS['type-custom-add'](); }
   if(e.key === 'Enter' && e.target.classList.contains('meal-name')){ e.preventDefault(); e.target.blur(); }
