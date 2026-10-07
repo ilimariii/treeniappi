@@ -21,7 +21,7 @@
 :root{
   --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280; --border:#e5e7eb; --soft:#f9fafb;
   --accent:#0f766e; --accent-soft:#ccfbf1; --accent-text:#ffffff; --danger:#dc2626; --warn:#d97706; --goal:#7c3aed; --ok:#16a34a;
-  --k-gym:#2563eb; --k-run:#16a34a; --k-swim:#0891b2; --k-func:#ea580c;
+  --k-gym:#2563eb; --k-run:#16a34a; --k-bike:#c026d3; --k-swim:#0891b2; --k-func:#ea580c;
   --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 1px 8px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme: dark){
@@ -43,7 +43,7 @@ a{color:var(--accent)}
 .sec-row{display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px;gap:8px}
 .sec-row h2{margin:0}
 .group-h{display:flex;align-items:center;gap:8px;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 2px 8px}
-.k-gym{--k:var(--k-gym)} .k-run{--k:var(--k-run)} .k-swim{--k:var(--k-swim)} .k-func{--k:var(--k-func)}
+.k-gym{--k:var(--k-gym)} .k-run{--k:var(--k-run)} .k-bike{--k:var(--k-bike)} .k-swim{--k:var(--k-swim)} .k-func{--k:var(--k-func)}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;background:var(--k,var(--accent))}
 button{font:inherit;color:inherit}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border);background:var(--card);font-weight:600;cursor:pointer;text-decoration:none}
@@ -58,7 +58,7 @@ button{font:inherit;color:inherit}
 svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .badge{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:#fef3c7;color:#92400e}
 .tag{font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--k,var(--accent)) 14%,transparent);color:var(--k,var(--accent));white-space:nowrap}
-.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .quick-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--soft);cursor:pointer;font-size:.8rem;font-weight:600}
 .quick-btn .ic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--k) 15%,transparent);color:var(--k)}
 .quick-btn .ic svg{width:22px;height:22px}
@@ -97,6 +97,7 @@ input[type=text],input[type=search],input[type=date],input[type=number],select,t
 textarea{min-height:70px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:0;border-color:var(--accent)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .row4 input{padding:10px 8px}
@@ -116,6 +117,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid color-mix(in srgb,var(
 .set-no{text-align:center;font-weight:700;color:var(--muted)}
 .set-row input{text-align:center}
 .tpl-ex-row{display:grid;grid-template-columns:1fr 92px 40px;gap:6px;margin-bottom:6px}
+.seg.seg5{grid-template-columns:repeat(5,1fr)}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:4px}
 .seg label{position:relative}
 .seg input{position:absolute;opacity:0}
@@ -320,19 +322,23 @@ const STORE_KEY = 'treeniappi.v1';
 const KINDS = {
   gym:  {label:'Kuntosali',      short:'Sali'},
   run:  {label:'Juoksu',         short:'Juoksu'},
+  bike: {label:'Pyöräily',       short:'Pyörä'},
   swim: {label:'Uinti',          short:'Uinti'},
   func: {label:'Toiminnallinen', short:'Toiminn.'}
 };
-const KIND_ORDER = ['gym','run','swim','func'];
+const KIND_ORDER = ['gym','run','bike','swim','func'];
+const ENDURANCE = ['run','bike','swim','func']; /* lajit joilla oletustyyppi, syke jne. */
 const KIND_ICONS = {
   gym:  '<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
   run:  '<circle cx="14" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v4M6 12l3-4 4 1 2 4 3 1M11 15l1.5-5"/>',
+  bike: '<circle cx="5.5" cy="16.5" r="3.5"/><circle cx="18.5" cy="16.5" r="3.5"/><path d="M5.5 16.5H12L9.3 9.5h7M12 16.5l4.3-7 2.2 7M7.8 8h3M16.3 9.5l-.9-3h2.4"/>',
   swim: '<path d="M2 18c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5M2 14c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5"/><circle cx="16" cy="6" r="1.8"/><path d="M5 11l4-4 3 3 2-2"/>',
   func: '<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>'
 };
 const DEFAULT_TYPES = {
   gym:  ['Voima','Lihaskasvu','Kestovoima','Tekniikka','Muu'],
   run:  ['PK','Vauhtikestävyys (VK)','Intervalli','Pitkä lenkki','Kuormajuoksu','Mäkiveto','Palauttava','Kilpailu','Muu'],
+  bike: ['PK-lenkki','Intervalli','Vauhtikestävyys (VK)','Pitkä lenkki','Mäki','Sisäpyöräily / trainer','Työmatka','Maastopyöräily','Kilpailu','Palauttava','Muu'],
   swim: ['Tekniikka','PK-uinti','Intervalli','Avovesi','Muu'],
   func: ['Kiertoharjoittelu','AMRAP','EMOM','For time','HIIT','Liikkuvuus','Muu']
 };
@@ -503,6 +509,7 @@ function sessionSummary(s){
   const p = [];
   if(s.kind === 'gym'){ const t = gymTotals(s); p.push(`${(s.exercises||[]).length} liikettä`, `${t.sets} sarjaa`); if(t.vol) p.push(`${fmtNum(t.vol,0)} kg`); }
   if(s.kind === 'run'){ if(s.distanceKm) p.push(`${fmtNum(s.distanceKm,2)} km`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceKm && s.durationSec) p.push(`${fmtPace(s.durationSec/s.distanceKm)} /km`); if(s.loadKg) p.push(`kuorma ${fmtNum(s.loadKg)} kg`); }
+  if(s.kind === 'bike'){ if(s.distanceKm) p.push(`${fmtNum(s.distanceKm,1)} km`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceKm && s.durationSec) p.push(`${fmtNum(s.distanceKm/(s.durationSec/3600),1)} km/h`); if(s.elevM) p.push(`nousu ${fmtNum(s.elevM,0)} m`); if(s.powerW) p.push(`${fmtNum(s.powerW,0)} W`); if(s.cadence) p.push(`kadenssi ${fmtNum(s.cadence,0)}`); }
   if(s.kind === 'swim'){ if(s.distanceM) p.push(`${fmtNum(s.distanceM,0)} m`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceM && s.durationSec) p.push(`${fmtPace(s.durationSec/s.distanceM*100)} /100 m`); if(s.stroke) p.push(s.stroke); }
   if(s.kind === 'func'){ if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.rounds) p.push(`${s.rounds} kierrosta`); if(s.result) p.push(`tulos: ${s.result}`); }
   if(s.kind !== 'gym' && hrText(s)) p.push(hrText(s));
@@ -569,14 +576,14 @@ function openTplEditor(id){
   const body = `<form id="tplForm" data-submit="tpl-save" data-id="${t ? t.id : ''}">
     <label class="f"><span>Treenin nimi</span><input type="text" name="tname" placeholder="esim. Treeni1, Jalkapäivä, Tiistain intervallit" value="${esc(t ? t.name : '')}"></label>
     <div class="f-label">Laji</div>
-    <div class="seg" style="margin-bottom:14px">${KIND_ORDER.map(k => `<label><input type="radio" name="kind" value="${k}" ${k===kind?'checked':''}><span>${KINDS[k].short}</span></label>`).join('')}</div>
+    <div class="seg seg5" style="margin-bottom:14px">${KIND_ORDER.map(k => `<label><input type="radio" name="kind" value="${k}" ${k===kind?'checked':''}><span>${KINDS[k].short}</span></label>`).join('')}</div>
     <div data-only="gym">
       <div class="f-label">Liikkeet <span style="font-weight:400">(tavoite valinnainen, esim. 3×8)</span></div>
       <div id="tplExs">${((t && t.exercises && t.exercises.length) ? t.exercises : [{},{},{}]).map(tplExRow).join('')}</div>
       <button type="button" class="btn small" data-action="te-add">+ Lisää liike</button><div style="height:12px"></div>
     </div>
-    ${['run','swim','func'].map(k => `<label class="f" data-only="${k}"><span>Oletustyyppi</span>${typeSelect(k)}</label>`).join('')}
-    <label class="f" data-only="run swim"><span>Rakenne / intervallit (valinnainen)</span><input type="text" name="intervals" placeholder="esim. 6 × 800 m / 2 min palautus" value="${esc(t && t.intervals || '')}"></label>
+    ${ENDURANCE.map(k => `<label class="f" data-only="${k}"><span>Oletustyyppi</span>${typeSelect(k)}</label>`).join('')}
+    <label class="f" data-only="run bike swim"><span>Rakenne / intervallit (valinnainen)</span><input type="text" name="intervals" placeholder="esim. 6 × 800 m / 2 min palautus" value="${esc(t && t.intervals || '')}"></label>
     <label class="f" data-only="func"><span>Liikkeet (yksi per rivi)</span><textarea name="movements" placeholder="10 burpeeta&#10;15 kahvakuulaheilautusta&#10;20 kyykkyä">${esc(t && t.movements || '')}</textarea></label>
     <label class="f"><span>Muistiinpanot (valinnainen)</span><textarea name="notes">${esc(t && t.notes || '')}</textarea></label>
   </form>`;
@@ -669,7 +676,7 @@ function openLogForm({kind, tplId, sessionId}){
   const oneOff = !t;
   let body = `<form id="logForm" data-submit="session-save" data-kind="${kind}" data-tpl="${t ? t.id : ''}" data-id="${s ? s.id : ''}">
     ${oneOff ? `<div class="oneoff-note"><b>Kertatreeni ilman pohjaa.</b> Tallentuu vain historiaan – treenipohjaa ei luoda${s ? '' : ' (voit halutessasi tallentaa sen pohjaksi lomakkeen lopussa)'}.</div>
-    <label class="f"><span>Nimi (valinnainen)</span><input type="text" name="stitle" maxlength="60" placeholder="esim. ${kind === 'gym' ? 'Yläkroppa hotellin salilla' : kind === 'run' ? 'Iltalenkki' : kind === 'swim' ? 'Uimahalli' : 'Kotitreeni'} – oletus: ${KINDS[kind].label}" value="${esc(s && s.title && s.title !== KINDS[kind].label ? s.title : '')}"></label>` : ''}
+    <label class="f"><span>Nimi (valinnainen)</span><input type="text" name="stitle" maxlength="60" placeholder="esim. ${kind === 'gym' ? 'Yläkroppa hotellin salilla' : kind === 'run' ? 'Iltalenkki' : kind === 'bike' ? 'Lauantain pyörälenkki' : kind === 'swim' ? 'Uimahalli' : 'Kotitreeni'} – oletus: ${KINDS[kind].label}" value="${esc(s && s.title && s.title !== KINDS[kind].label ? s.title : '')}"></label>` : ''}
     <label class="f"><span>Päivämäärä <b id="dateFi" style="color:var(--text);font-weight:600"></b></span><input type="date" name="date" value="${v.date || todayISO()}"></label>
     <div class="f-label">Tyyppi${kind === 'gym' ? ' (valinnainen)' : ''}</div>
     <div class="chips" id="typeChips" style="margin-bottom:6px">${typeChipsHtml(kind, selType)}</div>
@@ -712,6 +719,23 @@ function openLogForm({kind, tplId, sessionId}){
     <label class="f"><span>Tuntuma RPE (valinn.)</span>${rpeSelect(v.rpe)}</label>
     <div style="margin:-6px 0 10px"><button type="button" class="btn small ghost" id="showAllBtn" data-action="show-all-fields">Näytä kaikki kentät</button></div>`;
   }
+  if(kind === 'bike'){
+    body += `<div class="row">
+      <label class="f"><span>Matka (km)</span><input type="text" name="distance" inputmode="decimal" placeholder="esim. 42,5" value="${inNum(v.distanceKm)}"></label>
+      <label class="f"><span>Kesto</span><input type="text" name="duration" placeholder="esim. 1:35:00" value="${v.durationSec ? fmtDuration(v.durationSec) : ''}"></label>
+    </div>
+    <div class="hint" style="margin:-8px 0 10px">Kesto: min, min:s tai h:min:s (esim. 90, 1:35:00)</div>
+    <div class="calc"><span>Keskinopeus</span><b id="paceOut">–</b></div>
+    <label class="f" id="intWrap"><span>Intervallit / rakenne</span><input type="text" name="intervals" placeholder="esim. 5 × 5 min / 3 min palautus" value="${esc(v.intervals ?? (t && t.intervals) ?? '')}"></label>
+    <div class="row3">
+      <label class="f"><span>Nousu (m)</span><input type="text" name="elev" inputmode="numeric" placeholder="valinn." value="${v.elevM ?? ''}"></label>
+      <label class="f"><span>Ka teho (W)</span><input type="text" name="power" inputmode="numeric" placeholder="valinn." value="${v.powerW ?? ''}"></label>
+      <label class="f"><span>Kadenssi</span><input type="text" name="cadence" inputmode="numeric" placeholder="rpm" value="${v.cadence ?? ''}"></label>
+    </div>
+    ${hrFieldsHtml(v)}
+    <label class="f"><span>Tuntuma RPE (valinn.)</span>${rpeSelect(v.rpe)}</label>
+    <div style="margin:-6px 0 10px"><button type="button" class="btn small ghost" id="showAllBtn" data-action="show-all-fields">Näytä kaikki kentät</button></div>`;
+  }
   if(kind === 'func'){
     body += `<div class="row">
       <label class="f"><span>Kesto</span><input type="text" name="duration" placeholder="esim. 20 tai 20:00" value="${v.durationSec ? fmtDuration(v.durationSec) : ''}"></label>
@@ -737,13 +761,13 @@ function updateCalc(){
   const f = $('#logForm'); if(!f) return; const kind = f.dataset.kind;
   const df = $('#dateFi'); if(df){ const dv = f.date.value; df.textContent = dv ? `· ${weekday(dv)} ${fmtDate(dv)} (${relDays(dv)})` : ''; }
   updateHrWarn(f);
-  if(kind !== 'run' && kind !== 'swim') return;
+  if(kind !== 'run' && kind !== 'swim' && kind !== 'bike') return;
   const d = num(f.distance.value), t = parseDuration(f.duration.value), out = $('#paceOut');
-  if(d && t) out.textContent = kind === 'run' ? `${fmtPace(t/d)} min/km · ${fmtNum(d/(t/3600), 1)} km/h` : `${fmtPace(t/d*100)} /100 m`;
+  if(d && t) out.textContent = kind === 'run' ? `${fmtPace(t/d)} min/km · ${fmtNum(d/(t/3600), 1)} km/h` : kind === 'bike' ? `${fmtNum(d/(t/3600), 1)} km/h` : `${fmtPace(t/d*100)} /100 m`;
   else out.textContent = '–';
   const type = (f.querySelector('input[name=stype]:checked') || {}).value || '';
   const all = f.dataset.showAll === '1';
-  const iw = $('#intWrap'); if(iw) iw.hidden = !(all || /interv|mäki|vk|vauhti|fartlek|kilpa/i.test(type) || f.intervals.value.trim());
+  const iw = $('#intWrap'); if(iw) iw.hidden = !(all || /interv|mäki|vk|vauhti|fartlek|kilpa|trainer/i.test(type) || f.intervals.value.trim());
   const lw = $('#loadWrap'); if(lw) lw.hidden = !(all || /kuorma|reppu|paino/i.test(type) || f.load.value.trim());
   const sb = $('#showAllBtn'); if(sb) sb.hidden = (!iw || !iw.hidden) && (!lw || !lw.hidden);
 }
@@ -780,6 +804,15 @@ function saveSession(f){
     if(!d && !dur){ toast('Anna vähintään matka tai kesto', {error:true}); return; }
     if(kind === 'run'){ s.distanceKm = d; s.loadKg = num(f.load.value); } else { s.distanceM = d; s.stroke = (f.querySelector('input[name=stroke]:checked') || {}).value || ''; }
     s.durationSec = dur; s.rpe = num(f.rpe.value); s.intervals = f.intervals.value.trim();
+  }
+  if(kind === 'bike'){
+    const d = num(f.distance.value), dur = parseDuration(f.duration.value);
+    if(f.duration.value.trim() && dur == null){ toast('Kesto ei kelpaa – käytä esim. 1:35:00', {error:true}); return; }
+    if(!d && !dur){ toast('Anna vähintään matka tai kesto', {error:true}); return; }
+    const opt = (el, max, label) => { const raw = el.value.trim(); if(!raw) return {v:null}; const x = num(raw); return (x == null || x < 0 || x > max) ? {err:`${label}: anna luku väliltä 0–${fmtNum(max, 0)}`} : {v:Math.round(x)}; };
+    const el = opt(f.elev, 20000, 'Nousu'), pw = opt(f.power, 2500, 'Teho'), cd = opt(f.cadence, 250, 'Kadenssi');
+    const bad = [el, pw, cd].find(x => x.err); if(bad){ toast(bad.err, {error:true}); return; }
+    s.distanceKm = d; s.durationSec = dur; s.elevM = el.v; s.powerW = pw.v; s.cadence = cd.v; s.rpe = num(f.rpe.value); s.intervals = f.intervals.value.trim();
   }
   if(kind === 'func'){
     const dur = parseDuration(f.duration.value);
@@ -879,7 +912,7 @@ function kehOptions(){
   const o = [];
   const gymT = S.templates.filter(t => t.kind === 'gym');
   o.push({group:'Kuntosali', items:[...gymT.map(t => ({v:'tpl:'+t.id, l:t.name})), {v:'allgym', l:'Kaikki salitreenit (liikkeittäin)'}]});
-  for(const k of ['run','swim','func']){
+  for(const k of ENDURANCE){
     o.push({group:KINDS[k].label, items:[{v:'kind:'+k, l:`${KINDS[k].label} – kaikki`}, ...S.templates.filter(t => t.kind === k).map(t => ({v:'tpl:'+t.id, l:t.name}))]});
   }
   return o;
@@ -889,7 +922,7 @@ function renderKehitys(){
   if(!ui.kehSel || !all.includes(ui.kehSel)){
     const gymT = S.templates.filter(t => t.kind === 'gym');
     const firstGym = gymT.find(t => S.sessions.some(s => s.templateId === t.id)) || gymT[0];
-    ui.kehSel = firstGym ? 'tpl:' + firstGym.id : (S.sessions.some(s => s.kind === 'gym') ? 'allgym' : 'kind:' + (['run','swim','func'].find(k => S.sessions.some(s => s.kind === k)) || 'run'));
+    ui.kehSel = firstGym ? 'tpl:' + firstGym.id : (S.sessions.some(s => s.kind === 'gym') ? 'allgym' : 'kind:' + (ENDURANCE.find(k => S.sessions.some(s => s.kind === k)) || 'run'));
   }
   let h = `<div class="page-head"><h1>Kehitys</h1></div>
     <label class="f"><span>Valitse treeni</span><select data-change="keh-sel" id="kehSel">${opts.map(g => `<optgroup label="${esc(g.group)}">${g.items.map(i => `<option value="${esc(i.v)}" ${i.v === ui.kehSel ? 'selected' : ''}>${esc(i.l)}</option>`).join('')}</optgroup>`).join('')}</select></label>`;
@@ -902,6 +935,7 @@ function renderKehitys(){
   sessions = sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt||0) - (b.createdAt||0));
   if(kind === 'gym') h += kehGym(sessions, tpl);
   else if(kind === 'func') h += kehFunc(sessions);
+  else if(kind === 'bike') h += kehBike(sessions);
   else h += kehEndurance(kind, sessions);
   return h;
 }
@@ -977,6 +1011,27 @@ function kehEndurance(kind, all){
   </tbody></table></div><div class="hint">Napauta riviä muokataksesi.</div></section>`;
   return h;
 }
+function kehBike(all){
+  const col = 'var(--k-bike)';
+  let h = typeFilterChips(all);
+  const sessions = ui.kehType === 'all' ? all : all.filter(s => s.type === ui.kehType);
+  if(!sessions.length) return h + `<div class="card empty">Ei vielä kirjauksia.<br><br><button type="button" class="btn primary" data-action="log-new" data-kind="bike">Kirjaa pyöräily</button></div>`;
+  const spd = s => s.distanceKm && s.durationSec ? s.distanceKm / (s.durationSec / 3600) : null;
+  const last4 = sessions.filter(s => s.date >= addDays(todayISO(), -27));
+  const tot = sessions.reduce((a, s) => a + (s.distanceKm||0), 0), totT = sessions.reduce((a, s) => a + (s.durationSec||0), 0), totE = sessions.reduce((a, s) => a + (s.elevM||0), 0);
+  h += `<section class="card"><div class="stats"><span>Viim. 4 vk: <b>${fmtNum(last4.reduce((a, s) => a + (s.distanceKm||0), 0), 0)} km</b> / <b>${last4.length}</b> krt</span><span>Yhteensä: <b>${fmtNum(tot, 0)} km</b> · <b>${fmtDuration(totT)}</b>${totE ? ` · nousua <b>${fmtNum(totE, 0)} m</b>` : ''}</span><span>Kertoja: <b>${sessions.length}</b></span></div></section>`;
+  h += `<section class="card" id="bikeWeekly"><h2>Viikkomatka (km)</h2>${barChart(weeklyBars(sessions, s => s.distanceKm, v => `${fmtNum(v, 1)} km`), {color:col, fmtY:v => fmtNum(v, 0)})}</section>`;
+  const sp = sessions.filter(spd).map(s => ({x:parseISO(s.date).getTime(), y:spd(s), date:s.date, type:s.type}));
+  h += `<section class="card" id="bikeSpeed"><h2>Keskinopeus (km/h)</h2><div class="hint" style="margin-top:-4px">Ylempänä = nopeampi${ui.kehType === 'all' ? '. Vertailu on tarkin yhden tyypin sisällä – valitse tyyppi yllä.' : ''}</div>
+    ${lineChart(sp, {color:col, fmtY:v => fmtNum(v, 0), tip:p => `${fmtDate(p.date)}: ${fmtNum(p.y, 1)} km/h${p.type ? ' · ' + p.type : ''}`})}</section>`;
+  const pw = sessions.filter(s => s.powerW).map(s => ({x:parseISO(s.date).getTime(), y:s.powerW, date:s.date}));
+  if(pw.length >= 2) h += `<section class="card" id="bikePower"><h2>Keskiteho (W)</h2>${lineChart(pw, {color:'var(--k-func)', fmtY:v => fmtNum(v, 0), tip:p => `${fmtDate(p.date)}: ${p.y} W`})}</section>`;
+  h += hrChartHtml(sessions);
+  h += `<section class="card"><h2>Historia</h2><div class="tbl-wrap"><table class="tbl" id="bikeTable"><thead><tr><th>Pvm</th><th>Tyyppi</th><th class="num">km</th><th class="num">Aika</th><th class="num">km/h</th><th class="num">Nousu</th><th class="num">W</th><th class="num">Ka syke</th><th class="num">Max syke</th><th class="num">Kulutus</th><th>Lisätiedot</th></tr></thead><tbody>
+    ${sessions.slice().reverse().map(s => `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td class="num">${fmtNum(s.distanceKm, 1)}</td><td class="num">${fmtDuration(s.durationSec)}</td><td class="num">${spd(s) ? fmtNum(spd(s), 1) : '–'}</td><td class="num">${s.elevM ? fmtNum(s.elevM, 0) : '–'}</td><td class="num">${s.powerW || '–'}</td><td class="num">${s.hr || '–'}</td><td class="num">${s.hrMax || '–'}</td><td class="num">${s.kcalBurned ? fmtNum(s.kcalBurned, 0) : '–'}</td><td class="wrap">${esc([s.cadence ? `kadenssi ${s.cadence}` : '', s.intervals || ''].filter(Boolean).join(' · '))}</td></tr>`).join('')}
+  </tbody></table></div><div class="hint">Napauta riviä muokataksesi.</div></section>`;
+  return h;
+}
 function kehFunc(all){
   let h = typeFilterChips(all);
   const sessions = ui.kehType === 'all' ? all : all.filter(s => s.type === ui.kehType);
@@ -997,8 +1052,9 @@ function renderHistoria(){
   const month = S.sessions.filter(s => s.date >= mStart && s.date <= todayISO());
   const km = month.filter(s => s.kind === 'run').reduce((a, s) => a + (s.distanceKm||0), 0);
   const m = month.filter(s => s.kind === 'swim').reduce((a, s) => a + (s.distanceM||0), 0);
+  const bkm = month.filter(s => s.kind === 'bike').reduce((a, s) => a + (s.distanceKm||0), 0);
   let h = `<div class="page-head"><h1>Historia</h1></div>
-    <section class="card"><h2>${monthLabel(todayISO())}</h2><div class="stats"><span><b>${month.length}</b> treeniä</span><span>Sali: <b>${month.filter(s => s.kind === 'gym').length}</b> krt</span><span>Juoksu: <b>${fmtNum(km, 1)}</b> km</span><span>Uinti: <b>${fmtNum(m, 0)}</b> m</span><span>Toiminnallinen: <b>${month.filter(s => s.kind === 'func').length}</b> krt</span><span>Kulutus: <b>${fmtNum(month.reduce((a, s) => a + (s.kcalBurned || 0), 0), 0)}</b> kcal</span></div></section>
+    <section class="card"><h2>${monthLabel(todayISO())}</h2><div class="stats"><span><b>${month.length}</b> treeniä</span><span>Sali: <b>${month.filter(s => s.kind === 'gym').length}</b> krt</span><span>Juoksu: <b>${fmtNum(km, 1)}</b> km</span><span>Pyöräily: <b>${fmtNum(bkm, 1)}</b> km</span><span>Uinti: <b>${fmtNum(m, 0)}</b> m</span><span>Toiminnallinen: <b>${month.filter(s => s.kind === 'func').length}</b> krt</span><span>Kulutus: <b>${fmtNum(month.reduce((a, s) => a + (s.kcalBurned || 0), 0), 0)}</b> kcal</span></div></section>
     <div class="scroll-x" style="margin-bottom:10px"><button type="button" class="chip-btn ${ui.histKind === 'all' ? 'on' : ''}" data-action="hist-kind" data-k="all">Kaikki</button>${KIND_ORDER.map(k => `<button type="button" class="chip-btn ${ui.histKind === k ? 'on' : ''}" data-action="hist-kind" data-k="${k}">${KINDS[k].label}</button>`).join('')}</div>`;
   let list = sortedSessions();
   if(ui.histKind !== 'all'){
@@ -1617,7 +1673,7 @@ function renderAsetukset(){
       <div class="danger-box"><h3>Vaarallinen alue</h3>
         <p class="small">Poistaa pysyvästi kaikki tämän laitteen Treeniappi-tiedot. Toimintoa ei voi perua.</p>
         <button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot…</button></div></details>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.3</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.4</p>`;
 }
 /* Koko tietojen tyhjennys: vahva vahvistus (kirjoita POISTA) */
 function openWipeDialog(){
@@ -1675,8 +1731,9 @@ function addSampleData(){
   const t3 = mk({name:'Peruslenkki', kind:'run', defaultType:'PK'});
   const t4 = mk({name:'Tiistain intervallit', kind:'run', defaultType:'Intervalli', intervals:'6 × 800 m / 2 min palautus'});
   const t5 = mk({name:'Uintitreeni', kind:'swim', defaultType:'PK-uinti'});
+  const t7 = mk({name:'Pyörälenkki', kind:'bike', defaultType:'PK-lenkki'});
   const t6 = mk({name:'Kehonpainopiiri', kind:'func', defaultType:'AMRAP', movements:'10 burpeeta\n15 kahvakuulaheilautusta\n20 kyykkyä\n10 punnerrusta'});
-  S.templates.push(t1, t2, t3, t4, t5, t6);
+  S.templates.push(t1, t2, t3, t4, t5, t6, t7);
   const start = mondayOf(addDays(T, -7*9));
   const gymEx = (base, step, i, reps, slow) => { const kg = base + step * Math.floor(i * (slow ? 0.3 : 0.45)); return [{reps, kg}, {reps, kg}, {reps:Math.max(1, reps - (rnd() < .5 ? 1 : 0)), kg}]; };
   for(let w = 0; w < 10; w++){
@@ -1696,6 +1753,9 @@ function addSampleData(){
     else push(6, {kind:'run', title:'Juoksu', type:'Pitkä lenkki', distanceKm:14 + w*0.5, durationSec:Math.round((14 + w*0.5)*(385 - w)), hr:Math.round(140 + rnd()*4), hrMax:Math.round(158 + rnd()*6), rpe:5});
     const sm = 1200 + Math.round(rnd()*8)*100, st = ['PK-uinti','Tekniikka','Intervalli'][w % 3];
     push(4, {kind:'swim', templateId:t5.id, title:t5.name, type:st, distanceM:sm, durationSec:Math.round(sm/100*(132 - w*1.2 + rnd()*5)), stroke:'Vapaa', kcalBurned:Math.round(sm * 0.3), hr:Math.round(128 + rnd()*8), hrMax:Math.round(150 + rnd()*10), intervals:st === 'Intervalli' ? '10 × 100 m / 20 s palautus' : ''});
+    if(w % 2 === 0){ const bk = 40 + w*1.5 + Math.round(rnd()*10), bs = 25.5 + w*0.15 + rnd()*1.2;
+      push(5, {kind:'bike', templateId:t7.id, title:t7.name, type:'PK-lenkki', distanceKm:bk, durationSec:Math.round(bk/bs*3600), elevM:Math.round(250 + rnd()*350), cadence:Math.round(84 + rnd()*6), hr:Math.round(132 + rnd()*6), hrMax:Math.round(156 + rnd()*8), kcalBurned:Math.round(bk*24), rpe:4}); }
+    else push(5, {kind:'bike', title:'Pyöräily', type:'Sisäpyöräily / trainer', intervals:'5 × 5 min / 3 min palautus', distanceKm:Math.round((27 + rnd()*3)*10)/10, durationSec:3600, powerW:Math.round(185 + w*2.5 + rnd()*8), cadence:Math.round(90 + rnd()*5), hr:Math.round(145 + rnd()*5), hrMax:Math.round(172 + rnd()*6), kcalBurned:Math.round(650 + rnd()*60), rpe:7});
     if(w % 2 === 1) push(5, {kind:'func', templateId:t6.id, title:t6.name, type:'AMRAP', durationSec:1200, rounds:5 + Math.floor(w/3), movements:t6.movements, result:`${5 + Math.floor(w/3)} kierrosta + ${Math.floor(rnd()*20)} toistoa`, hr:Math.round(150 + rnd()*6), hrMax:Math.round(176 + rnd()*8), kcalBurned:Math.round(260 + rnd()*40), rpe:8});
   }
   const foods = [['Kaurapuuro marjoilla',380,14,62,8,'aamiainen'],['Kahvi maidolla',40,2,3,2,'aamiainen'],['Kanasalaatti',520,42,30,22,'lounas'],['Rahka + banaani',260,22,38,1,'valipala'],['Lohi, peruna ja kasvikset',680,40,60,28,'paivallinen'],['Proteiinipatukka',210,20,18,7,'valipala']];
