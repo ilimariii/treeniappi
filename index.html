@@ -263,9 +263,8 @@ nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:re
 .hr-warn.err{background:#fee2e2;color:#991b1b}
 .legend{display:flex;gap:14px;justify-content:center;font-size:.78rem;color:var(--muted);margin-top:2px}
 .legend .lg{display:inline-flex;align-items:center;gap:5px}
-.burned{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--muted);margin:2px 0 4px;padding:8px 10px;background:color-mix(in srgb,var(--k-func) 10%,transparent);border-radius:10px}
-.burned svg{color:var(--k-func);flex:none;width:18px;height:18px;margin-top:1px}
-.burned b{color:var(--text)}
+.burned-note{display:flex;gap:5px;align-items:center;font-size:.78rem;color:var(--muted);margin:6px 0 0}
+.burned-note svg{flex:none;width:14px;height:14px;opacity:.8}
 details.adv{padding:0;overflow:hidden}
 details.adv summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;color:var(--muted);font-weight:600;font-size:.92rem}
 details.adv summary::-webkit-details-marker{display:none}
@@ -1114,7 +1113,7 @@ function renderKalorit(){
       <div class="kcal-big"><div><span class="v">${fmtNum(kcal, 0)}</span> <span class="g" id="goalK">${goalK ? `/ ${fmtNum(goalK, 0)} ` : ''}kcal</span></div>
         <div class="${over ? 'down' : 'muted'}" style="font-weight:700" id="kcalLeft">${goalK ? (over ? `Yli ${fmtNum(kcal - goalK, 0)} kcal` : `Jäljellä ${fmtNum(goalK - kcal, 0)} kcal`) : ''}</div></div>
       ${goalK ? `<div class="bar ${over ? 'over' : ''}"><i style="width:${pct}%"></i></div>` : ''}
-      ${burned ? `<div class="burned" id="burnedInfo"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c.5 3 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.8 2.2-4.8.1 2 1 3.2 2.3 3.3C11 9 11 6 12 3z"/></svg><span>Treeneissä kulutettu: <b>${fmtNum(burned, 0)} kcal</b> (${daySess.length} ${daySess.length === 1 ? 'treeni' : 'treeniä'})${addB ? ` · tavoite ${fmtNum(g.kcal, 0)} + ${fmtNum(burned, 0)}` : g.kcal ? ' · ei lisätty tavoitteeseen' : ''}</span></div>` : ''}
+      ${addB ? `<div class="burned-note" id="burnedNote"><svg class="i" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span>Kulutus laskettu tavoitteeseen</span></div>` : ''}
       <div class="macros">${macro('Proteiini', p, g.protein, '#7c3aed')}${macro('Hiilihydraatit', c, g.carbs, '#d97706')}${macro('Rasva', f, g.fat, '#0891b2')}</div>
     </section>
     <section class="card" id="addFoodCard"><h2>Lisää ruoka</h2>
@@ -1673,7 +1672,7 @@ function renderAsetukset(){
       <div class="danger-box"><h3>Vaarallinen alue</h3>
         <p class="small">Poistaa pysyvästi kaikki tämän laitteen Treeniappi-tiedot. Toimintoa ei voi perua.</p>
         <button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot…</button></div></details>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.4</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.5</p>`;
 }
 /* Koko tietojen tyhjennys: vahva vahvistus (kirjoita POISTA) */
 function openWipeDialog(){
