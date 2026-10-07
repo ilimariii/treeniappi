@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Treeniappi</title>
+<style>
+:root{
+  --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280; --border:#e5e7eb; --soft:#f9fafb;
+  --accent:#0f766e; --accent-soft:#ccfbf1; --accent-text:#ffffff; --danger:#dc2626; --warn:#d97706; --ok:#16a34a;
+  --k-gym:#2563eb; --k-run:#16a34a; --k-swim:#0891b2; --k-func:#ea580c;
+  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 1px 8px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b0f14; --card:#151b23; --text:#e5e7eb; --muted:#9ca3af; --border:#273140; --soft:#1b2330;
+    --accent:#14b8a6; --accent-soft:#134e4a; --accent-text:#04201d; --shadow:none; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body.modal-open{overflow:hidden}
+main{max-width:720px;margin:0 auto;padding:12px 16px calc(96px + env(safe-area-inset-bottom))}
+h1{font-size:1.6rem;margin:6px 0 12px;letter-spacing:-.01em}
+h2{font-size:1.1rem;margin:0 0 8px}
+h3{font-size:1rem;margin:0}
+a{color:var(--accent)}
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.muted{color:var(--muted)} .small{font-size:.85rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin:0 0 12px;box-shadow:var(--shadow)}
+.sec-row{display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px;gap:8px}
+.sec-row h2{margin:0}
+.group-h{display:flex;align-items:center;gap:8px;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 2px 8px}
+.k-gym{--k:var(--k-gym)} .k-run{--k:var(--k-run)} .k-swim{--k:var(--k-swim)} .k-func{--k:var(--k-func)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;background:var(--k,var(--accent))}
+button{font:inherit;color:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:11px;border:1px solid var(--border);background:var(--card);font-weight:600;cursor:pointer;text-decoration:none}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,var(--border))}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--accent)}
+.btn.small{min-height:36px;padding:0 12px;font-size:.9rem;border-radius:9px}
+.btn.block{width:100%}
+.icon-btn{border:0;background:transparent;width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--soft)}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.badge{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:#fef3c7;color:#92400e}
+.tag{font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--k,var(--accent)) 14%,transparent);color:var(--k,var(--accent));white-space:nowrap}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.quick-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:12px;border:1px solid var(--border);background:var(--soft);cursor:pointer;font-size:.8rem;font-weight:600}
+.quick-btn .ic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--k) 15%,transparent);color:var(--k)}
+.quick-btn .ic svg{width:22px;height:22px}
+.tpl{border-left:4px solid var(--k)}
+.tpl-head{display:flex;align-items:center;gap:8px}
+.tpl-head h3{font-size:1.15rem;flex:1;min-width:0;overflow-wrap:anywhere}
+.ex-list{margin:8px 0 10px;padding-left:22px}
+.ex-list li{padding:1px 0}
+.ex-list .tgt{color:var(--muted);font-size:.85rem;margin-left:6px}
+.tpl-meta{font-size:.85rem;color:var(--muted);margin:6px 0 10px}
+.empty{text-align:center;padding:28px 16px;color:var(--muted)}
+.empty b{color:var(--text)}
+.slist{display:flex;flex-direction:column;gap:8px}
+.srow{display:flex;align-items:stretch;gap:12px;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;box-shadow:var(--shadow)}
+.srow .kbar{width:4px;border-radius:4px;background:var(--k);flex:none}
+.srow-main{flex:1;min-width:0}
+.srow-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.srow-top b{overflow-wrap:anywhere}
+.srow-sub{font-size:.85rem;color:var(--muted);margin-top:2px}
+.srow-date{font-size:.8rem;color:var(--muted);white-space:nowrap;align-self:center}
+.month-h{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 2px 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span,.chip-btn{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:.9rem;font-weight:500;cursor:pointer;user-select:none}
+.chip input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.chip input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.chip-btn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.chip-btn.dashed{border-style:dashed;color:var(--muted)}
+.scroll-x{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.scroll-x::-webkit-scrollbar{display:none}
+.scroll-x .chip-btn{flex:none}
+label.f{display:block;margin:0 0 12px}
+label.f > span,.f-label{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=date],input[type=number],select,textarea{width:100%;font:inherit;font-size:16px;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-height:44px}
+textarea{min-height:70px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:0;border-color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.row4 input{padding:10px 8px}
+.calc{display:flex;align-items:center;justify-content:space-between;background:var(--accent-soft);color:var(--text);border-radius:10px;padding:10px 12px;margin:0 0 12px;font-weight:600}
+.calc b{font-size:1.1rem}
+.hint{font-size:.8rem;color:var(--muted);margin-top:4px}
+[hidden]{display:none!important}
+.ex-block{border:1px solid var(--border);border-radius:12px;padding:10px;margin:0 0 10px;background:var(--soft)}
+.ex-head{display:flex;gap:6px;align-items:center}
+.ex-head input{font-weight:600}
+.ex-prev{font-size:.8rem;color:var(--muted);margin:6px 2px}
+.set-grid-h,.set-row{display:grid;grid-template-columns:34px 1fr 1fr 40px;gap:6px;align-items:center}
+.set-grid-h{font-size:.75rem;color:var(--muted);font-weight:600;margin:4px 0 2px}
+.set-row{margin-bottom:6px}
+.set-no{text-align:center;font-weight:700;color:var(--muted)}
+.set-row input{text-align:center}
+.tpl-ex-row{display:grid;grid-template-columns:1fr 92px 40px;gap:6px;margin-bottom:6px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:4px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0}
+.seg span{display:block;text-align:center;padding:8px 2px;border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer}
+.seg input:checked + span{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--accent)}
+.chart{margin:6px 0 2px}
+.chart svg{display:block;max-width:100%;height:auto;overflow:visible}
+.chart .grid{stroke:var(--border);stroke-width:1}
+.chart .axis-t{fill:var(--muted);font-size:11px;font-family:inherit}
+.chart .pt{cursor:pointer}
+.chart-tip{font-size:.82rem;color:var(--muted);min-height:1.3em;text-align:center}
+.chart-empty{padding:26px;text-align:center;color:var(--muted);font-size:.9rem;background:var(--soft);border-radius:10px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;color:var(--muted);margin:4px 0}
+.stats b{color:var(--text)}
+.up{color:var(--ok)!important} .down{color:var(--danger)!important}
+.tbl-wrap{overflow-x:auto;margin-top:6px}
+table.tbl{width:100%;border-collapse:collapse;font-size:.85rem}
+.tbl th,.tbl td{padding:6px 6px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em}
+.tbl td.num,.tbl th.num{text-align:right}
+.tbl td.wrap{white-space:normal;min-width:120px}
+details summary.sum{cursor:pointer;color:var(--accent);font-weight:600;font-size:.88rem;padding:4px 0}
+.datenav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:4px}
+.datenav .d{text-align:center;font-weight:700}
+.datenav .d small{display:block;font-weight:500;color:var(--muted);font-size:.8rem}
+.kcal-big{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.kcal-big .v{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+.kcal-big .g{color:var(--muted);font-weight:600}
+.bar{height:12px;background:var(--soft);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin:8px 0 6px}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .3s}
+.bar.over > i{background:var(--danger)}
+.bar.thin{height:7px;margin:4px 0}
+.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.macro .lbl{font-size:.75rem;color:var(--muted);font-weight:600}
+.macro .val{font-size:.9rem;font-weight:700}
+.macro .bar > i{background:var(--mc)}
+.food-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
+.meal-h + .food-item{border-top:0}
+.food-item .n{flex:1;min-width:0}
+.food-item .n div:first-child{font-weight:600;overflow-wrap:anywhere}
+.food-item .k{font-weight:700;white-space:nowrap}
+.meal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.meal-h h3{font-size:.95rem}
+.type-chip{display:inline-flex;align-items:center;gap:2px;min-height:32px;padding:0 4px 0 12px;border-radius:999px;border:1px solid var(--border);background:var(--soft);font-size:.88rem}
+.type-chip button{border:0;background:transparent;width:28px;height:28px;border-radius:50%;cursor:pointer;color:var(--muted);font-size:1.1rem;line-height:1}
+.add-inline{display:flex;gap:6px;margin-top:8px}
+.add-inline input{flex:1}
+.set-list .btn{margin:0 0 8px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 7px;color:var(--muted);font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none}
+.tab svg{width:24px;height:24px}
+.tab.active{color:var(--accent)}
+#modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+#modal[hidden]{display:none!important}
+.sheet{background:var(--bg);width:100%;max-width:600px;max-height:96vh;max-height:96dvh;border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px 18px;border-bottom:1px solid var(--border);background:var(--card)}
+.sheet-head h2{margin:0;font-size:1.1rem}
+.sheet-body{overflow-y:auto;padding:14px 16px 8px;flex:1;-webkit-overflow-scrolling:touch}
+.sheet-foot{display:flex;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--card)}
+.sheet-foot .spacer{flex:1}
+@media (min-width:700px){ #modal{align-items:center} .sheet{border-radius:18px;max-height:90vh} main{padding-top:20px} }
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;font-size:.92rem;box-shadow:0 6px 24px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center;max-width:92vw}
+#toast[hidden]{display:none!important}
+#toast.err{background:var(--danger)}
+#toast button{background:transparent;border:0;color:#5eead4;font-weight:700;cursor:pointer;padding:0}
+</style>
+</head>
+<body>
+<main id="main" aria-live="polite"></main>
+
+<nav class="tabs" aria-label="Päävalikko"><div class="in">
+  <a class="tab" href="#treenit" data-page="treenit"><svg class="i" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>Treenit</a>
+  <a class="tab" href="#kehitys" data-page="kehitys"><svg class="i" viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>Kehitys</a>
+  <a class="tab" href="#historia" data-page="historia"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Historia</a>
+  <a class="tab" href="#kalorit" data-page="kalorit"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c.5 3 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.8 2.2-4.8.1 2 1 3.2 2.3 3.3C11 9 11 6 12 3z"/></svg>Kalorit</a>
+  <a class="tab" href="#asetukset" data-page="asetukset"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Asetukset</a>
+</div></nav>
+
+<div id="modal" hidden></div>
+<div id="toast" hidden></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<script>
+'use strict';
+/* ====================== Perusasetukset ====================== */
+const STORE_KEY = 'treeniappi.v1';
+const KINDS = {
+  gym:  {label:'Kuntosali',      short:'Sali'},
+  run:  {label:'Juoksu',         short:'Juoksu'},
+  swim: {label:'Uinti',          short:'Uinti'},
+  func: {label:'Toiminnallinen', short:'Toiminn.'}
+};
+const KIND_ORDER = ['gym','run','swim','func'];
+const KIND_ICONS = {
+  gym:  '<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
+  run:  '<circle cx="14" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v4M6 12l3-4 4 1 2 4 3 1M11 15l1.5-5"/>',
+  swim: '<path d="M2 18c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5M2 14c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5"/><circle cx="16" cy="6" r="1.8"/><path d="M5 11l4-4 3 3 2-2"/>',
+  func: '<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>'
+};
+const DEFAULT_TYPES = {
+  gym:  ['Voima','Lihaskasvu','Kestovoima','Tekniikka','Muu'],
+  run:  ['PK','Vauhtikestävyys (VK)','Intervalli','Pitkä lenkki','Kuormajuoksu','Mäkiveto','Palauttava','Kilpailu','Muu'],
+  swim: ['Tekniikka','PK-uinti','Intervalli','Avovesi','Muu'],
+  func: ['Kiertoharjoittelu','AMRAP','EMOM','For time','HIIT','Liikkuvuus','Muu']
+};
+const DEFAULT_STROKES = ['Vapaa','Rinta','Selkä','Perhonen','Sekauinti'];
+const MEALS = [['aamiainen','Aamiainen'],['lounas','Lounas'],['paivallinen','Päivällinen'],['valipala','Välipala']];
+const RPE_LABELS = ['','1 – erittäin kevyt','2 – kevyt','3 – kevyt','4 – kohtalainen','5 – kohtalainen','6 – reipas','7 – raskas','8 – raskas','9 – erittäin raskas','10 – maksimaalinen'];
+const DAY = 86400000;
+
+/* ====================== Apufunktiot ====================== */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = n => String(n).padStart(2, '0');
+const isoOf = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+const todayISO = () => isoOf(new Date());
+const parseISO = iso => { const [y,m,d] = String(iso).split('-').map(Number); return new Date(y, (m||1)-1, d||1); };
+const addDays = (iso, n) => { const d = parseISO(iso); d.setDate(d.getDate()+n); return isoOf(d); };
+const fmtDate = iso => { if(!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}.${m}.${y}`; };
+const fmtDateShort = iso => { const [,m,d] = iso.split('-'); return `${+d}.${+m}.`; };
+const weekday = iso => parseISO(iso).toLocaleDateString('fi-FI', {weekday:'short'});
+const monthLabel = iso => { const s = parseISO(iso).toLocaleDateString('fi-FI', {month:'long', year:'numeric'}); return s.charAt(0).toUpperCase() + s.slice(1); };
+const daysBetween = (a, b) => Math.round((parseISO(b) - parseISO(a)) / DAY);
+function relDays(iso){ const n = daysBetween(iso, todayISO()); if(n === 0) return 'tänään'; if(n === 1) return 'eilen'; if(n === -1) return 'huomenna'; if(n < 0) return `${-n} pv päästä`; return `${n} pv sitten`; }
+function num(v){ if(v == null) return null; const s = String(v).trim().replace(/\s/g,'').replace(',', '.'); if(s === '') return null; const n = parseFloat(s); return isFinite(n) ? n : null; }
+function fmtNum(n, dec=1){ if(n == null || !isFinite(n)) return '–'; return Number(n).toLocaleString('fi-FI', {maximumFractionDigits:dec}); }
+function inNum(n){ return n == null ? '' : String(n).replace('.', ','); }
+/* Kesto: "45" = 45 min, "45:30" = 45 min 30 s, "1:05:00" = 1 h 5 min, myös "1h 5min" */
+function parseDuration(str){
+  if(str == null) return null; const s = String(str).trim().replace(/\./g, ':').replace(',', '.');
+  if(!s) return null;
+  const hm = s.match(/^(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?$/i);
+  if(hm && (hm[1] || hm[2])) return (+(hm[1]||0))*3600 + (+(hm[2]||0))*60;
+  const parts = s.split(':').map(p => p.trim());
+  if(parts.some(p => p === '' || isNaN(+p))) return null;
+  if(parts.length === 1) return Math.round(+parts[0] * 60);
+  if(parts.length === 2) return Math.round(+parts[0]*60 + +parts[1]);
+  if(parts.length === 3) return Math.round(+parts[0]*3600 + +parts[1]*60 + +parts[2]);
+  return null;
+}
+function fmtDuration(sec){ if(sec == null || !isFinite(sec)) return '–'; sec = Math.round(sec); const h = Math.floor(sec/3600), m = Math.floor(sec%3600/60), s = sec%60; return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`; }
+function fmtPace(secPer){ if(!secPer || !isFinite(secPer)) return '–'; const t = Math.round(secPer); return `${Math.floor(t/60)}:${pad(t%60)}`; }
+function icon(kind){ return `<svg class="i" viewBox="0 0 24 24">${KIND_ICONS[kind]}</svg>`; }
+const ICON_EDIT = '<svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+const ICON_X = '<svg class="i" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+function isoWeek(iso){ const d = parseISO(iso); const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dn = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dn); const y0 = new Date(Date.UTC(t.getUTCFullYear(),0,1)); return Math.ceil(((t - y0)/DAY + 1)/7); }
+function mondayOf(iso){ const d = parseISO(iso); const dn = (d.getDay()+6)%7; d.setDate(d.getDate()-dn); return isoOf(d); }
+function defaultMeal(){ const h = new Date().getHours(); if(h < 10) return 'aamiainen'; if(h < 14) return 'lounas'; if(h < 16) return 'valipala'; if(h < 20) return 'paivallinen'; return 'valipala'; }
+
+/* ====================== Tila ja tallennus ====================== */
+function defaultState(){
+  return { version:1, templates:[], sessions:[], types:JSON.parse(JSON.stringify(DEFAULT_TYPES)), strokes:DEFAULT_STROKES.slice(),
+    food:{ goals:{kcal:2500, protein:null, carbs:null, fat:null}, entries:[] } };
+}
+function normalize(s){
+  const d = defaultState(); if(!s || typeof s !== 'object') return d;
+  const types = Object.assign({}, d.types);
+  if(s.types && typeof s.types === 'object') for(const k of KIND_ORDER) if(Array.isArray(s.types[k]) && s.types[k].length) types[k] = s.types[k].map(String);
+  return { version:1,
+    templates: Array.isArray(s.templates) ? s.templates.filter(t => t && t.id && KINDS[t.kind]) : [],
+    sessions: Array.isArray(s.sessions) ? s.sessions.filter(x => x && x.id && KINDS[x.kind] && x.date) : [],
+    types, strokes: Array.isArray(s.strokes) && s.strokes.length ? s.strokes.map(String) : d.strokes,
+    food: { goals: Object.assign({}, d.food.goals, (s.food && s.food.goals) || {}),
+            entries: Array.isArray(s.food && s.food.entries) ? s.food.entries.filter(e => e && e.id && e.date) : [] } };
+}
+function load(){ try{ const raw = localStorage.getItem(STORE_KEY); return raw ? normalize(JSON.parse(raw)) : defaultState(); } catch(e){ console.warn('Lataus epäonnistui', e); return defaultState(); } }
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){ toast('Tallennus epäonnistui: ' + e.message, {error:true}); } }
+let S = load();
+const ui = { page:'treenit', kehSel:null, kehMetric:'max', kehType:'all', histKind:'all', histType:'', kalDate:todayISO(), kalMeal:defaultMeal(), recent:[] };
+
+const sortedSessions = () => S.sessions.slice().sort((a,b) => (b.date.localeCompare(a.date)) || ((b.createdAt||0) - (a.createdAt||0)));
+const tplById = id => S.templates.find(t => t.id === id);
+const sessById = id => S.sessions.find(s => s.id === id);
+const lastSessionOf = tplId => sortedSessions().find(s => s.templateId === tplId);
+
+/* ====================== Toast ====================== */
+let toastTimer;
+function toast(msg, opt={}){
+  const t = $('#toast'); clearTimeout(toastTimer);
+  t.className = opt.error ? 'err' : '';
+  t.innerHTML = `<span>${esc(msg)}</span>` + (opt.undo ? '<button type="button" id="toastUndo">Kumoa</button>' : '');
+  t.hidden = false;
+  if(opt.undo) $('#toastUndo').onclick = () => { opt.undo(); t.hidden = true; };
+  toastTimer = setTimeout(() => t.hidden = true, opt.undo ? 5000 : 2600);
+}
+
+/* ====================== Modaali ====================== */
+function openModal(title, body, foot){
+  const m = $('#modal');
+  m.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="sheet-head"><h2>${esc(title)}</h2><button type="button" class="icon-btn" data-action="modal-close" aria-label="Sulje">${ICON_X}</button></div>
+    <div class="sheet-body">${body}</div>${foot ? `<div class="sheet-foot">${foot}</div>` : ''}</div>`;
+  m.hidden = false; document.body.classList.add('modal-open');
+}
+function closeModal(){ const m = $('#modal'); m.hidden = true; m.innerHTML = ''; document.body.classList.remove('modal-open'); }
+
+/* ====================== Reititys ====================== */
+const PAGES = { treenit:()=>renderTreenit(), kehitys:()=>renderKehitys(), historia:()=>renderHistoria(), kalorit:()=>renderKalorit(), asetukset:()=>renderAsetukset() };
+function route(){ const p = location.hash.slice(1); ui.page = PAGES[p] ? p : 'treenit'; closeModal(); render(); window.scrollTo(0, 0); }
+function render(){
+  $('#main').innerHTML = PAGES[ui.page]();
+  $$('.tab').forEach(t => { const on = t.dataset.page === ui.page; t.classList.toggle('active', on); if(on) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current'); });
+}
+window.addEventListener('hashchange', route);
+let rsTimer; window.addEventListener('resize', () => { clearTimeout(rsTimer); rsTimer = setTimeout(() => { if(ui.page === 'kehitys') render(); }, 200); });
+
+/* ====================== Yhteenvedot ====================== */
+function gymTotals(s){ let sets = 0, vol = 0; for(const e of (s.exercises||[])) for(const st of e.sets){ sets++; vol += (st.reps||0) * (st.kg||0); } return {sets, vol}; }
+function sessionSummary(s){
+  const p = [];
+  if(s.kind === 'gym'){ const t = gymTotals(s); p.push(`${(s.exercises||[]).length} liikettä`, `${t.sets} sarjaa`); if(t.vol) p.push(`${fmtNum(t.vol,0)} kg`); }
+  if(s.kind === 'run'){ if(s.distanceKm) p.push(`${fmtNum(s.distanceKm,2)} km`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceKm && s.durationSec) p.push(`${fmtPace(s.durationSec/s.distanceKm)} /km`); if(s.loadKg) p.push(`kuorma ${fmtNum(s.loadKg)} kg`); if(s.hr) p.push(`syke ${s.hr}`); }
+  if(s.kind === 'swim'){ if(s.distanceM) p.push(`${fmtNum(s.distanceM,0)} m`); if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.distanceM && s.durationSec) p.push(`${fmtPace(s.durationSec/s.distanceM*100)} /100 m`); if(s.stroke) p.push(s.stroke); }
+  if(s.kind === 'func'){ if(s.durationSec) p.push(fmtDuration(s.durationSec)); if(s.rounds) p.push(`${s.rounds} kierrosta`); if(s.result) p.push(`tulos: ${s.result}`); }
+  if(s.rpe) p.push(`RPE ${s.rpe}`);
+  if(s.intervals && s.kind !== 'gym') p.push(s.intervals);
+  return p.join(' · ');
+}
+function sessionRow(s){
+  return `<button type="button" class="srow k-${s.kind}" data-action="session-edit" data-id="${s.id}">
+    <span class="kbar"></span>
+    <div class="srow-main"><div class="srow-top"><b>${esc(s.title || KINDS[s.kind].label)}</b>${s.type ? `<span class="tag">${esc(s.type)}</span>` : ''}${s.sample ? '<span class="badge">esim.</span>' : ''}</div>
+    <div class="srow-sub">${esc(sessionSummary(s)) || '&nbsp;'}</div></div>
+    <div class="srow-date">${weekday(s.date)} ${fmtDate(s.date)}</div></button>`;
+}
+/* ====================== TREENIT ====================== */
+function renderTreenit(){
+  let h = `<div class="page-head"><h1>Treenit</h1></div>
+  <section class="card"><h2>Kirjaa nopeasti</h2><div class="quick">
+    ${KIND_ORDER.map(k => `<button type="button" class="quick-btn k-${k}" data-action="log-new" data-kind="${k}"><span class="ic">${icon(k)}</span>${KINDS[k].short}</button>`).join('')}
+  </div><div class="hint">Tai valitse alta oma treenipohja – liikkeet ja asetukset täyttyvät valmiiksi.</div></section>
+  <div class="sec-row"><h2>Omat treenit</h2><button type="button" class="btn small primary" data-action="tpl-new">+ Uusi treeni</button></div>`;
+  if(!S.templates.length){
+    h += `<div class="card empty"><b>Ei vielä treenipohjia.</b><br>Luo esimerkiksi “Treeni1” ja lisää siihen salin liikkeet, tai tee pohja juoksulle, uinnille tai toiminnalliselle treenille.<br><br>
+      <button type="button" class="btn primary" data-action="tpl-new">Luo ensimmäinen treeni</button><br><br>
+      <span class="small">Haluatko ensin kokeilla? Asetuksista löytyy <a href="#asetukset">Lisää esimerkkidata</a>.</span></div>`;
+  }
+  for(const k of KIND_ORDER){
+    const tpls = S.templates.filter(t => t.kind === k);
+    if(!tpls.length) continue;
+    h += `<div class="group-h k-${k}"><span class="dot"></span>${KINDS[k].label}</div>`;
+    for(const t of tpls){
+      const last = lastSessionOf(t.id), count = S.sessions.filter(s => s.templateId === t.id).length;
+      let body = '';
+      if(k === 'gym') body = (t.exercises||[]).length ? `<ol class="ex-list">${t.exercises.map(e => `<li>${esc(e.name)}${e.target ? `<span class="tgt">${esc(e.target)}</span>` : ''}</li>`).join('')}</ol>` : '<p class="muted small">Ei liikkeitä – lisää ne muokkaamalla.</p>';
+      else {
+        const bits = [];
+        if(t.defaultType) bits.push(`<span class="tag">${esc(t.defaultType)}</span>`);
+        if(t.intervals) bits.push(`<span class="small">${esc(t.intervals)}</span>`);
+        if(t.movements) bits.push(`<span class="small muted">${esc(t.movements.split('\n').filter(Boolean).join(' · '))}</span>`);
+        body = bits.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0">${bits.join('')}</div>` : '';
+      }
+      h += `<article class="card tpl k-${k}">
+        <div class="tpl-head"><h3>${esc(t.name)}</h3>${t.sample ? '<span class="badge">esimerkki</span>' : ''}<button type="button" class="icon-btn" data-action="tpl-edit" data-id="${t.id}" aria-label="Muokkaa treeniä ${esc(t.name)}">${ICON_EDIT}</button></div>
+        ${body}${t.notes ? `<div class="small muted">${esc(t.notes)}</div>` : ''}
+        <div class="tpl-meta">${last ? `Viimeksi ${fmtDate(last.date)} (${relDays(last.date)}) · ${count} kertaa` : 'Ei vielä kirjauksia'}</div>
+        <button type="button" class="btn primary block" data-action="log-tpl" data-id="${t.id}">Kirjaa treeni</button>
+      </article>`;
+    }
+  }
+  const recent = sortedSessions().slice(0, 5);
+  if(recent.length) h += `<div class="sec-row"><h2>Viimeisimmät</h2><a class="btn small ghost" href="#historia">Kaikki →</a></div><div class="slist">${recent.map(sessionRow).join('')}</div>`;
+  return h;
+}
+
+/* ---------- Treenipohjan muokkaus ---------- */
+function tplExRow(e={}){
+  return `<div class="tpl-ex-row"><input type="text" class="te-name" placeholder="Liike, esim. Penkkipunnerrus" value="${esc(e.name||'')}" aria-label="Liikkeen nimi"><input type="text" class="te-target" placeholder="3×8" value="${esc(e.target||'')}" aria-label="Tavoite (sarjat × toistot)"><button type="button" class="icon-btn" data-action="te-remove" aria-label="Poista liike">${ICON_X}</button></div>`;
+}
+function openTplEditor(id){
+  const t = id ? tplById(id) : null;
+  const kind = t ? t.kind : 'gym';
+  const typeSelect = k => `<select name="defaultType_${k}"><option value="">– ei oletusta –</option>${S.types[k].map(x => `<option ${t && t.kind===k && t.defaultType===x ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>`;
+  const body = `<form id="tplForm" data-submit="tpl-save" data-id="${t ? t.id : ''}">
+    <label class="f"><span>Treenin nimi</span><input type="text" name="tname" placeholder="esim. Treeni1, Jalkapäivä, Tiistain intervallit" value="${esc(t ? t.name : '')}"></label>
+    <div class="f-label">Laji</div>
+    <div class="seg" style="margin-bottom:14px">${KIND_ORDER.map(k => `<label><input type="radio" name="kind" value="${k}" ${k===kind?'checked':''}><span>${KINDS[k].short}</span></label>`).join('')}</div>
+    <div data-only="gym">
+      <div class="f-label">Liikkeet <span style="font-weight:400">(tavoite valinnainen, esim. 3×8)</span></div>
+      <div id="tplExs">${((t && t.exercises && t.exercises.length) ? t.exercises : [{},{},{}]).map(tplExRow).join('')}</div>
+      <button type="button" class="btn small" data-action="te-add">+ Lisää liike</button><div style="height:12px"></div>
+    </div>
+    ${['run','swim','func'].map(k => `<label class="f" data-only="${k}"><span>Oletustyyppi</span>${typeSelect(k)}</label>`).join('')}
+    <label class="f" data-only="run swim"><span>Rakenne / intervallit (valinnainen)</span><input type="text" name="intervals" placeholder="esim. 6 × 800 m / 2 min palautus" value="${esc(t && t.intervals || '')}"></label>
+    <label class="f" data-only="func"><span>Liikkeet (yksi per rivi)</span><textarea name="movements" placeholder="10 burpeeta&#10;15 kahvakuulaheilautusta&#10;20 kyykkyä">${esc(t && t.movements || '')}</textarea></label>
+    <label class="f"><span>Muistiinpanot (valinnainen)</span><textarea name="notes">${esc(t && t.notes || '')}</textarea></label>
+  </form>`;
+  const foot = `${t ? `<button type="button" class="btn danger" data-action="tpl-delete" data-id="${t.id}">Poista</button>` : ''}<span class="spacer"></span><button type="button" class="btn" data-action="modal-close">Peruuta</button><button type="submit" form="tplForm" class="btn primary">Tallenna</button>`;
+  openModal(t ? 'Muokkaa treeniä' : 'Uusi treeni', body, foot);
+  updateKindVisibility($('#tplForm'));
+}
+function updateKindVisibility(form){
+  const k = (form.querySelector('input[name=kind]:checked') || {}).value;
+  $$('[data-only]', form).forEach(el => el.hidden = !el.dataset.only.split(' ').includes(k));
+}
+function saveTpl(form){
+  const name = form.tname.value.trim(); if(!name){ toast('Anna treenille nimi', {error:true}); form.tname.focus(); return; }
+  const kind = form.querySelector('input[name=kind]:checked').value;
+  const id = form.dataset.id; const t = id ? tplById(id) : {id:uid(), createdAt:Date.now()};
+  Object.assign(t, {name, kind, notes:form.notes.value.trim()});
+  if(kind === 'gym'){
+    t.exercises = $$('.tpl-ex-row', form).map(r => ({name:r.querySelector('.te-name').value.trim(), target:r.querySelector('.te-target').value.trim()})).filter(e => e.name);
+    delete t.defaultType; delete t.intervals; delete t.movements;
+  } else {
+    t.defaultType = form['defaultType_'+kind].value; t.intervals = kind !== 'func' ? form.intervals.value.trim() : '';
+    t.movements = kind === 'func' ? form.movements.value.trim() : ''; delete t.exercises;
+  }
+  delete t.sample;
+  if(!id) S.templates.push(t);
+  save(); closeModal(); render(); toast(id ? 'Treeni päivitetty' : 'Treeni luotu');
+}
+
+/* ---------- Kirjauslomake ---------- */
+function typeChipsHtml(kind, selected){
+  return S.types[kind].map(x => `<label class="chip"><input type="radio" name="stype" value="${esc(x)}" ${x===selected?'checked':''}><span>${esc(x)}</span></label>`).join('')
+    + `<button type="button" class="chip-btn dashed" data-action="type-custom-toggle">+ Oma tyyppi</button>`;
+}
+function findPrevExercise(name, excludeId, beforeDate){
+  const key = name.trim().toLowerCase(); if(!key) return null;
+  for(const s of sortedSessions()){
+    if(s.kind !== 'gym' || s.id === excludeId) continue;
+    if(beforeDate && s.date > beforeDate) continue;
+    const e = (s.exercises||[]).find(x => x.name.trim().toLowerCase() === key);
+    if(e) return {date:s.date, sets:e.sets};
+  }
+  return null;
+}
+const setsText = sets => sets.map(st => `${st.reps}×${fmtNum(st.kg||0,2)}`).join(' · ');
+function setRowHtml(i, st={}){
+  return `<div class="set-row"><span class="set-no">${i}</span><input type="text" class="set-reps" inputmode="numeric" placeholder="toistot" aria-label="Toistot" value="${st.reps ?? ''}"><input type="text" class="set-kg" inputmode="decimal" placeholder="kg" aria-label="Paino kg" value="${inNum(st.kg)}"><button type="button" class="icon-btn" data-action="set-remove" aria-label="Poista sarja">${ICON_X}</button></div>`;
+}
+function exBlockHtml(name, sets, prev){
+  if(!sets || !sets.length) sets = [{},{},{}];
+  return `<div class="ex-block">
+    <div class="ex-head"><input type="text" class="ex-name" placeholder="Liikkeen nimi" value="${esc(name||'')}" aria-label="Liikkeen nimi"><button type="button" class="icon-btn" data-action="ex-remove" aria-label="Poista liike">${ICON_X}</button></div>
+    <div class="ex-prev">${prev ? `Edellinen (${fmtDate(prev.date)}): ${esc(setsText(prev.sets))}` : 'Ei aiempia kirjauksia'}</div>
+    <div class="set-grid-h"><span style="text-align:center">#</span><span style="text-align:center">Toistot</span><span style="text-align:center">Paino (kg)</span><span></span></div>
+    <div class="sets">${sets.map((st, i) => setRowHtml(i+1, st)).join('')}</div>
+    <button type="button" class="btn small" data-action="set-add">+ Sarja</button>
+  </div>`;
+}
+function rpeSelect(val){ return `<select name="rpe"><option value="">–</option>${RPE_LABELS.slice(1).map((l, i) => `<option value="${i+1}" ${+val === i+1 ? 'selected' : ''}>${l}</option>`).join('')}</select>`; }
+function openLogForm({kind, tplId, sessionId}){
+  const s = sessionId ? sessById(sessionId) : null;
+  const t = s ? (s.templateId ? tplById(s.templateId) : null) : (tplId ? tplById(tplId) : null);
+  kind = s ? s.kind : (t ? t.kind : kind);
+  const v = s || {};
+  const selType = s ? s.type : (t && t.defaultType) || (kind === 'gym' ? '' : S.types[kind][0]);
+  let body = `<form id="logForm" data-submit="session-save" data-kind="${kind}" data-tpl="${t ? t.id : ''}" data-id="${s ? s.id : ''}">
+    <label class="f"><span>Päivämäärä <b id="dateFi" style="color:var(--text);font-weight:600"></b></span><input type="date" name="date" value="${v.date || todayISO()}"></label>
+    <div class="f-label">Tyyppi${kind === 'gym' ? ' (valinnainen)' : ''}</div>
+    <div class="chips" id="typeChips" style="margin-bottom:6px">${typeChipsHtml(kind, selType)}</div>
+    <div class="add-inline" id="customTypeRow" hidden><input type="text" id="customType" placeholder="Uuden tyypin nimi, esim. Fartlek"><button type="button" class="btn small primary" data-action="type-custom-add">Lisää</button></div>
+    <div style="height:12px"></div>`;
+  if(kind === 'gym'){
+    let exs;
+    if(s) exs = (s.exercises||[]).map(e => ({name:e.name, sets:e.sets, prev:findPrevExercise(e.name, s.id, s.date)}));
+    else if(t){
+      const lastT = lastSessionOf(t.id);
+      exs = (t.exercises||[]).map(e => {
+        const prev = findPrevExercise(e.name);
+        const fromT = lastT && (lastT.exercises||[]).find(x => x.name.trim().toLowerCase() === e.name.trim().toLowerCase());
+        let sets = fromT ? fromT.sets : prev ? prev.sets : null;
+        if(!sets){ const m = (e.target||'').match(/(\d+)\s*[x×*]\s*(\d+)/i); if(m) sets = Array.from({length:Math.min(+m[1],10)}, () => ({reps:+m[2]})); }
+        return {name:e.name, sets: sets ? sets.map(x => ({reps:x.reps, kg:x.kg})) : null, prev};
+      });
+      if(!exs.length) exs = [{name:'', sets:null, prev:null}];
+    } else exs = [{name:'', sets:null, prev:null}];
+    body += `<div class="f-label">Liikkeet ja sarjat</div>${!s && t && lastSessionOf(t.id) ? '<div class="hint" style="margin:-2px 0 8px">Sarjat on esitäytetty edellisen kerran arvoilla – muuta tarvittaessa. Sarjat ilman toistoja ohitetaan.</div>' : ''}
+      <div id="exs">${exs.map(e => exBlockHtml(e.name, e.sets, e.prev)).join('')}</div>
+      <button type="button" class="btn small" data-action="ex-add">+ Lisää liike</button><div style="height:14px"></div>`;
+  }
+  if(kind === 'run' || kind === 'swim'){
+    const isRun = kind === 'run';
+    body += `<div class="row">
+      <label class="f"><span>Matka (${isRun ? 'km' : 'm'})</span><input type="text" name="distance" inputmode="decimal" placeholder="${isRun ? 'esim. 8,5' : 'esim. 1500'}" value="${inNum(isRun ? v.distanceKm : v.distanceM)}"></label>
+      <label class="f"><span>Kesto</span><input type="text" name="duration" placeholder="esim. 45:30" value="${v.durationSec ? fmtDuration(v.durationSec) : ''}"></label>
+    </div>
+    <div class="hint" style="margin:-8px 0 10px">Kesto: min, min:s tai h:min:s (esim. 45, 45:30, 1:05:00)</div>
+    <div class="calc"><span>Vauhti</span><b id="paceOut">–</b></div>`;
+    if(!isRun) body += `<div class="f-label">Uintityyli</div><div class="chips" style="margin-bottom:12px">${S.strokes.map(x => `<label class="chip"><input type="radio" name="stroke" value="${esc(x)}" ${(v.stroke || S.strokes[0]) === x ? 'checked' : ''}><span>${esc(x)}</span></label>`).join('')}</div>`;
+    body += `<label class="f" id="intWrap"><span>${isRun ? 'Intervallit / rakenne' : 'Sarjat / rakenne'}</span><input type="text" name="intervals" placeholder="${isRun ? 'esim. 6 × 800 m / 2 min palautus' : 'esim. 10 × 100 m / 20 s palautus'}" value="${esc(v.intervals ?? (t && t.intervals) ?? '')}"></label>`;
+    if(isRun) body += `<label class="f" id="loadWrap"><span>Kuorma (kg)</span><input type="text" name="load" inputmode="decimal" placeholder="esim. 10" value="${inNum(v.loadKg)}"></label>`;
+    body += `<div class="row">
+      <label class="f"><span>Keskisyke (valinn.)</span><input type="text" name="hr" inputmode="numeric" placeholder="bpm" value="${v.hr ?? ''}"></label>
+      <label class="f"><span>Tuntuma RPE (valinn.)</span>${rpeSelect(v.rpe)}</label>
+    </div>
+    <div style="margin:-6px 0 10px"><button type="button" class="btn small ghost" id="showAllBtn" data-action="show-all-fields">Näytä kaikki kentät</button></div>`;
+  }
+  if(kind === 'func'){
+    body += `<div class="row">
+      <label class="f"><span>Kesto</span><input type="text" name="duration" placeholder="esim. 20 tai 20:00" value="${v.durationSec ? fmtDuration(v.durationSec) : ''}"></label>
+      <label class="f"><span>Kierrokset</span><input type="text" name="rounds" inputmode="numeric" placeholder="esim. 5" value="${v.rounds ?? ''}"></label>
+    </div>
+    <label class="f"><span>Liikkeet (yksi per rivi)</span><textarea name="movements" placeholder="10 burpeeta&#10;15 kahvakuulaheilautusta">${esc(v.movements ?? (t && t.movements) ?? '')}</textarea></label>
+    <div class="row">
+      <label class="f"><span>Tulos / pisteet</span><input type="text" name="result" placeholder="esim. 6 krs + 5" value="${esc(v.result || '')}"></label>
+      <label class="f"><span>Tuntuma RPE</span>${rpeSelect(v.rpe)}</label>
+    </div>`;
+  }
+  body += `<label class="f"><span>Muistiinpanot</span><textarea name="notes" placeholder="Fiilis, sää, kipeytyminen…">${esc(v.notes || '')}</textarea></label></form>`;
+  const foot = `${s ? `<button type="button" class="btn danger" data-action="session-delete" data-id="${s.id}">Poista</button>` : ''}<span class="spacer"></span><button type="button" class="btn" data-action="modal-close">Peruuta</button><button type="submit" form="logForm" class="btn primary">Tallenna</button>`;
+  const title = s ? `Muokkaa: ${s.title || KINDS[kind].label}` : t ? `Kirjaa: ${t.name}` : `Uusi kirjaus: ${KINDS[kind].label}`;
+  openModal(title, body, foot);
+  updateCalc();
+}
+function updateCalc(){
+  const f = $('#logForm'); if(!f) return; const kind = f.dataset.kind;
+  const df = $('#dateFi'); if(df){ const dv = f.date.value; df.textContent = dv ? `· ${weekday(dv)} ${fmtDate(dv)} (${relDays(dv)})` : ''; }
+  if(kind !== 'run' && kind !== 'swim') return;
+  const d = num(f.distance.value), t = parseDuration(f.duration.value), out = $('#paceOut');
+  if(d && t) out.textContent = kind === 'run' ? `${fmtPace(t/d)} min/km · ${fmtNum(d/(t/3600), 1)} km/h` : `${fmtPace(t/d*100)} /100 m`;
+  else out.textContent = '–';
+  const type = (f.querySelector('input[name=stype]:checked') || {}).value || '';
+  const all = f.dataset.showAll === '1';
+  const iw = $('#intWrap'); if(iw) iw.hidden = !(all || /interv|mäki|vk|vauhti|fartlek|kilpa/i.test(type) || f.intervals.value.trim());
+  const lw = $('#loadWrap'); if(lw) lw.hidden = !(all || /kuorma|reppu|paino/i.test(type) || f.load.value.trim());
+  const sb = $('#showAllBtn'); if(sb) sb.hidden = (!iw || !iw.hidden) && (!lw || !lw.hidden);
+}
+function saveSession(f){
+  const kind = f.dataset.kind, id = f.dataset.id;
+  const s = id ? Object.assign({}, sessById(id)) : {id:uid(), createdAt:Date.now()};
+  const t = f.dataset.tpl ? tplById(f.dataset.tpl) : null;
+  s.kind = kind; s.templateId = f.dataset.tpl || null;
+  if(!id) s.title = t ? t.name : KINDS[kind].label;
+  s.date = f.date.value || todayISO();
+  s.type = (f.querySelector('input[name=stype]:checked') || {}).value || '';
+  s.notes = f.notes.value.trim();
+  if(kind === 'gym'){
+    s.exercises = $$('.ex-block', f).map(b => ({ name:b.querySelector('.ex-name').value.trim(),
+      sets: $$('.set-row', b).map(r => ({reps:Math.round(num(r.querySelector('.set-reps').value) || 0), kg:num(r.querySelector('.set-kg').value) || 0})).filter(x => x.reps > 0) }))
+      .filter(e => e.name && e.sets.length);
+    if(!s.exercises.length){ toast('Lisää vähintään yksi liike ja sarja (toistot)', {error:true}); return; }
+  }
+  if(kind === 'run' || kind === 'swim'){
+    const d = num(f.distance.value), dur = parseDuration(f.duration.value);
+    if(f.duration.value.trim() && dur == null){ toast('Kesto ei kelpaa – käytä esim. 45:30', {error:true}); return; }
+    if(!d && !dur){ toast('Anna vähintään matka tai kesto', {error:true}); return; }
+    if(kind === 'run'){ s.distanceKm = d; s.loadKg = num(f.load.value); } else { s.distanceM = d; s.stroke = (f.querySelector('input[name=stroke]:checked') || {}).value || ''; }
+    s.durationSec = dur; s.hr = num(f.hr.value) ? Math.round(num(f.hr.value)) : null; s.rpe = num(f.rpe.value); s.intervals = f.intervals.value.trim();
+  }
+  if(kind === 'func'){
+    const dur = parseDuration(f.duration.value);
+    if(f.duration.value.trim() && dur == null){ toast('Kesto ei kelpaa – käytä esim. 20:00', {error:true}); return; }
+    s.durationSec = dur; s.rounds = num(f.rounds.value); s.movements = f.movements.value.trim(); s.result = f.result.value.trim(); s.rpe = num(f.rpe.value);
+    if(!dur && !s.rounds && !s.result && !s.movements){ toast('Täytä ainakin kesto, kierrokset, liikkeet tai tulos', {error:true}); return; }
+  }
+  delete s.sample;
+  if(id){ const i = S.sessions.findIndex(x => x.id === id); S.sessions[i] = s; } else S.sessions.push(s);
+  save(); closeModal(); render(); toast(id ? 'Kirjaus päivitetty' : 'Treeni tallennettu');
+}
+
+/* ====================== KEHITYS: kaaviot ====================== */
+function chartWidth(){ const m = $('#main'); const w = (m ? m.clientWidth : 390) - 32 - 34; return Math.round(Math.max(260, Math.min(660, w))); }
+function niceTicks(min, max, count=4){
+  if(min === max){ const d = Math.abs(min) * 0.1 || 1; min -= d; max += d; }
+  const step0 = (max - min) / count, mag = Math.pow(10, Math.floor(Math.log10(step0))), n = step0 / mag;
+  const step = (n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10) * mag;
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step, ticks = [];
+  for(let v = lo; v <= hi + step/2; v += step) ticks.push(+v.toFixed(10));
+  return {lo, hi, ticks};
+}
+function lineChart(pts, {fmtY = v => fmtNum(v), invert = false, color = 'var(--accent)', tip = () => ''} = {}){
+  if(!pts.length) return '<div class="chart-empty">Ei vielä dataa</div>';
+  pts = pts.slice().sort((a, b) => a.x - b.x);
+  const W = chartWidth(), H = 190, L = 44, R = 12, T = 12, B = 26;
+  let x0 = pts[0].x, x1 = pts[pts.length-1].x; if(x0 === x1){ x0 -= 3*DAY; x1 += 3*DAY; }
+  const ys = pts.map(p => p.y); const {lo, hi, ticks} = niceTicks(Math.min(...ys), Math.max(...ys));
+  const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R);
+  const sy = y => { const f = (y - lo) / ((hi - lo) || 1); return invert ? T + f*(H-T-B) : H - B - f*(H-T-B); };
+  let g = '';
+  for(const tk of ticks){ const y = sy(tk).toFixed(1); g += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y}" y2="${y}"/><text class="axis-t" x="${L-6}" y="${(+y+4).toFixed(1)}" text-anchor="end">${esc(fmtY(tk))}</text>`; }
+  const nx = Math.min(4, Math.max(2, Math.floor((W - L - R) / 80)));
+  for(let i = 0; i < nx; i++){ const x = x0 + (x1 - x0) * i / (nx - 1); const d = new Date(x); g += `<text class="axis-t" x="${sx(x).toFixed(1)}" y="${H-6}" text-anchor="${i === 0 ? 'start' : i === nx-1 ? 'end' : 'middle'}">${d.getDate()}.${d.getMonth()+1}.</text>`; }
+  const path = pts.map((p, i) => `${i ? 'L' : 'M'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join('');
+  const base = H - B;
+  const area = pts.length > 1 ? `<path d="${path}L${sx(pts[pts.length-1].x).toFixed(1)},${base}L${sx(pts[0].x).toFixed(1)},${base}Z" fill="${color}" opacity=".10"/>` : '';
+  const dots = pts.map(p => `<circle class="pt" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="4.5" fill="var(--card)" stroke="${color}" stroke-width="2.5" data-tip="${esc(tip(p))}"><title>${esc(tip(p))}</title></circle>`).join('');
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${g}${area}<path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg><div class="chart-tip">Napauta pistettä nähdäksesi arvon</div></div>`;
+}
+function barChart(bars, {fmtY = v => fmtNum(v), color = 'var(--accent)'} = {}){
+  if(!bars.length || bars.every(b => !b.value)) return '<div class="chart-empty">Ei dataa viime viikoilta</div>';
+  const W = chartWidth(), H = 170, L = 40, R = 8, T = 10, B = 24;
+  const {hi, ticks} = niceTicks(0, Math.max(...bars.map(b => b.value)));
+  const sy = v => H - B - v / (hi || 1) * (H - T - B);
+  const bw = (W - L - R) / bars.length;
+  let g = '';
+  for(const tk of ticks){ const y = sy(tk).toFixed(1); g += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y}" y2="${y}"/><text class="axis-t" x="${L-6}" y="${(+y+4).toFixed(1)}" text-anchor="end">${esc(fmtY(tk))}</text>`; }
+  bars.forEach((b, i) => {
+    const x = L + i*bw + bw*0.18, w = bw*0.64, y = sy(b.value);
+    g += `<rect class="pt" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H-B-y).toFixed(1)}" rx="3" fill="${color}" opacity="${b.value ? .85 : 0}" data-tip="${esc(b.tip)}"><title>${esc(b.tip)}</title></rect>`;
+    g += `<text class="axis-t" x="${(L + i*bw + bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle">${esc(b.label)}</text>`;
+  });
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${g}</svg><div class="chart-tip">Viikkonumerot · napauta pylvästä nähdäksesi arvon</div></div>`;
+}
+function e1rm(kg, reps){ if(!kg || !reps) return 0; return reps === 1 ? kg : kg * (1 + reps/30); }
+
+/* ====================== KEHITYS ====================== */
+function kehOptions(){
+  const o = [];
+  const gymT = S.templates.filter(t => t.kind === 'gym');
+  o.push({group:'Kuntosali', items:[...gymT.map(t => ({v:'tpl:'+t.id, l:t.name})), {v:'allgym', l:'Kaikki salitreenit (liikkeittäin)'}]});
+  for(const k of ['run','swim','func']){
+    o.push({group:KINDS[k].label, items:[{v:'kind:'+k, l:`${KINDS[k].label} – kaikki`}, ...S.templates.filter(t => t.kind === k).map(t => ({v:'tpl:'+t.id, l:t.name}))]});
+  }
+  return o;
+}
+function renderKehitys(){
+  const opts = kehOptions(); const all = opts.flatMap(g => g.items.map(i => i.v));
+  if(!ui.kehSel || !all.includes(ui.kehSel)){
+    const gymT = S.templates.filter(t => t.kind === 'gym');
+    const firstGym = gymT.find(t => S.sessions.some(s => s.templateId === t.id)) || gymT[0];
+    ui.kehSel = firstGym ? 'tpl:' + firstGym.id : (S.sessions.some(s => s.kind === 'gym') ? 'allgym' : 'kind:' + (['run','swim','func'].find(k => S.sessions.some(s => s.kind === k)) || 'run'));
+  }
+  let h = `<div class="page-head"><h1>Kehitys</h1></div>
+    <label class="f"><span>Valitse treeni</span><select data-change="keh-sel" id="kehSel">${opts.map(g => `<optgroup label="${esc(g.group)}">${g.items.map(i => `<option value="${esc(i.v)}" ${i.v === ui.kehSel ? 'selected' : ''}>${esc(i.l)}</option>`).join('')}</optgroup>`).join('')}</select></label>`;
+  if(!S.sessions.length) return h + `<div class="card empty"><b>Ei vielä kirjattuja treenejä.</b><br>Kirjaa treenejä Treenit-sivulla, niin kehitys näkyy täällä kaavioina.<br><br><span class="small">Voit myös lisätä <a href="#asetukset">esimerkkidataa</a> asetuksista.</span></div>`;
+  const sel = ui.kehSel;
+  let kind, sessions, tpl = null;
+  if(sel === 'allgym'){ kind = 'gym'; sessions = S.sessions.filter(s => s.kind === 'gym'); }
+  else if(sel.startsWith('kind:')){ kind = sel.slice(5); sessions = S.sessions.filter(s => s.kind === kind); }
+  else { tpl = tplById(sel.slice(4)); kind = tpl.kind; sessions = S.sessions.filter(s => s.templateId === tpl.id); }
+  sessions = sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt||0) - (b.createdAt||0));
+  if(kind === 'gym') h += kehGym(sessions, tpl);
+  else if(kind === 'func') h += kehFunc(sessions);
+  else h += kehEndurance(kind, sessions);
+  return h;
+}
+function kehGym(sessions, tpl){
+  const metrics = [['max','Paras paino'],['e1rm','Arvioitu 1RM'],['vol','Volyymi']];
+  let h = `<div class="scroll-x" style="margin-bottom:8px">${metrics.map(([k, l]) => `<button type="button" class="chip-btn ${ui.kehMetric === k ? 'on' : ''}" data-action="keh-metric" data-m="${k}">${l}</button>`).join('')}</div>`;
+  if(!sessions.length) return h + `<div class="card empty">Tälle treenille ei ole vielä kirjauksia.${tpl ? `<br><br><button type="button" class="btn primary" data-action="log-tpl" data-id="${tpl.id}">Kirjaa ${esc(tpl.name)}</button>` : ''}</div>`;
+  const map = new Map();
+  for(const e of (tpl ? tpl.exercises || [] : [])) map.set(e.name.trim().toLowerCase(), {name:e.name, rows:[]});
+  for(const s of sessions) for(const e of (s.exercises||[])){
+    const key = e.name.trim().toLowerCase(); if(!map.has(key)) map.set(key, {name:e.name, rows:[]});
+    let max = 0, best = 0, vol = 0, maxReps = 0;
+    for(const st of e.sets){ max = Math.max(max, st.kg||0); best = Math.max(best, e1rm(st.kg, st.reps)); vol += (st.reps||0)*(st.kg||0); maxReps = Math.max(maxReps, st.reps||0); }
+    map.get(key).rows.push({date:s.date, x:parseISO(s.date).getTime(), sets:e.sets, max, e1rm:best, vol, maxReps});
+  }
+  h += `<div class="hint" style="margin:0 0 10px">${ui.kehMetric === 'max' ? 'Raskain sarjan paino kultakin kerralta.' : ui.kehMetric === 'e1rm' ? 'Arvioitu yhden toiston maksimi parhaasta sarjasta (Epley: kg × (1 + toistot/30)).' : 'Volyymi = toistot × kg kaikista sarjoista yhteensä.'} ${sessions.length} kirjausta.</div>`;
+  for(const ex of map.values()){
+    const rows = ex.rows;
+    const bodyweight = rows.length > 0 && rows.every(r => !r.max);
+    const mk = bodyweight ? 'maxReps' : ui.kehMetric;
+    const unit = bodyweight ? 'toistoa' : 'kg', dec = mk === 'vol' ? 0 : 1;
+    const pts = rows.map(r => ({x:r.x, y:r[mk], date:r.date}));
+    let stats = '';
+    if(rows.length){
+      const bestRow = rows.reduce((a, b) => b[mk] > a[mk] ? b : a);
+      const diff = rows[rows.length-1][mk] - rows[0][mk];
+      stats = `<div class="stats"><span>Ennätys: <b>${fmtNum(bestRow[mk], dec)} ${unit}</b> (${fmtDate(bestRow.date)})</span>
+        ${rows.length > 1 ? `<span>Muutos alusta: <b class="${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${diff > 0 ? '+' : ''}${fmtNum(diff, dec)} ${unit}</b></span>` : ''}
+        <span>Kertoja: <b>${rows.length}</b></span></div>`;
+    }
+    h += `<section class="card k-gym"><h2>${esc(ex.name)}${bodyweight ? ' <span class="tag">kehonpaino · max toistot</span>' : ''}</h2>${stats}
+      ${lineChart(pts, {color:'var(--k-gym)', fmtY:v => fmtNum(v, dec), tip:p => `${fmtDate(p.date)}: ${fmtNum(p.y, dec)} ${unit}`})}
+      ${rows.length ? `<details><summary class="sum">Historia (${rows.length})</summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Sarjat (toistot×kg)</th><th class="num">Paras</th><th class="num">1RM</th><th class="num">Volyymi</th></tr></thead><tbody>
+        ${rows.slice().reverse().map(r => `<tr><td>${fmtDate(r.date)}</td><td class="wrap">${esc(setsText(r.sets))}</td><td class="num">${fmtNum(r.max)}</td><td class="num">${fmtNum(r.e1rm)}</td><td class="num">${fmtNum(r.vol, 0)}</td></tr>`).join('')}
+      </tbody></table></div></details>` : ''}
+    </section>`;
+  }
+  return h;
+}
+function weeklyBars(sessions, valueFn, fmt, weeks=10){
+  const thisMon = mondayOf(todayISO()); const bars = [];
+  for(let i = weeks-1; i >= 0; i--){
+    const mon = addDays(thisMon, -7*i), sun = addDays(mon, 6);
+    const v = sessions.filter(s => s.date >= mon && s.date <= sun).reduce((a, s) => a + (valueFn(s) || 0), 0);
+    bars.push({label:String(isoWeek(mon)), value:v, tip:`Vk ${isoWeek(mon)} (${fmtDateShort(mon)}–${fmtDateShort(sun)}): ${fmt(v)}`});
+  }
+  return bars;
+}
+function typeFilterChips(sessions){
+  const types = [...new Set(sessions.map(s => s.type).filter(Boolean))];
+  if(ui.kehType !== 'all' && !types.includes(ui.kehType)) ui.kehType = 'all';
+  return `<div class="scroll-x" style="margin-bottom:12px"><button type="button" class="chip-btn ${ui.kehType === 'all' ? 'on' : ''}" data-action="keh-type" data-t="all">Kaikki</button>${types.map(t => `<button type="button" class="chip-btn ${ui.kehType === t ? 'on' : ''}" data-action="keh-type" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div>`;
+}
+function kehEndurance(kind, all){
+  const isRun = kind === 'run', col = isRun ? 'var(--k-run)' : 'var(--k-swim)';
+  let h = typeFilterChips(all);
+  const sessions = ui.kehType === 'all' ? all : all.filter(s => s.type === ui.kehType);
+  if(!sessions.length) return h + `<div class="card empty">Ei vielä kirjauksia.<br><br><button type="button" class="btn primary" data-action="log-new" data-kind="${kind}">Kirjaa ${KINDS[kind].label.toLowerCase()}</button></div>`;
+  const dist = s => isRun ? s.distanceKm : s.distanceM, unit = isRun ? 'km' : 'm', dec = isRun ? 1 : 0;
+  const last4 = sessions.filter(s => s.date >= addDays(todayISO(), -27));
+  const tot = sessions.reduce((a, s) => a + (dist(s)||0), 0), totT = sessions.reduce((a, s) => a + (s.durationSec||0), 0);
+  h += `<section class="card"><div class="stats"><span>Viim. 4 vk: <b>${fmtNum(last4.reduce((a, s) => a + (dist(s)||0), 0), dec)} ${unit}</b> / <b>${last4.length}</b> krt</span><span>Yhteensä: <b>${fmtNum(tot, dec)} ${unit}</b> · <b>${fmtDuration(totT)}</b></span><span>Kertoja: <b>${sessions.length}</b></span></div></section>`;
+  h += `<section class="card"><h2>Viikkomatka (${unit})</h2>${barChart(weeklyBars(sessions, dist, v => `${fmtNum(v, dec)} ${unit}`), {color:col, fmtY:v => fmtNum(v, 0)})}</section>`;
+  const pacePts = sessions.filter(s => dist(s) && s.durationSec).map(s => ({x:parseISO(s.date).getTime(), y:isRun ? s.durationSec/s.distanceKm : s.durationSec/s.distanceM*100, date:s.date, type:s.type}));
+  h += `<section class="card"><h2>Vauhti (${isRun ? 'min/km' : 'min/100 m'})</h2><div class="hint" style="margin-top:-4px">Ylempänä = nopeampi${ui.kehType === 'all' ? '. Vertailu on tarkin yhden tyypin sisällä – valitse tyyppi yllä.' : ''}</div>
+    ${lineChart(pacePts, {invert:true, color:col, fmtY:fmtPace, tip:p => `${fmtDate(p.date)}: ${fmtPace(p.y)} ${isRun ? '/km' : '/100 m'}${p.type ? ' · ' + p.type : ''}`})}</section>`;
+  const hrPts = sessions.filter(s => s.hr).map(s => ({x:parseISO(s.date).getTime(), y:s.hr, date:s.date}));
+  if(hrPts.length >= 2) h += `<section class="card"><h2>Keskisyke</h2>${lineChart(hrPts, {color:'var(--danger)', fmtY:v => fmtNum(v, 0), tip:p => `${fmtDate(p.date)}: ${p.y} bpm`})}</section>`;
+  h += `<section class="card"><h2>Historia</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Tyyppi</th><th class="num">${unit}</th><th class="num">Aika</th><th class="num">Vauhti</th><th class="num">Syke</th><th>Lisätiedot</th></tr></thead><tbody>
+    ${sessions.slice().reverse().map(s => `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td class="num">${fmtNum(dist(s), isRun ? 2 : 0)}</td><td class="num">${fmtDuration(s.durationSec)}</td><td class="num">${dist(s) && s.durationSec ? fmtPace(isRun ? s.durationSec/s.distanceKm : s.durationSec/s.distanceM*100) : '–'}</td><td class="num">${s.hr || '–'}</td><td class="wrap">${esc([s.loadKg ? `kuorma ${fmtNum(s.loadKg)} kg` : '', s.stroke || '', s.intervals || ''].filter(Boolean).join(' · '))}</td></tr>`).join('')}
+  </tbody></table></div><div class="hint">Napauta riviä muokataksesi.</div></section>`;
+  return h;
+}
+function kehFunc(all){
+  let h = typeFilterChips(all);
+  const sessions = ui.kehType === 'all' ? all : all.filter(s => s.type === ui.kehType);
+  if(!sessions.length) return h + `<div class="card empty">Ei vielä kirjauksia.<br><br><button type="button" class="btn primary" data-action="log-new" data-kind="func">Kirjaa treeni</button></div>`;
+  h += `<section class="card"><h2>Treeniminuutit viikoittain</h2>${barChart(weeklyBars(sessions, s => (s.durationSec||0)/60, v => `${fmtNum(v, 0)} min`), {color:'var(--k-func)', fmtY:v => fmtNum(v, 0)})}</section>`;
+  const roundPts = sessions.filter(s => s.rounds).map(s => ({x:parseISO(s.date).getTime(), y:s.rounds, date:s.date}));
+  if(roundPts.length >= 2) h += `<section class="card"><h2>Kierrokset</h2>${lineChart(roundPts, {color:'var(--k-func)', fmtY:v => fmtNum(v, 0), tip:p => `${fmtDate(p.date)}: ${p.y} kierrosta`})}</section>`;
+  h += `<section class="card"><h2>Historia</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Pvm</th><th>Tyyppi</th><th class="num">Kesto</th><th class="num">Kierr.</th><th>Tulos</th><th>Liikkeet</th></tr></thead><tbody>
+    ${sessions.slice().reverse().map(s => `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.type)}</td><td class="num">${fmtDuration(s.durationSec)}</td><td class="num">${s.rounds ?? '–'}</td><td>${esc(s.result || '–')}</td><td class="wrap">${esc((s.movements||'').split('\n').filter(Boolean).join(', '))}</td></tr>`).join('')}
+  </tbody></table></div></section>`;
+  return h;
+}
+
+/* ====================== HISTORIA ====================== */
+function renderHistoria(){
+  const mStart = todayISO().slice(0, 8) + '01';
+  const month = S.sessions.filter(s => s.date >= mStart && s.date <= todayISO());
+  const km = month.filter(s => s.kind === 'run').reduce((a, s) => a + (s.distanceKm||0), 0);
+  const m = month.filter(s => s.kind === 'swim').reduce((a, s) => a + (s.distanceM||0), 0);
+  let h = `<div class="page-head"><h1>Historia</h1></div>
+    <section class="card"><h2>${monthLabel(todayISO())}</h2><div class="stats"><span><b>${month.length}</b> treeniä</span><span>Sali: <b>${month.filter(s => s.kind === 'gym').length}</b> krt</span><span>Juoksu: <b>${fmtNum(km, 1)}</b> km</span><span>Uinti: <b>${fmtNum(m, 0)}</b> m</span><span>Toiminnallinen: <b>${month.filter(s => s.kind === 'func').length}</b> krt</span></div></section>
+    <div class="scroll-x" style="margin-bottom:10px"><button type="button" class="chip-btn ${ui.histKind === 'all' ? 'on' : ''}" data-action="hist-kind" data-k="all">Kaikki</button>${KIND_ORDER.map(k => `<button type="button" class="chip-btn ${ui.histKind === k ? 'on' : ''}" data-action="hist-kind" data-k="${k}">${KINDS[k].label}</button>`).join('')}</div>`;
+  let list = sortedSessions();
+  if(ui.histKind !== 'all'){
+    list = list.filter(s => s.kind === ui.histKind);
+    const types = [...new Set(list.map(s => s.type).filter(Boolean))];
+    if(ui.histType && !types.includes(ui.histType)) ui.histType = '';
+    if(types.length) h += `<label class="f"><span>Tyyppi</span><select data-change="hist-type" id="histType"><option value="">Kaikki tyypit</option>${types.map(t => `<option ${t === ui.histType ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>`;
+    if(ui.histType) list = list.filter(s => s.type === ui.histType);
+  }
+  if(!list.length) return h + `<div class="card empty">Ei kirjauksia${ui.histKind !== 'all' ? ' tällä suodatuksella' : ''}.</div>`;
+  let cur = '';
+  for(const s of list){
+    const mk = s.date.slice(0, 7);
+    if(mk !== cur){ if(cur) h += '</div>'; cur = mk; h += `<div class="month-h">${monthLabel(s.date)}</div><div class="slist">`; }
+    h += sessionRow(s);
+  }
+  h += '</div><p class="hint" style="text-align:center;margin-top:14px">Napauta kirjausta muokataksesi tai poistaaksesi sen.</p>';
+  return h;
+}
+
+/* ====================== KALORIT ====================== */
+function knownFoods(){
+  const seen = new Map();
+  for(const e of S.food.entries.slice().sort((a, b) => (b.t||0) - (a.t||0) || b.date.localeCompare(a.date))){
+    const k = e.name.trim().toLowerCase(); if(!seen.has(k)) seen.set(k, e);
+  }
+  return [...seen.values()];
+}
+function renderKalorit(){
+  const d = ui.kalDate, g = S.food.goals;
+  const entries = S.food.entries.filter(e => e.date === d);
+  const sum = k => entries.reduce((a, e) => a + (e[k]||0), 0);
+  const kcal = sum('kcal'), p = sum('p'), c = sum('c'), f = sum('f');
+  const pct = g.kcal ? Math.min(100, kcal / g.kcal * 100) : 0, over = g.kcal && kcal > g.kcal;
+  const isToday = d === todayISO();
+  const known = knownFoods(); ui.recent = known.slice(0, 14);
+  const macro = (lbl, val, goal, color) => `<div class="macro" style="--mc:${color}"><div class="lbl">${lbl}</div><div class="val">${fmtNum(val, 0)}${goal ? ` / ${fmtNum(goal, 0)}` : ''} g</div>${goal ? `<div class="bar thin"><i style="width:${Math.min(100, val/goal*100)}%"></i></div>` : ''}</div>`;
+  let h = `<div class="page-head"><h1>Kalorit</h1><button type="button" class="btn small" data-action="goals-edit">Tavoitteet</button></div>
+    <div class="datenav"><button type="button" class="icon-btn" data-action="kal-day" data-d="-1" aria-label="Edellinen päivä"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="d">${weekday(d)} ${fmtDate(d)}<small>${isToday ? 'Tänään' : `<a href="#kalorit" data-action="kal-today">Takaisin tähän päivään</a>`}</small></div>
+      <button type="button" class="icon-btn" data-action="kal-day" data-d="1" aria-label="Seuraava päivä"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></div>
+    <section class="card">
+      <div class="kcal-big"><div><span class="v">${fmtNum(kcal, 0)}</span> <span class="g">${g.kcal ? `/ ${fmtNum(g.kcal, 0)} ` : ''}kcal</span></div>
+        <div class="${over ? 'down' : 'muted'}" style="font-weight:700">${g.kcal ? (over ? `Yli ${fmtNum(kcal - g.kcal, 0)} kcal` : `Jäljellä ${fmtNum(g.kcal - kcal, 0)} kcal`) : ''}</div></div>
+      ${g.kcal ? `<div class="bar ${over ? 'over' : ''}"><i style="width:${pct}%"></i></div>` : ''}
+      <div class="macros">${macro('Proteiini', p, g.protein, '#7c3aed')}${macro('Hiilihydraatit', c, g.carbs, '#d97706')}${macro('Rasva', f, g.fat, '#0891b2')}</div>
+    </section>
+    <section class="card"><h2>Lisää ruoka</h2>
+      <form id="foodForm" data-submit="food-add" autocomplete="off">
+        <label class="f"><span>Ruoka</span><input type="text" name="fname" id="foodName" list="foodList" placeholder="esim. Kaurapuuro marjoilla"></label>
+        <datalist id="foodList">${known.map(e => `<option value="${esc(e.name)}">`).join('')}</datalist>
+        <div class="row4">
+          <label class="f"><span>kcal</span><input type="text" name="kcal" inputmode="decimal" placeholder="0"></label>
+          <label class="f"><span>Prot. g</span><input type="text" name="p" inputmode="decimal" placeholder="–"></label>
+          <label class="f"><span>Hiilih. g</span><input type="text" name="c" inputmode="decimal" placeholder="–"></label>
+          <label class="f"><span>Rasva g</span><input type="text" name="fat" inputmode="decimal" placeholder="–"></label>
+        </div>
+        <div class="chips" style="margin-bottom:12px">${MEALS.map(([k, l]) => `<label class="chip"><input type="radio" name="meal" value="${k}" ${ui.kalMeal === k ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>
+        <button type="submit" class="btn primary block">Lisää</button>
+      </form>
+      ${ui.recent.length ? `<div class="f-label" style="margin-top:14px">Viimeksi käytetyt – napauta lisätäksesi (${MEALS.find(m => m[0] === ui.kalMeal)[1].toLowerCase()})</div>
+        <div class="chips">${ui.recent.map((e, i) => `<button type="button" class="chip-btn" data-action="food-quick" data-i="${i}">${esc(e.name)} <span class="muted">${fmtNum(e.kcal, 0)}</span></button>`).join('')}</div>` : ''}
+    </section>`;
+  for(const [mk, ml] of MEALS){
+    const list = entries.filter(e => e.meal === mk); if(!list.length) continue;
+    h += `<section class="card"><div class="meal-h"><h3>${ml}</h3><span class="muted small">${fmtNum(list.reduce((a, e) => a + (e.kcal||0), 0), 0)} kcal</span></div>
+      ${list.map(e => `<div class="food-item"><div class="n"><div>${esc(e.name)}${e.sample ? ' <span class="badge">esim.</span>' : ''}</div><div class="small muted">${[e.p != null ? `P ${fmtNum(e.p)} g` : '', e.c != null ? `H ${fmtNum(e.c)} g` : '', e.f != null ? `R ${fmtNum(e.f)} g` : ''].filter(Boolean).join(' · ') || '&nbsp;'}</div></div><span class="k">${fmtNum(e.kcal, 0)} kcal</span><button type="button" class="icon-btn" data-action="food-del" data-id="${e.id}" aria-label="Poista ${esc(e.name)}">${ICON_X}</button></div>`).join('')}
+    </section>`;
+  }
+  if(!entries.length) h += `<div class="card empty">Ei merkintöjä tälle päivälle.</div>`;
+  return h;
+}
+function addFood(name, kcal, p, c, f, meal){
+  const e = {id:uid(), date:ui.kalDate, name, kcal, p, c, f, meal, t:Date.now()};
+  S.food.entries.push(e); save(); render();
+  toast(`Lisätty: ${name} (${fmtNum(kcal, 0)} kcal)`, {undo:() => { S.food.entries = S.food.entries.filter(x => x.id !== e.id); save(); render(); }});
+}
+function openGoals(){
+  const g = S.food.goals;
+  openModal('Päivän tavoitteet', `<form id="goalsForm" data-submit="goals-save">
+    <label class="f"><span>Kalorit (kcal / päivä)</span><input type="text" name="kcal" inputmode="numeric" value="${inNum(g.kcal)}" placeholder="esim. 2500"></label>
+    <div class="row3"><label class="f"><span>Proteiini g</span><input type="text" name="protein" inputmode="numeric" value="${inNum(g.protein)}" placeholder="valinn."></label>
+    <label class="f"><span>Hiilihydr. g</span><input type="text" name="carbs" inputmode="numeric" value="${inNum(g.carbs)}" placeholder="valinn."></label>
+    <label class="f"><span>Rasva g</span><input type="text" name="fat" inputmode="numeric" value="${inNum(g.fat)}" placeholder="valinn."></label></div>
+    <p class="hint">Makrotavoitteet ovat valinnaisia – jätä tyhjäksi, jos et halua seurata niitä.</p></form>`,
+    `<span class="spacer"></span><button type="button" class="btn" data-action="modal-close">Peruuta</button><button type="submit" form="goalsForm" class="btn primary">Tallenna</button>`);
+}
+
+/* ====================== ASETUKSET ====================== */
+function renderAsetukset(){
+  const hasSample = S.templates.some(t => t.sample) || S.sessions.some(s => s.sample) || S.food.entries.some(e => e.sample);
+  const bytes = new Blob([JSON.stringify(S)]).size;
+  const typeEditor = (key, label, list) => `<div style="margin-bottom:16px"><div class="f-label">${label}</div><div class="chips">${list.map(x => `<span class="type-chip">${esc(x)}<button type="button" data-action="type-del" data-k="${key}" data-name="${esc(x)}" aria-label="Poista ${esc(x)}">×</button></span>`).join('')}</div>
+    <div class="add-inline"><input type="text" data-addfor="${key}" placeholder="Lisää uusi…" aria-label="Uusi tyyppi: ${label}"><button type="button" class="btn small" data-action="type-add" data-k="${key}">Lisää</button></div></div>`;
+  return `<div class="page-head"><h1>Asetukset</h1></div>
+    <section class="card set-list"><h2>Esimerkkidata</h2><p class="hint" style="margin-top:-4px">Lisää valmiit esimerkit (Treeni1, Treeni2, juoksut, uinnit, toiminnallinen treeni ja ruokamerkinnät), niin näet kaaviot heti. Esimerkit on merkitty “esimerkki”-merkillä ja ne voi poistaa koskematta omiin tietoihin.</p>
+      <button type="button" class="btn block" data-action="sample-add">Lisää esimerkkidata</button>
+      ${hasSample ? '<button type="button" class="btn block" data-action="sample-remove">Poista esimerkkidata</button>' : ''}</section>
+    <section class="card set-list"><h2>Varmuuskopio</h2><p class="hint" style="margin-top:-4px">Tiedot tallentuvat vain tämän laitteen selaimeen (localStorage). Ota välillä varmuuskopio – selaimen tietojen tyhjennys poistaa ne.</p>
+      <button type="button" class="btn block" data-action="export">Vie tiedot (JSON)</button>
+      <button type="button" class="btn block" data-action="import">Tuo tiedot (JSON)…</button>
+      <p class="hint">Tallennettu: ${S.templates.length} treenipohjaa, ${S.sessions.length} kirjausta, ${S.food.entries.length} ruokamerkintää · ${fmtNum(bytes/1024, 1)} kt</p></section>
+    <section class="card"><h2>Treenityypit</h2><p class="hint" style="margin-top:-4px">Näistä valitaan tyyppi kirjatessa. Tyypin poistaminen ei muuta vanhoja kirjauksia.</p>
+      ${KIND_ORDER.map(k => typeEditor(k, KINDS[k].label, S.types[k])).join('')}
+      ${typeEditor('strokes', 'Uintityylit', S.strokes)}
+      <button type="button" class="btn small" data-action="types-reset">Palauta oletustyypit</button></section>
+    <section class="card set-list"><h2>Vaara-alue</h2><button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot</button></section>
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.1</p>`;
+}
+function exportData(){
+  const data = JSON.stringify(Object.assign({app:'treeniappi', exportedAt:new Date().toISOString()}, S), null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `treeniappi-varmuuskopio-${todayISO()}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast('Varmuuskopio ladattu');
+}
+$('#importFile').addEventListener('change', async ev => {
+  const file = ev.target.files[0]; ev.target.value = ''; if(!file) return;
+  try{
+    const obj = JSON.parse(await file.text());
+    if(!obj || typeof obj !== 'object' || !(Array.isArray(obj.sessions) || Array.isArray(obj.templates) || obj.food)) throw new Error('tiedosto ei näytä Treeniapin varmuuskopiolta');
+    const n = normalize(obj);
+    if(!confirm(`Tuodaanko varmuuskopio?\n\n${n.templates.length} treenipohjaa, ${n.sessions.length} kirjausta, ${n.food.entries.length} ruokamerkintää.\n\nNykyiset tiedot korvataan.`)) return;
+    S = n; save(); render(); toast('Tiedot tuotu');
+  } catch(e){ toast('Tuonti epäonnistui: ' + e.message, {error:true}); }
+});
+
+/* ---------- Esimerkkidata ---------- */
+function addSampleData(){
+  removeSampleData(true);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const T = todayISO(); let n = 0; const mk = o => Object.assign({id:uid() + (n++), sample:true, createdAt:Date.now() + n}, o);
+  const t1 = mk({name:'Treeni1 – Ylävartalo', kind:'gym', exercises:[{name:'Penkkipunnerrus', target:'3×8'},{name:'Pystypunnerrus', target:'3×8'},{name:'Kulmasoutu', target:'3×10'},{name:'Leuanveto', target:'3×6'}]});
+  const t2 = mk({name:'Treeni2 – Alavartalo', kind:'gym', exercises:[{name:'Takakyykky', target:'3×6'},{name:'Maastaveto', target:'3×5'},{name:'Askelkyykky', target:'3×10'},{name:'Pohjenousu', target:'3×12'}]});
+  const t3 = mk({name:'Peruslenkki', kind:'run', defaultType:'PK'});
+  const t4 = mk({name:'Tiistain intervallit', kind:'run', defaultType:'Intervalli', intervals:'6 × 800 m / 2 min palautus'});
+  const t5 = mk({name:'Uintitreeni', kind:'swim', defaultType:'PK-uinti'});
+  const t6 = mk({name:'Kehonpainopiiri', kind:'func', defaultType:'AMRAP', movements:'10 burpeeta\n15 kahvakuulaheilautusta\n20 kyykkyä\n10 punnerrusta'});
+  S.templates.push(t1, t2, t3, t4, t5, t6);
+  const start = mondayOf(addDays(T, -7*9));
+  const gymEx = (base, step, i, reps, slow) => { const kg = base + step * Math.floor(i * (slow ? 0.3 : 0.45)); return [{reps, kg}, {reps, kg}, {reps:Math.max(1, reps - (rnd() < .5 ? 1 : 0)), kg}]; };
+  for(let w = 0; w < 10; w++){
+    const mon = addDays(start, 7*w), i = w*2;
+    const push = (dayOff, o) => { const date = addDays(mon, dayOff); if(date <= T) S.sessions.push(mk(Object.assign({date}, o))); };
+    push(0, {kind:'gym', templateId:t1.id, title:t1.name, type:'Voima', exercises:[
+      {name:'Penkkipunnerrus', sets:gymEx(60, 2.5, i, 8)}, {name:'Pystypunnerrus', sets:gymEx(35, 2.5, i, 8, true)},
+      {name:'Kulmasoutu', sets:gymEx(50, 2.5, i, 10)}, {name:'Leuanveto', sets:[{reps:5 + Math.floor(w/3), kg:0},{reps:5 + Math.floor(w/3), kg:0},{reps:4 + Math.floor(w/3), kg:0}]}]});
+    push(3, {kind:'gym', templateId:t2.id, title:t2.name, type:'Voima', exercises:[
+      {name:'Takakyykky', sets:gymEx(70, 5, i, 6)}, {name:'Maastaveto', sets:gymEx(90, 5, i, 5, true)},
+      {name:'Askelkyykky', sets:gymEx(16, 2, i, 10, true)}, {name:'Pohjenousu', sets:gymEx(60, 5, i, 12, true)}]});
+    const pkKm = 7 + Math.round(rnd()*30)/10, pkPace = 372 - w*2.2 + rnd()*8;
+    push(1, {kind:'run', templateId:t3.id, title:t3.name, type:'PK', distanceKm:pkKm, durationSec:Math.round(pkKm*pkPace), hr:Math.round(138 - w*0.6 + rnd()*4), rpe:3});
+    if(w % 2 === 0) push(2, {kind:'run', templateId:t4.id, title:t4.name, type:'Intervalli', intervals:'6 × 800 m / 2 min palautus', distanceKm:8.2, durationSec:Math.round(8.2*(330 - w*2 + rnd()*6)), hr:Math.round(156 + rnd()*5), rpe:8});
+    else push(2, {kind:'run', title:'Juoksu', type:'Vauhtikestävyys (VK)', intervals:'3 × 10 min / 2 min', distanceKm:10, durationSec:Math.round(10*(318 - w*1.5 + rnd()*6)), hr:Math.round(152 + rnd()*4), rpe:7});
+    if(w % 3 === 1) push(6, {kind:'run', title:'Juoksu', type:'Kuormajuoksu', distanceKm:6, durationSec:Math.round(6*(430 - w*2)), loadKg:10, hr:144, rpe:6, notes:'Reppu 10 kg'});
+    else push(6, {kind:'run', title:'Juoksu', type:'Pitkä lenkki', distanceKm:14 + w*0.5, durationSec:Math.round((14 + w*0.5)*(385 - w)), hr:Math.round(140 + rnd()*4), rpe:5});
+    const sm = 1200 + Math.round(rnd()*8)*100, st = ['PK-uinti','Tekniikka','Intervalli'][w % 3];
+    push(4, {kind:'swim', templateId:t5.id, title:t5.name, type:st, distanceM:sm, durationSec:Math.round(sm/100*(132 - w*1.2 + rnd()*5)), stroke:'Vapaa', intervals:st === 'Intervalli' ? '10 × 100 m / 20 s palautus' : ''});
+    if(w % 2 === 1) push(5, {kind:'func', templateId:t6.id, title:t6.name, type:'AMRAP', durationSec:1200, rounds:5 + Math.floor(w/3), movements:t6.movements, result:`${5 + Math.floor(w/3)} kierrosta + ${Math.floor(rnd()*20)} toistoa`, rpe:8});
+  }
+  const foods = [['Kaurapuuro marjoilla',380,14,62,8,'aamiainen'],['Kahvi maidolla',40,2,3,2,'aamiainen'],['Kanasalaatti',520,42,30,22,'lounas'],['Rahka + banaani',260,22,38,1,'valipala'],['Lohi, peruna ja kasvikset',680,40,60,28,'paivallinen'],['Proteiinipatukka',210,20,18,7,'valipala']];
+  for(const [dOff, picks] of [[-1, [0,1,2,3,4]], [0, [0,1,2,5]]]) for(const k of picks){ const f = foods[k]; S.food.entries.push({id:uid() + (n++), sample:true, date:addDays(T, dOff), name:f[0], kcal:f[1], p:f[2], c:f[3], f:f[4], meal:f[5], t:Date.now() - 1000*k}); }
+  save();
+}
+function removeSampleData(silent){
+  const sampleTpl = new Set(S.templates.filter(t => t.sample).map(t => t.id));
+  S.templates = S.templates.filter(t => !t.sample);
+  S.sessions = S.sessions.filter(s => !s.sample).map(s => sampleTpl.has(s.templateId) ? Object.assign(s, {templateId:null}) : s);
+  S.food.entries = S.food.entries.filter(e => !e.sample);
+  if(!silent) save();
+}
+
+/* ====================== Tapahtumat ====================== */
+const ACTIONS = {
+  'modal-close': () => closeModal(),
+  'tpl-new': () => openTplEditor(null),
+  'tpl-edit': el => openTplEditor(el.dataset.id),
+  'tpl-delete': el => { const t = tplById(el.dataset.id); const n = S.sessions.filter(s => s.templateId === t.id).length;
+    if(!confirm(`Poistetaanko treeni “${t.name}”?${n ? `\n\nSen ${n} kirjausta säilyvät historiassa.` : ''}`)) return;
+    S.templates = S.templates.filter(x => x.id !== t.id); S.sessions.forEach(s => { if(s.templateId === t.id) s.templateId = null; }); save(); closeModal(); render(); toast('Treeni poistettu'); },
+  'te-add': () => { $('#tplExs').insertAdjacentHTML('beforeend', tplExRow()); const r = $$('#tplExs .te-name'); r[r.length-1].focus(); },
+  'te-remove': el => el.closest('.tpl-ex-row').remove(),
+  'log-new': el => openLogForm({kind:el.dataset.kind}),
+  'log-tpl': el => openLogForm({tplId:el.dataset.id}),
+  'session-edit': el => openLogForm({sessionId:el.dataset.id}),
+  'session-delete': el => { const s = sessById(el.dataset.id); if(!confirm(`Poistetaanko kirjaus ${fmtDate(s.date)} (${s.title})?`)) return;
+    S.sessions = S.sessions.filter(x => x.id !== s.id); save(); closeModal(); render(); toast('Kirjaus poistettu', {undo:() => { S.sessions.push(s); save(); render(); }}); },
+  'ex-add': () => { $('#exs').insertAdjacentHTML('beforeend', exBlockHtml('', null, null)); const nm = $$('#exs .ex-name'); nm[nm.length-1].focus(); },
+  'ex-remove': el => { const b = el.closest('.ex-block'); const name = b.querySelector('.ex-name').value; if(name && !confirm(`Poistetaanko liike “${name}” tästä kirjauksesta?`)) return; b.remove(); },
+  'set-add': el => { const sets = el.closest('.ex-block').querySelector('.sets'); const rows = $$('.set-row', sets); const last = rows[rows.length-1];
+    const st = last ? {reps:last.querySelector('.set-reps').value, kg:num(last.querySelector('.set-kg').value)} : {};
+    sets.insertAdjacentHTML('beforeend', setRowHtml(rows.length + 1, st)); },
+  'set-remove': el => { const sets = el.closest('.sets'); el.closest('.set-row').remove(); $$('.set-no', sets).forEach((x, i) => x.textContent = i + 1); },
+  'type-custom-toggle': () => { const r = $('#customTypeRow'); r.hidden = !r.hidden; if(!r.hidden) $('#customType').focus(); },
+  'type-custom-add': () => { const f = $('#logForm'), kind = f.dataset.kind, name = $('#customType').value.trim(); if(!name) return;
+    if(!S.types[kind].some(x => x.toLowerCase() === name.toLowerCase())){ S.types[kind].push(name); save(); }
+    const real = S.types[kind].find(x => x.toLowerCase() === name.toLowerCase());
+    $('#typeChips').innerHTML = typeChipsHtml(kind, real); $('#customType').value = ''; $('#customTypeRow').hidden = true; updateCalc(); toast(`Tyyppi “${real}” lisätty`); },
+  'show-all-fields': () => { $('#logForm').dataset.showAll = '1'; updateCalc(); },
+  'keh-metric': el => { ui.kehMetric = el.dataset.m; render(); },
+  'keh-type': el => { ui.kehType = el.dataset.t; render(); },
+  'hist-kind': el => { ui.histKind = el.dataset.k; ui.histType = ''; render(); },
+  'kal-day': el => { ui.kalDate = addDays(ui.kalDate, +el.dataset.d); render(); },
+  'kal-today': (el, e) => { e.preventDefault(); ui.kalDate = todayISO(); render(); },
+  'food-quick': el => { const e = ui.recent[+el.dataset.i]; if(e) addFood(e.name, e.kcal, e.p ?? null, e.c ?? null, e.f ?? null, ui.kalMeal); },
+  'food-del': el => { const e = S.food.entries.find(x => x.id === el.dataset.id); if(!e) return; S.food.entries = S.food.entries.filter(x => x !== e); save(); render();
+    toast(`Poistettu: ${e.name}`, {undo:() => { S.food.entries.push(e); save(); render(); }}); },
+  'goals-edit': () => openGoals(),
+  'type-del': el => { const k = el.dataset.k, nm = el.dataset.name; const list = k === 'strokes' ? S.strokes : S.types[k];
+    if(list.length <= 1){ toast('Vähintään yksi tyyppi tarvitaan', {error:true}); return; }
+    const idx = list.indexOf(nm); if(idx < 0) return; list.splice(idx, 1); save(); render();
+    toast(`Poistettu: ${nm}`, {undo:() => { list.splice(idx, 0, nm); save(); render(); }}); },
+  'type-add': el => { const k = el.dataset.k, inp = $(`input[data-addfor="${k}"]`), nm = inp.value.trim(); if(!nm) return;
+    const list = k === 'strokes' ? S.strokes : S.types[k]; if(list.some(x => x.toLowerCase() === nm.toLowerCase())){ toast('Tyyppi on jo listalla', {error:true}); return; }
+    list.push(nm); save(); render(); toast(`Lisätty: ${nm}`); },
+  'types-reset': () => { if(!confirm('Palautetaanko oletustyypit? Omat lisätyt tyypit poistuvat listoilta (vanhat kirjaukset säilyvät).')) return;
+    S.types = JSON.parse(JSON.stringify(DEFAULT_TYPES)); S.strokes = DEFAULT_STROKES.slice(); save(); render(); toast('Oletustyypit palautettu'); },
+  'export': () => exportData(),
+  'import': () => $('#importFile').click(),
+  'sample-add': () => { const has = S.templates.some(t => t.sample) || S.sessions.some(s => s.sample);
+    if(has && !confirm('Esimerkkidata on jo lisätty. Korvataanko se uudella?')) return;
+    addSampleData(); render(); toast('Esimerkkidata lisätty – katso Kehitys-sivu'); },
+  'sample-remove': () => { if(!confirm('Poistetaanko kaikki esimerkkidata? Omat kirjauksesi säilyvät.')) return; removeSampleData(); render(); toast('Esimerkkidata poistettu'); },
+  'clear-all': () => { if(!confirm('Tyhjennetäänkö KAIKKI tiedot (treenit, kirjaukset, ruokamerkinnät ja asetukset)?\n\nTätä ei voi perua. Ota tarvittaessa ensin varmuuskopio.')) return;
+    S = defaultState(); save(); render(); toast('Kaikki tiedot tyhjennetty'); }
+};
+const SUBMITS = {
+  'tpl-save': f => saveTpl(f),
+  'session-save': f => saveSession(f),
+  'food-add': f => { const name = f.fname.value.trim(), kcal = num(f.kcal.value);
+    if(!name || kcal == null){ toast('Anna ruoan nimi ja kalorit', {error:true}); return; }
+    ui.kalMeal = (f.querySelector('input[name=meal]:checked') || {}).value || ui.kalMeal;
+    addFood(name, kcal, num(f.p.value), num(f.c.value), num(f.fat.value), ui.kalMeal); },
+  'goals-save': f => { S.food.goals = {kcal:num(f.kcal.value), protein:num(f.protein.value), carbs:num(f.carbs.value), fat:num(f.fat.value)}; save(); closeModal(); render(); toast('Tavoitteet tallennettu'); }
+};
+document.addEventListener('click', e => {
+  const tipEl = e.target.closest('[data-tip]');
+  if(tipEl){ const tip = tipEl.closest('.chart').querySelector('.chart-tip'); if(tip) tip.textContent = tipEl.dataset.tip; }
+  const el = e.target.closest('[data-action]'); if(!el) return;
+  const fn = ACTIONS[el.dataset.action]; if(fn) fn(el, e);
+});
+document.addEventListener('submit', e => { const f = e.target, fn = SUBMITS[f.dataset.submit]; if(fn){ e.preventDefault(); fn(f); } });
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.dataset.change === 'keh-sel'){ ui.kehSel = t.value; ui.kehType = 'all'; render(); }
+  else if(t.dataset.change === 'hist-type'){ ui.histType = t.value; render(); }
+  else if(t.name === 'kind' && t.closest('#tplForm')) updateKindVisibility(t.closest('form'));
+  else if(t.name === 'stype' || (t.name === 'date' && t.closest('#logForm'))) updateCalc();
+  else if(t.name === 'meal' && t.closest('#foodForm')){
+    ui.kalMeal = t.value; const lbl = $('#main .f-label[style*="margin-top:14px"]');
+    if(lbl) lbl.textContent = `Viimeksi käytetyt – napauta lisätäksesi (${MEALS.find(m => m[0] === ui.kalMeal)[1].toLowerCase()})`; }
+  else if(t.id === 'foodName'){ const k = t.value.trim().toLowerCase(); const m = knownFoods().find(x => x.name.trim().toLowerCase() === k); const f = t.form;
+    if(m && !f.kcal.value){ f.kcal.value = inNum(m.kcal); f.p.value = inNum(m.p); f.c.value = inNum(m.c); f.fat.value = inNum(m.f); } }
+});
+document.addEventListener('input', e => { if(e.target.closest('#logForm')) updateCalc(); });
+document.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.matches('input[data-addfor]')){ e.preventDefault(); ACTIONS['type-add']({dataset:{k:e.target.dataset.addfor}}); }
+  if(e.key === 'Enter' && e.target.id === 'customType'){ e.preventDefault(); ACTIONS['type-custom-add'](); }
+});
+window.addEventListener('storage', e => { if(e.key === STORE_KEY){ S = load(); render(); } });
+
+route();
+</script>
+</body>
+</html>
