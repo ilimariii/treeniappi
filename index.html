@@ -10,13 +10,13 @@
 <style>
 :root{
   --bg:#f3f4f6; --card:#ffffff; --text:#111827; --muted:#6b7280; --border:#e5e7eb; --soft:#f9fafb;
-  --accent:#0f766e; --accent-soft:#ccfbf1; --accent-text:#ffffff; --danger:#dc2626; --warn:#d97706; --ok:#16a34a;
+  --accent:#0f766e; --accent-soft:#ccfbf1; --accent-text:#ffffff; --danger:#dc2626; --warn:#d97706; --goal:#7c3aed; --ok:#16a34a;
   --k-gym:#2563eb; --k-run:#16a34a; --k-swim:#0891b2; --k-func:#ea580c;
   --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 1px 8px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme: dark){
   :root{ --bg:#0b0f14; --card:#151b23; --text:#e5e7eb; --muted:#9ca3af; --border:#273140; --soft:#1b2330;
-    --accent:#14b8a6; --accent-soft:#134e4a; --accent-text:#04201d; --shadow:none; }
+    --accent:#14b8a6; --accent-soft:#134e4a; --accent-text:#04201d; --shadow:none; --goal:#a78bfa; }
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -143,20 +143,49 @@ details summary.sum{cursor:pointer;color:var(--accent);font-weight:600;font-size
 .macro .val{font-size:.9rem;font-weight:700}
 .macro .bar > i{background:var(--mc)}
 .food-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
-.meal-h + .food-item{border-top:0}
+.meal-body > .food-item:first-child{border-top:1px solid var(--border)}
 .food-item .n{flex:1;min-width:0}
 .food-item .n div:first-child{font-weight:600;overflow-wrap:anywhere}
 .food-item .k{font-weight:700;white-space:nowrap}
-.meal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.meal-h h3{font-size:.95rem}
+.meal-h{display:flex;align-items:center;gap:2px}
+.meal-h h3{flex:1;min-width:0;font-size:inherit;margin:0}
+.meals-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 2px 8px}
+.meals-bar h2{margin:0}
+.meals-empty{margin:-2px 2px 10px}
+.meal-card{padding:4px 6px 4px 4px}
+.meal-card .meal-body{padding:0 10px 6px 14px}
+.meal-tog{flex:1;width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:10px 6px 10px 8px;min-height:52px;border-radius:10px;cursor:pointer}
+.meal-tog:hover{background:var(--soft)}
+.meal-tog .chev,.meal-tog .chev-sp{width:18px;height:18px;flex:none;color:var(--muted);transition:transform .2s}
+.meal-card.collapsed .meal-tog .chev{transform:rotate(-90deg)}
+.meal-tog .mt{flex:1;min-width:0;display:flex;flex-direction:column}
+.meal-tog .mn{font-weight:700;font-size:.98rem;overflow-wrap:anywhere}
+.meal-tog .mm{font-size:.78rem;color:var(--muted);font-weight:500}
+.meal-tog .mk{font-weight:700;white-space:nowrap}
+.meal-card.is-empty .mk,.meal-card.is-empty .mn{color:var(--muted)}
+.meal-plus{color:var(--accent);width:44px;height:44px}
+.meal-plus:hover{background:var(--accent-soft)}
+#addFoodCard{scroll-margin-top:8px}
+#addFoodCard.flash{animation:flash 1.2s ease}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:var(--shadow)}}
+details.sec{padding:0;overflow:hidden}
+details.sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:56px}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary:hover{background:var(--soft)}
+details.sec .sec-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+details.sec .sec-t h2{margin:0}
+details.sec .sec-sum{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+details.sec .chev{width:18px;height:18px;flex:none;color:var(--muted);transition:transform .2s}
+details.sec[open] .chev{transform:rotate(180deg)}
+details.sec .sec-b{padding:2px 16px 14px}
 .type-chip{display:inline-flex;align-items:center;gap:2px;min-height:32px;padding:0 4px 0 12px;border-radius:999px;border:1px solid var(--border);background:var(--soft);font-size:.88rem}
 .type-chip button{border:0;background:transparent;width:28px;height:28px;border-radius:50%;cursor:pointer;color:var(--muted);font-size:1.1rem;line-height:1}
 .add-inline{display:flex;gap:6px;margin-top:8px}
 .add-inline input{flex:1}
 .set-list .btn{margin:0 0 8px}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
-nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
-.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 7px;color:var(--muted);font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none}
+nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;min-width:0;white-space:nowrap;letter-spacing:-.01em;color:var(--muted);font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none}
 .tab svg{width:24px;height:24px}
 .tab.active{color:var(--accent)}
 #modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
@@ -239,6 +268,24 @@ details.adv[open] .chev{transform:rotate(180deg)}
 .btn.danger-solid{background:var(--danger);border-color:var(--danger);color:#fff}
 .btn.danger-solid:disabled{opacity:.4;cursor:not-allowed}
 #wipeConfirm{font-weight:700;letter-spacing:.08em}
+.w-row{grid-template-columns:1.25fr 1fr}
+.w-exists{margin:-4px 0 10px;color:var(--warn,#b45309)}
+.rseg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:4px;margin:0 0 12px}
+.rseg button{border:0;background:transparent;color:var(--text);font:inherit;font-size:.82rem;font-weight:600;padding:8px 2px;border-radius:9px;cursor:pointer}
+.rseg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--accent)}
+.w-now{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.w-now .v{font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.w-now .v small{font-size:1rem;color:var(--muted);font-weight:600}
+.lbl{font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.w-goal{text-align:right;padding-top:2px}.w-goal .gv{font-weight:700;color:var(--goal);font-size:1rem;white-space:nowrap}
+.w-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:8px}
+.w-grid .val{font-weight:700;font-size:1.05rem}
+.w-grid .val.up{color:var(--accent)} .w-grid .val.down{color:var(--danger)}
+.w-item{display:flex;align-items:center;gap:4px;padding:6px 0;border-top:1px solid var(--border)}
+.w-item:first-of-type{border-top:0}
+.w-item .n{flex:1;min-width:0}
+.w-d{color:var(--muted);font-weight:600}
+.hl-t{font-weight:700}
 </style>
 </head>
 <body>
@@ -249,6 +296,7 @@ details.adv[open] .chev{transform:rotate(180deg)}
   <a class="tab" href="#kehitys" data-page="kehitys"><svg class="i" viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg>Kehitys</a>
   <a class="tab" href="#historia" data-page="historia"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Historia</a>
   <a class="tab" href="#kalorit" data-page="kalorit"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c.5 3 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.8 2.2-4.8.1 2 1 3.2 2.3 3.3C11 9 11 6 12 3z"/></svg>Kalorit</a>
+  <a class="tab" href="#paino" data-page="paino"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3.5" width="18" height="17" rx="4"/><path d="M7.5 10.5a5.5 5.5 0 0 1 9 0"/><path d="M12 11l1.8-2.6"/></svg>Paino</a>
   <a class="tab" href="#asetukset" data-page="asetukset"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>Asetukset</a>
 </div></nav>
 
@@ -330,7 +378,8 @@ function defaultMeal(){ const h = new Date().getHours(); if(h < 10) return 'aami
 /* ====================== Tila ja tallennus ====================== */
 function defaultState(){
   return { version:2, templates:[], sessions:[], types:JSON.parse(JSON.stringify(DEFAULT_TYPES)), strokes:DEFAULT_STROKES.slice(),
-    food:{ goals:{kcal:2500, protein:null, carbs:null, fat:null}, entries:[], meals:DEFAULT_MEALS.map(m => Object.assign({}, m)), products:{}, addBurnedToGoal:false } };
+    food:{ goals:{kcal:2500, protein:null, carbs:null, fat:null}, entries:[], meals:DEFAULT_MEALS.map(m => Object.assign({}, m)), products:{}, addBurnedToGoal:false },
+    weight:{ entries:[], goal:null } };
 }
 /* v1 -> v2: ateriat olivat kiinteitä avaimia (aamiainen, lounas, paivallinen, valipala) – samat id:t säilyvät oletusaterioissa */
 function normMeals(m){
@@ -344,6 +393,19 @@ function normProducts(p){
   if(p && typeof p === 'object' && !Array.isArray(p)) for(const [k, v] of Object.entries(p)) if(/^\d{6,14}$/.test(k) && v && typeof v === 'object' && v.per100) out[k] = Object.assign({}, v, {code:k});
   return out;
 }
+/* Paino (lisätty v0.3.2): yksi merkintä per päivä – jos samalle päivälle on useampi, viimeisin jää */
+function normWeight(w){
+  const out = {entries:[], goal:null}; if(!w || typeof w !== 'object') return out;
+  const g = Number(w.goal); out.goal = isFinite(g) && g >= 20 && g <= 400 ? g : null;
+  const byDate = new Map();
+  if(Array.isArray(w.entries)) for(const e of w.entries){
+    const kg = Number(e && e.kg);
+    if(!e || !/^\d{4}-\d{2}-\d{2}$/.test(String(e.date)) || !isFinite(kg) || kg < 20 || kg > 400) continue;
+    byDate.set(e.date, Object.assign({}, e, {id:String(e.id || uid()), kg, note:String(e.note || '')}));
+  }
+  out.entries = [...byDate.values()].sort((a, b) => a.date < b.date ? -1 : 1);
+  return out;
+}
 function normalize(s){
   const d = defaultState(); if(!s || typeof s !== 'object') return d;
   const types = Object.assign({}, d.types);
@@ -354,7 +416,8 @@ function normalize(s){
     types, strokes: Array.isArray(s.strokes) && s.strokes.length ? s.strokes.map(String) : d.strokes,
     food: { goals: Object.assign({}, d.food.goals, (s.food && s.food.goals) || {}),
             entries: Array.isArray(s.food && s.food.entries) ? s.food.entries.filter(e => e && e.id && e.date) : [],
-            meals: normMeals(s.food && s.food.meals), products: normProducts(s.food && s.food.products), addBurnedToGoal: !!(s.food && s.food.addBurnedToGoal) } };
+            meals: normMeals(s.food && s.food.meals), products: normProducts(s.food && s.food.products), addBurnedToGoal: !!(s.food && s.food.addBurnedToGoal) },
+    weight: normWeight(s.weight) };
 }
 function load(){ try{ const raw = localStorage.getItem(STORE_KEY); return raw ? normalize(JSON.parse(raw)) : defaultState(); } catch(e){ console.warn('Lataus epäonnistui', e); return defaultState(); } }
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){ toast('Tallennus epäonnistui: ' + e.message, {error:true}); } }
@@ -377,6 +440,27 @@ function toast(msg, opt={}){
   toastTimer = setTimeout(() => t.hidden = true, opt.undo ? 5000 : 2600);
 }
 
+/* ====================== Näkymäasetukset (localStorage, ei varmuuskopioon) ======================
+   mealsCollapsed = ateriakorttien oletustila (true = pienennetty), meals[id] = yksittäisen aterian poikkeus.
+   setsOpen = Asetukset-osioiden oletustila (false = kiinni), sets[id] = osion poikkeus. */
+const PREF_KEY = 'treeniappi.ui';
+function loadPrefs(){
+  let p = {}; try{ p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; }catch(e){}
+  const obj = o => (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
+  return {mealsCollapsed: p.mealsCollapsed !== false, meals: obj(p.meals), setsOpen: p.setsOpen === true, sets: obj(p.sets), wRange: typeof p.wRange === 'string' ? p.wRange : '3m'};
+}
+let PREFS = loadPrefs();
+function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(PREFS)); }catch(e){} }
+const mealCollapsed = id => (id in PREFS.meals) ? !!PREFS.meals[id] : PREFS.mealsCollapsed;
+const secOpen = id => (id in PREFS.sets) ? !!PREFS.sets[id] : PREFS.setsOpen;
+const ICON_CHEV = '<svg class="i chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+const ICON_PLUS = '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+/* Kokoontaitettava Asetukset-osio */
+const mealsSummary = () => `${S.food.meals.length} ${S.food.meals.length === 1 ? 'ateria' : 'ateriaa'}: ${S.food.meals.map(m => m.name).join(', ')}`;
+function secHtml(id, title, summary, body){
+  return `<details class="card sec" data-sec="${id}" ${secOpen(id) ? 'open' : ''}><summary><span class="sec-t"><h2>${title}</h2>${summary ? `<span class="sec-sum">${summary}</span>` : ''}</span>${ICON_CHEV}</summary><div class="sec-b">${body}</div></details>`;
+}
+
 /* ====================== Modaali ====================== */
 function openModal(title, body, foot){
   const m = $('#modal');
@@ -388,7 +472,7 @@ function openModal(title, body, foot){
 function closeModal(){ if(typeof stopScanner === 'function') stopScanner(); const m = $('#modal'); m.hidden = true; m.innerHTML = ''; document.body.classList.remove('modal-open'); }
 
 /* ====================== Reititys ====================== */
-const PAGES = { treenit:()=>renderTreenit(), kehitys:()=>renderKehitys(), historia:()=>renderHistoria(), kalorit:()=>renderKalorit(), asetukset:()=>renderAsetukset() };
+const PAGES = { treenit:()=>renderTreenit(), kehitys:()=>renderKehitys(), historia:()=>renderHistoria(), kalorit:()=>renderKalorit(), paino:()=>renderPaino(), asetukset:()=>renderAsetukset() };
 function route(){ const p = location.hash.slice(1); ui.page = PAGES[p] ? p : 'treenit'; closeModal(); render(); window.scrollTo(0, 0); }
 function render(){
   $('#main').innerHTML = PAGES[ui.page]();
@@ -734,13 +818,14 @@ function lineChart(pts, {fmtY = v => fmtNum(v), invert = false, color = 'var(--a
   const dots = pts.map(p => `<circle class="pt" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="4.5" fill="var(--card)" stroke="${color}" stroke-width="2.5" data-tip="${esc(tip(p))}"><title>${esc(tip(p))}</title></circle>`).join('');
   return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${g}${area}<path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${dots}</svg><div class="chart-tip">Napauta pistettä nähdäksesi arvon</div></div>`;
 }
-function multiLineChart(series, {fmtY = v => fmtNum(v), tip = () => ''} = {}){
+function multiLineChart(series, {fmtY = v => fmtNum(v), tip = () => '', hline = null, id = ''} = {}){
   series = series.filter(se => se.pts.length).map(se => Object.assign({}, se, {pts:se.pts.slice().sort((a, b) => a.x - b.x)}));
   if(!series.length) return '<div class="chart-empty">Ei vielä dataa</div>';
   const all = series.flatMap(se => se.pts);
   const W = chartWidth(), H = 190, L = 44, R = 12, T = 12, B = 26;
   let x0 = Math.min(...all.map(p => p.x)), x1 = Math.max(...all.map(p => p.x)); if(x0 === x1){ x0 -= 3*DAY; x1 += 3*DAY; }
-  const {lo, hi, ticks} = niceTicks(Math.min(...all.map(p => p.y)), Math.max(...all.map(p => p.y)));
+  const yv = all.map(p => p.y).concat(hline ? [hline.y] : []);
+  const {lo, hi, ticks} = niceTicks(Math.min(...yv), Math.max(...yv));
   const sx = x => L + (x - x0) / (x1 - x0) * (W - L - R), sy = y => H - B - (y - lo) / ((hi - lo) || 1) * (H - T - B);
   let g = '';
   for(const tk of ticks){ const y = sy(tk).toFixed(1); g += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y}" y2="${y}"/><text class="axis-t" x="${L-6}" y="${(+y+4).toFixed(1)}" text-anchor="end">${esc(fmtY(tk))}</text>`; }
@@ -749,10 +834,12 @@ function multiLineChart(series, {fmtY = v => fmtNum(v), tip = () => ''} = {}){
   for(const se of series){
     const path = se.pts.map((p, i) => `${i ? 'L' : 'M'}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join('');
     g += `<path d="${path}" fill="none" stroke="${se.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" ${se.dash ? 'stroke-dasharray="6 4"' : ''}/>`;
-    g += se.pts.map(p => `<circle class="pt" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="4" fill="var(--card)" stroke="${se.color}" stroke-width="2.5" data-tip="${esc(tip(p, se))}"><title>${esc(tip(p, se))}</title></circle>`).join('');
+    if(se.dots !== false) g += se.pts.map(p => `<circle class="pt" cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="${se.r || 4}" fill="var(--card)" stroke="${se.color}" stroke-width="2.5" data-tip="${esc(tip(p, se))}"><title>${esc(tip(p, se))}</title></circle>`).join('');
   }
-  const legend = series.map(se => `<span class="lg"><svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" stroke="${se.color}" stroke-width="3" ${se.dash ? 'stroke-dasharray="5 3"' : ''}/></svg>${esc(se.label)}</span>`).join('');
-  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${g}</svg><div class="legend">${legend}</div><div class="chart-tip">Napauta pistettä nähdäksesi arvon</div></div>`;
+  if(hline){ const y = sy(hline.y).toFixed(1); g += `<line class="hline" x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="${hline.color}" stroke-width="2" stroke-dasharray="7 5"/><text class="axis-t hl-t" x="${W-R-2}" y="${(+y - 5).toFixed(1)}" text-anchor="end" fill="${hline.color}">${esc(hline.label)}</text>`; }
+  const legend = series.map(se => `<span class="lg"><svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" stroke="${se.color}" stroke-width="3" ${se.dash ? 'stroke-dasharray="5 3"' : ''}/></svg>${esc(se.label)}</span>`).join('')
+    + (hline ? `<span class="lg"><svg width="22" height="10"><line x1="1" x2="21" y1="5" y2="5" stroke="${hline.color}" stroke-width="2.5" stroke-dasharray="5 3"/></svg>${esc(hline.legend || hline.label)}</span>` : '');
+  return `<div class="chart"${id ? ` id="${id}"` : ''}><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${g}</svg><div class="legend">${legend}</div><div class="chart-tip">Napauta pistettä nähdäksesi arvon</div></div>`;
 }
 function hrChartHtml(sessions){
   const pt = k => sessions.filter(s => s[k]).map(s => ({x:parseISO(s.date).getTime(), y:s[k], date:s.date}));
@@ -964,7 +1051,7 @@ function renderKalorit(){
       ${burned ? `<div class="burned" id="burnedInfo"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c.5 3 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.8 2.2-4.8.1 2 1 3.2 2.3 3.3C11 9 11 6 12 3z"/></svg><span>Treeneissä kulutettu: <b>${fmtNum(burned, 0)} kcal</b> (${daySess.length} ${daySess.length === 1 ? 'treeni' : 'treeniä'})${addB ? ` · tavoite ${fmtNum(g.kcal, 0)} + ${fmtNum(burned, 0)}` : g.kcal ? ' · ei lisätty tavoitteeseen' : ''}</span></div>` : ''}
       <div class="macros">${macro('Proteiini', p, g.protein, '#7c3aed')}${macro('Hiilihydraatit', c, g.carbs, '#d97706')}${macro('Rasva', f, g.fat, '#0891b2')}</div>
     </section>
-    <section class="card"><h2>Lisää ruoka</h2>
+    <section class="card" id="addFoodCard"><h2>Lisää ruoka</h2>
       <form id="searchForm" data-submit="food-search" role="search" autocomplete="off"><div class="search-wrap"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="foodSearch" placeholder="Hae tuotetta nimellä" aria-label="Hae tuotetta nimellä" enterkeyhint="search"></div></form>
       <div id="searchResults" class="sr" hidden></div>
       <button type="button" class="btn block scan-btn" data-action="scan-open">${ICON_BARCODE} Skannaa viivakoodi</button>
@@ -985,20 +1072,155 @@ function renderKalorit(){
       ${ui.recent.length ? `<div class="f-label" id="recentLbl" style="margin-top:14px">${esc(recentLabel())}</div>
         <div class="chips">${ui.recent.map((e, i) => `<button type="button" class="chip-btn" data-action="food-quick" data-i="${i}">${esc(e.name)}${e.grams ? ` <span class="muted">${fmtNum(e.grams)} g</span>` : ''} <span class="muted">${fmtNum(e.kcal, 0)}</span></button>`).join('')}</div>` : ''}
     </section>`;
-  const groups = S.food.meals.map(m => ({name:m.name, list:entries.filter(e => e.meal === m.id)}));
+  const groups = S.food.meals.map(m => ({id:m.id, name:m.name, list:entries.filter(e => e.meal === m.id)}));
   const orphans = entries.filter(e => !S.food.meals.some(m => m.id === e.meal));
-  if(orphans.length) groups.push({name:'Muut merkinnät', list:orphans});
-  for(const gr of groups){
-    if(!gr.list.length) continue;
-    h += `<section class="card"><div class="meal-h"><h3>${esc(gr.name)}</h3><span class="muted small">${fmtNum(gr.list.reduce((a, e) => a + (e.kcal||0), 0), 0)} kcal</span></div>${gr.list.map(foodItemHtml).join('')}</section>`;
-  }
-  if(!entries.length) h += `<div class="card empty">Ei merkintöjä tälle päivälle.</div>`;
+  if(orphans.length) groups.push({id:'_muut', name:'Muut merkinnät', list:orphans, noAdd:true});
+  const anyOpen = groups.some(gr => gr.list.length && !mealCollapsed(gr.id));
+  h += `<div class="meals-bar" id="mealsBar"><h2>Ateriat</h2>${entries.length ? `<button type="button" class="btn small ghost" id="mealsToggleAll" data-action="meals-toggle-all">${anyOpen ? 'Pienennä kaikki' : 'Avaa kaikki'}</button>` : ''}</div>`;
+  if(!entries.length) h += `<p class="hint meals-empty">Ei merkintöjä tälle päivälle – lisää ruoka yllä tai aterian +-painikkeella.</p>`;
+  for(const gr of groups) h += mealCardHtml(gr);
   return h;
+}
+function mealCardHtml(gr){
+  const empty = !gr.list.length, col = empty || mealCollapsed(gr.id), id = esc(gr.id);
+  const t = k => gr.list.reduce((a, e) => a + (e[k]||0), 0);
+  const hasM = gr.list.some(e => e.p != null || e.c != null || e.f != null);
+  const sub = empty ? 'Ei merkintöjä' : (hasM ? `P ${fmtNum(t('p'), 0)} g · H ${fmtNum(t('c'), 0)} g · R ${fmtNum(t('f'), 0)} g` : `${gr.list.length} ${gr.list.length === 1 ? 'ruoka' : 'ruokaa'}`);
+  return `<section class="card meal-card${empty ? ' is-empty' : ''}${col ? ' collapsed' : ''}" data-meal="${id}">
+    <div class="meal-h"><h3><button type="button" class="meal-tog" data-action="${empty ? (gr.noAdd ? '' : 'meal-plus') : 'meal-toggle'}" data-id="${id}"${empty ? '' : ` aria-expanded="${!col}" aria-controls="mb-${id}"`}>${empty ? '<span class="chev-sp"></span>' : ICON_CHEV}<span class="mt"><span class="mn">${esc(gr.name)}</span><span class="mm">${sub}</span></span><span class="mk">${fmtNum(t('kcal'), 0)} kcal</span></button></h3>
+      ${gr.noAdd ? '' : `<button type="button" class="icon-btn meal-plus" data-action="meal-plus" data-id="${id}" aria-label="Lisää ruoka: ${esc(gr.name)}">${ICON_PLUS}</button>`}</div>
+    ${empty ? '' : `<div class="meal-body" id="mb-${id}"${col ? ' hidden' : ''}>${gr.list.map(foodItemHtml).join('')}</div>`}</section>`;
+}
+function syncMealsToggle(){
+  const b = $('#mealsToggleAll'); if(b) b.textContent = $$('.meal-body').some(x => !x.hidden) ? 'Pienennä kaikki' : 'Avaa kaikki';
+}
+function setMealOpen(card, open){
+  const body = card.querySelector('.meal-body'); if(!body) return;
+  body.hidden = !open; card.classList.toggle('collapsed', !open);
+  const b = card.querySelector('.meal-tog'); if(b) b.setAttribute('aria-expanded', String(open));
 }
 function addFood(name, kcal, p, c, f, meal, extra){
   const e = Object.assign({id:uid(), date:ui.kalDate, name, kcal, p, c, f, meal, t:Date.now()}, extra || {});
   S.food.entries.push(e); save(); render();
   toast(`Lisätty: ${name} (${fmtNum(kcal, 0)} kcal)`, {undo:() => { S.food.entries = S.food.entries.filter(x => x.id !== e.id); save(); render(); }});
+}
+
+/* ====================== Paino ====================== */
+const W_RANGES = [['1m', '1 kk', 30], ['3m', '3 kk', 91], ['6m', '6 kk', 182], ['1y', '1 v', 365], ['all', 'Kaikki', 0]];
+const kgFmt = v => (v == null || !isFinite(v)) ? '–' : Number(v).toLocaleString('fi-FI', {minimumFractionDigits:1, maximumFractionDigits:1});
+const signKg = v => (v > 0 ? '+' : v < 0 ? '−' : '±') + kgFmt(Math.abs(v)) + ' kg';
+function wEntries(){ return S.weight.entries; }
+function wByDate(d){ return S.weight.entries.find(e => e.date === d); }
+function wRange(){ return W_RANGES.find(r => r[0] === PREFS.wRange) || W_RANGES[1]; }
+/* 7 päivän liukuva keskiarvo: kunkin merkinnän kohdalla edellisten 7 vrk:n (pv-6 … pv) merkintöjen ka */
+function movingAvg(list){
+  return list.map((e, i) => { const from = addDays(e.date, -6); let sum = 0, n = 0;
+    for(let j = i; j >= 0 && list[j].date >= from; j--){ sum += list[j].kg; n++; }
+    return {date:e.date, kg:sum / n, n}; });
+}
+function wGoalText(cur){
+  const g = S.weight.goal; if(g == null || cur == null) return '';
+  const d = cur - g;
+  return Math.abs(d) < 0.05 ? 'Tavoite saavutettu!' : `tavoitteeseen ${kgFmt(Math.abs(d))} kg`;
+}
+function wDateHint(d){
+  const ex = wByDate(d);
+  return ex ? `Päivälle ${fmtDate(d)} on jo merkintä (${kgFmt(ex.kg)} kg) – tallennus päivittää sen.` : '';
+}
+function renderPaino(){
+  const all = wEntries(), T = todayISO(), [rk, rl, rdays] = wRange();
+  const from = rdays ? addDays(T, -rdays) : '0000-00-00';
+  const inR = all.filter(e => e.date >= from);
+  const last = all[all.length - 1], cur = last ? last.kg : null, goal = S.weight.goal;
+  const ma = movingAvg(all).filter(m => m.date >= from);
+  const ex = wByDate(T);
+  let h = `<div class="page-head"><h1>Paino</h1><button type="button" class="btn small" data-action="w-goal">${goal != null ? `Tavoite ${kgFmt(goal)} kg` : 'Aseta tavoite'}</button></div>
+    <section class="card" id="wAddCard"><h2>Kirjaa paino</h2>
+      <form id="wForm" data-submit="w-add" autocomplete="off">
+        <div class="row w-row">
+          <label class="f"><span>Päivämäärä</span><input type="date" name="date" value="${T}" max="${T}" required></label>
+          <label class="f"><span>Paino (kg)</span><input type="text" name="kg" inputmode="decimal" placeholder="${cur != null ? kgFmt(cur) : 'esim. 82,4'}" enterkeyhint="done" aria-label="Paino kilogrammoina"></label>
+        </div>
+        <label class="f"><span>Muistiinpano (valinn.)</span><input type="text" name="note" maxlength="120" placeholder="esim. aamulla ennen aamiaista"></label>
+        <div class="hint w-exists" id="wExists" ${ex ? '' : 'hidden'}>${esc(wDateHint(T))}</div>
+        <button type="submit" class="btn primary block">Tallenna</button>
+      </form></section>`;
+  if(!all.length){
+    return h + `<div class="card empty"><b>Ei vielä painomerkintöjä.</b><br>Kirjaa paino yllä – kerran päivässä samaan aikaan (esim. aamulla) antaa tasaisimman käyrän.<br><br><span class="small">Voit myös lisätä <a href="#asetukset">esimerkkidataa</a> asetuksista.</span></div>`;
+  }
+  const first = inR[0], lastR = inR[inR.length - 1];
+  const change = inR.length > 1 ? lastR.kg - first.kg : null;
+  const lo = inR.length ? inR.reduce((a, e) => e.kg < a.kg ? e : a) : null, hi = inR.length ? inR.reduce((a, e) => e.kg > a.kg ? e : a) : null;
+  const toward = (goal != null && change != null && change !== 0) ? (Math.sign(change) === Math.sign(goal - first.kg)) : null;
+  const maLast = ma.length ? ma[ma.length - 1].kg : null;
+  h += `<div class="rseg" role="tablist" aria-label="Aikaväli">${W_RANGES.map(r => `<button type="button" role="tab" class="${r[0] === rk ? 'on' : ''}" aria-selected="${r[0] === rk}" data-action="w-range" data-r="${r[0]}">${r[1]}</button>`).join('')}</div>
+    <section class="card" id="wStats">
+      <div class="w-now"><div><div class="lbl">Nykyinen</div><div class="v">${kgFmt(cur)} <small>kg</small></div><div class="small muted">${weekday(last.date)} ${fmtDate(last.date)}${maLast != null ? `<br>7 pv keskiarvo ${kgFmt(maLast)} kg` : ''}</div></div>
+        ${goal != null ? `<div class="w-goal"><div class="lbl">Tavoite ${kgFmt(goal)} kg</div><div class="gv">${wGoalText(cur)}</div></div>` : ''}</div>
+      <div class="w-grid">
+        <div><div class="lbl">Muutos (${rl.toLowerCase()})</div><div class="val ${toward === true ? 'up' : toward === false ? 'down' : ''}" id="wChange">${change != null ? signKg(change) : '–'}</div></div>
+        <div><div class="lbl">Alin</div><div class="val" id="wLow">${lo ? kgFmt(lo.kg) + ' kg' : '–'}</div><div class="small muted">${lo ? fmtDate(lo.date) : ''}</div></div>
+        <div><div class="lbl">Ylin</div><div class="val" id="wHigh">${hi ? kgFmt(hi.kg) + ' kg' : '–'}</div><div class="small muted">${hi ? fmtDate(hi.date) : ''}</div></div>
+      </div>
+      ${inR.length ? multiLineChart([
+          {label:'Paino', color:'var(--accent)', pts:inR.map(e => ({x:parseISO(e.date).getTime(), y:e.kg, date:e.date})), r:inR.length > 60 ? 2.5 : 3.5},
+          {label:'7 pv keskiarvo', color:'var(--k-func)', dots:false, pts:ma.map(m => ({x:parseISO(m.date).getTime(), y:m.kg, date:m.date}))}],
+          {id:'wChart', fmtY:v => fmtNum(v, Number.isInteger(v) ? 0 : 1), tip:(p, se) => `${fmtDate(p.date)}: ${kgFmt(p.y)} kg`,
+           hline: goal != null ? {y:goal, color:'var(--goal)', label:`Tavoite ${kgFmt(goal)} kg`, legend:'Tavoite'} : null})
+        : `<div class="chart-empty">Ei merkintöjä valitulla aikavälillä</div>`}
+    </section>`;
+  const list = inR.slice().reverse();
+  h += `<section class="card" id="wHist"><h2>Historia <span class="muted small">(${list.length}${rk !== 'all' ? ` · ${rl}` : ''})</span></h2>
+    ${list.length ? list.map(e => { const i = all.indexOf(e), prev = i > 0 ? all[i - 1] : null, d = prev ? e.kg - prev.kg : null;
+      return `<div class="w-item" data-id="${e.id}"><div class="n"><div><b>${kgFmt(e.kg)} kg</b>${d != null ? ` <span class="small ${Math.abs(d) < 0.05 ? 'muted' : ''} w-d">${signKg(d)}</span>` : ''}${e.sample ? ' <span class="badge">esim.</span>' : ''}</div><div class="small muted">${weekday(e.date)} ${fmtDate(e.date)}${e.note ? ' · ' + esc(e.note) : ''}</div></div>
+        <button type="button" class="icon-btn" data-action="w-edit" data-id="${e.id}" aria-label="Muokkaa ${fmtDate(e.date)}"><svg class="i" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg></button>
+        <button type="button" class="icon-btn" data-action="w-del" data-id="${e.id}" aria-label="Poista ${fmtDate(e.date)}">${ICON_X}</button></div>`; }).join('')
+      : '<p class="hint">Ei merkintöjä valitulla aikavälillä – valitse pidempi aikaväli.</p>'}</section>`;
+  return h;
+}
+/* Tallentaa merkinnän; sama päivä = päivitys. Palauttaa false jos virhe. */
+function wUpsert(date, kgRaw, note, editId){
+  const kg = num(kgRaw);
+  if(!date){ toast('Valitse päivämäärä', {error:true}); return false; }
+  if(date > todayISO()){ toast('Päivämäärä ei voi olla tulevaisuudessa', {error:true}); return false; }
+  if(kg == null || kg < 20 || kg > 400){ toast('Anna paino kilogrammoina väliltä 20–400 (esim. 82,4)', {error:true}); return false; }
+  const kgR = Math.round(kg * 100) / 100, list = S.weight.entries;
+  const same = list.find(e => e.date === date && e.id !== editId);
+  if(editId){
+    const e = list.find(x => x.id === editId); if(!e) return false;
+    if(same){ if(!confirm(`Päivälle ${fmtDate(date)} on jo merkintä (${kgFmt(same.kg)} kg). Korvataanko se tällä?`)) return false; S.weight.entries = list.filter(x => x !== same); }
+    Object.assign(e, {date, kg:kgR, note}); delete e.sample;
+    toast(`Merkintä päivitetty: ${fmtDate(date)} ${kgFmt(kgR)} kg`);
+  } else if(same){
+    const old = same.kg; Object.assign(same, {kg:kgR, note: note || same.note}); delete same.sample;
+    toast(`Päivän ${fmtDate(date)} paino päivitetty: ${kgFmt(old)} → ${kgFmt(kgR)} kg`);
+  } else {
+    list.push({id:uid(), date, kg:kgR, note});
+    const g = S.weight.goal; toast(`Tallennettu: ${kgFmt(kgR)} kg${g != null ? ` · ${wGoalText(kgR)}` : ''}`);
+  }
+  S.weight.entries.sort((a, b) => a.date < b.date ? -1 : 1);
+  save(); return true;
+}
+function openWeightEdit(id){
+  const e = S.weight.entries.find(x => x.id === id); if(!e) return;
+  openModal('Muokkaa painomerkintää', `<form id="wEditForm" data-submit="w-edit-save" data-id="${e.id}" autocomplete="off">
+      <div class="row w-row"><label class="f"><span>Päivämäärä</span><input type="date" name="date" value="${e.date}" max="${todayISO()}" required></label>
+      <label class="f"><span>Paino (kg)</span><input type="text" name="kg" inputmode="decimal" value="${kgFmt(e.kg)}"></label></div>
+      <label class="f"><span>Muistiinpano (valinn.)</span><input type="text" name="note" maxlength="120" value="${esc(e.note || '')}"></label></form>`,
+    `<button type="button" class="btn" data-action="modal-close">Peruuta</button><button type="submit" form="wEditForm" class="btn primary">Tallenna</button>`);
+}
+function openWeightGoal(){
+  const g = S.weight.goal, last = S.weight.entries[S.weight.entries.length - 1];
+  openModal('Tavoitepaino', `<form id="wGoalForm" data-submit="w-goal-save" autocomplete="off">
+      <label class="f"><span>Tavoitepaino (kg)</span><input type="text" name="goal" inputmode="decimal" placeholder="esim. 78" value="${g != null ? kgFmt(g) : ''}"></label>
+      <p class="hint">${last ? `Nykyinen ${kgFmt(last.kg)} kg. ` : ''}Tavoite näkyy kaaviossa katkoviivana. Jätä tyhjäksi, jos et halua tavoitetta.</p></form>`,
+    `${g != null ? '<button type="button" class="btn danger" data-action="w-goal-clear">Poista tavoite</button>' : ''}<span class="spacer"></span><button type="button" class="btn" data-action="modal-close">Peruuta</button><button type="submit" form="wGoalForm" class="btn primary">Tallenna</button>`);
+}
+function setWeightGoal(raw){
+  const t = String(raw || '').trim();
+  if(!t){ S.weight.goal = null; save(); toast('Tavoitepaino poistettu'); return true; }
+  const g = num(t); if(g == null || g < 20 || g > 400){ toast('Anna tavoite väliltä 20–400 kg', {error:true}); return false; }
+  S.weight.goal = Math.round(g * 10) / 10; save(); toast(`Tavoitepaino ${kgFmt(S.weight.goal)} kg tallennettu`); return true;
 }
 
 /* ---------- Ateriat (muokattavat) ---------- */
@@ -1360,37 +1582,38 @@ function openGoals(){
 
 /* ====================== ASETUKSET ====================== */
 function renderAsetukset(){
-  const hasSample = S.templates.some(t => t.sample) || S.sessions.some(s => s.sample) || S.food.entries.some(e => e.sample);
+  const hasSample = S.templates.some(t => t.sample) || S.sessions.some(s => s.sample) || S.food.entries.some(e => e.sample) || S.weight.entries.some(e => e.sample);
   const bytes = new Blob([JSON.stringify(S)]).size;
   const typeEditor = (key, label, list) => `<div style="margin-bottom:16px"><div class="f-label">${label}</div><div class="chips">${list.map(x => `<span class="type-chip">${esc(x)}<button type="button" data-action="type-del" data-k="${key}" data-name="${esc(x)}" aria-label="Poista ${esc(x)}">×</button></span>`).join('')}</div>
     <div class="add-inline"><input type="text" data-addfor="${key}" placeholder="Lisää uusi…" aria-label="Uusi tyyppi: ${label}"><button type="button" class="btn small" data-action="type-add" data-k="${key}">Lisää</button></div></div>`;
   return `<div class="page-head"><h1>Asetukset</h1></div>
-    <section class="card set-list"><h2>Esimerkkidata</h2><p class="hint" style="margin-top:-4px">Lisää valmiit esimerkit (Treeni1, Treeni2, juoksut, uinnit, toiminnallinen treeni ja ruokamerkinnät), niin näet kaaviot heti. Esimerkit on merkitty “esimerkki”-merkillä ja ne voi poistaa koskematta omiin tietoihin.</p>
+    ${secHtml('sample', 'Esimerkkidata', hasSample ? 'Esimerkkidata käytössä' : 'Ei käytössä', `<div class="set-list"><p class="hint" style="margin-top:0">Lisää valmiit esimerkit (Treeni1, Treeni2, juoksut, uinnit, toiminnallinen treeni, ruokamerkinnät ja painokäyrä), niin näet kaaviot heti. Esimerkit on merkitty “esimerkki”-merkillä ja ne voi poistaa koskematta omiin tietoihin.</p>
       <button type="button" class="btn block" data-action="sample-add">Lisää esimerkkidata</button>
-      ${hasSample ? '<button type="button" class="btn block" data-action="sample-remove">Poista esimerkkidata</button>' : ''}</section>
-    <section class="card set-list"><h2>Varmuuskopio</h2><p class="hint" style="margin-top:-4px">Tiedot tallentuvat vain tämän laitteen selaimeen (localStorage). Ota välillä varmuuskopio – selaimen tietojen tyhjennys poistaa ne.</p>
+      ${hasSample ? '<button type="button" class="btn block" data-action="sample-remove">Poista esimerkkidata</button>' : ''}</div>`)}
+    ${secHtml('backup', 'Varmuuskopio', `${S.sessions.length} kirjausta · ${S.food.entries.length} ruokamerkintää · ${fmtNum(bytes/1024, 1)} kt`, `<div class="set-list"><p class="hint" style="margin-top:0">Tiedot tallentuvat vain tämän laitteen selaimeen (localStorage). Ota välillä varmuuskopio – selaimen tietojen tyhjennys poistaa ne.</p>
       <button type="button" class="btn block" data-action="export">Vie tiedot (JSON)</button>
       <button type="button" class="btn block" data-action="import">Tuo tiedot (JSON)…</button>
-      <p class="hint">Tallennettu: ${S.templates.length} treenipohjaa, ${S.sessions.length} kirjausta, ${S.food.entries.length} ruokamerkintää, ${Object.keys(S.food.products).length} tallennettua tuotetta · ${fmtNum(bytes/1024, 1)} kt</p></section>
-    <section class="card"><h2>Kalorilaskuri</h2>
-      <label class="check-row"><input type="checkbox" id="addBurnedToggle" data-change="add-burned" ${S.food.addBurnedToGoal ? 'checked' : ''}><span><b>Lisää treenikulutus päivän kaloritavoitteeseen</b><br><span class="small muted">Kun päällä, päivän tavoite kasvaa sinä päivänä kirjattujen treenien kulutetuilla kaloreilla (esim. 2 500 + 450 = 2 950 kcal). Oletuksena pois päältä.</span></span></label></section>
-    <section class="card"><h2>Ateriat (Kalorit)</h2>${mealEditorHtml()}</section>
-    <section class="card"><h2>Treenityypit</h2><p class="hint" style="margin-top:-4px">Näistä valitaan tyyppi kirjatessa. Tyypin poistaminen ei muuta vanhoja kirjauksia.</p>
+      <p class="hint">Tallennettu: ${S.templates.length} treenipohjaa, ${S.sessions.length} kirjausta, ${S.food.entries.length} ruokamerkintää, ${Object.keys(S.food.products).length} tallennettua tuotetta, ${S.weight.entries.length} painomerkintää · ${fmtNum(bytes/1024, 1)} kt</p></div>`)}
+    ${secHtml('kalorit', 'Kalorilaskuri', `Treenikulutus tavoitteeseen: ${S.food.addBurnedToGoal ? 'päällä' : 'pois'}`, `<label class="check-row"><input type="checkbox" id="addBurnedToggle" data-change="add-burned" ${S.food.addBurnedToGoal ? 'checked' : ''}><span><b>Lisää treenikulutus päivän kaloritavoitteeseen</b><br><span class="small muted">Kun päällä, päivän tavoite kasvaa sinä päivänä kirjattujen treenien kulutetuilla kaloreilla (esim. 2 500 + 450 = 2 950 kcal). Oletuksena pois päältä.</span></span></label>`)}
+    ${secHtml('ateriat', 'Ateriat', esc(mealsSummary()), mealEditorHtml())}
+    ${secHtml('paino', 'Paino', `${S.weight.entries.length} painomerkintää · ${S.weight.goal != null ? `tavoite ${kgFmt(S.weight.goal)} kg` : 'ei tavoitepainoa'}`, `<form data-submit="w-goal-set" autocomplete="off"><label class="f"><span>Tavoitepaino (kg) – näkyy Paino-sivun kaaviossa katkoviivana</span>
+      <div class="add-inline" style="margin-top:0"><input type="text" name="wgoal" inputmode="decimal" placeholder="esim. 78 (tyhjä = ei tavoitetta)" value="${S.weight.goal != null ? kgFmt(S.weight.goal) : ''}"><button type="submit" class="btn small">Tallenna</button></div></label></form>`)}
+    ${secHtml('tyypit', 'Treenityypit', `${KIND_ORDER.reduce((a, k) => a + S.types[k].length, 0)} treenityyppiä · ${S.strokes.length} uintityyliä`, `<p class="hint" style="margin-top:0">Näistä valitaan tyyppi kirjatessa. Tyypin poistaminen ei muuta vanhoja kirjauksia.</p>
       ${KIND_ORDER.map(k => typeEditor(k, KINDS[k].label, S.types[k])).join('')}
       ${typeEditor('strokes', 'Uintityylit', S.strokes)}
-      <button type="button" class="btn small" data-action="types-reset">Palauta oletustyypit</button></section>
+      <button type="button" class="btn small" data-action="types-reset">Palauta oletustyypit</button>`)}
     <details class="card adv" id="dangerZone"><summary><span>Lisäasetukset</span><svg class="i chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></summary>
       <div class="danger-box"><h3>Vaarallinen alue</h3>
         <p class="small">Poistaa pysyvästi kaikki tämän laitteen Treeniappi-tiedot. Toimintoa ei voi perua.</p>
         <button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot…</button></div></details>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.1</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.3.2</p>`;
 }
 /* Koko tietojen tyhjennys: vahva vahvistus (kirjoita POISTA) */
 function openWipeDialog(){
   const nProd = Object.keys(S.food.products || {}).length;
   openModal('Tyhjennä kaikki tiedot', `<div class="wipe-warn">
       <p><b>Kaikki tiedot poistetaan pysyvästi tästä selaimesta:</b></p>
-      <ul><li>${S.templates.length} treenipohjaa</li><li>${S.sessions.length} treenikirjausta</li><li>${S.food.entries.length} ruokamerkintää ja ${nProd} tallennettua tuotetta</li><li>kaloritavoitteet, ateriat, treenityypit ja muut asetukset</li></ul>
+      <ul><li>${S.templates.length} treenipohjaa</li><li>${S.sessions.length} treenikirjausta</li><li>${S.food.entries.length} ruokamerkintää ja ${nProd} tallennettua tuotetta</li><li>${S.weight.entries.length} painomerkintää</li><li>kaloritavoitteet, ateriat, treenityypit ja muut asetukset</li></ul>
       <p>Tätä <b>ei voi perua</b>.</p></div>
     <div class="wipe-backup"><p class="small">Suositus: ota ensin varmuuskopio, jonka voit tarvittaessa tuoda takaisin (Asetukset › Tuo tiedot).</p>
       <button type="button" class="btn block" data-action="wipe-backup">Vie varmuuskopio ensin</button></div>
@@ -1408,7 +1631,7 @@ $('#importFile').addEventListener('change', async ev => {
   const file = ev.target.files[0]; ev.target.value = ''; if(!file) return;
   try{
     const obj = JSON.parse(await file.text());
-    if(!obj || typeof obj !== 'object' || !(Array.isArray(obj.sessions) || Array.isArray(obj.templates) || obj.food)) throw new Error('tiedosto ei näytä Treeniapin varmuuskopiolta');
+    if(!obj || typeof obj !== 'object' || !(Array.isArray(obj.sessions) || Array.isArray(obj.templates) || obj.food || obj.weight)) throw new Error('tiedosto ei näytä Treeniapin varmuuskopiolta');
     const n = normalize(obj);
     if(!confirm(`Tuodaanko varmuuskopio?\n\n${n.templates.length} treenipohjaa, ${n.sessions.length} kirjausta, ${n.food.entries.length} ruokamerkintää.\n\nNykyiset tiedot korvataan.`)) return;
     S = n; save(); render(); toast('Tiedot tuotu');
@@ -1450,6 +1673,14 @@ function addSampleData(){
   }
   const foods = [['Kaurapuuro marjoilla',380,14,62,8,'aamiainen'],['Kahvi maidolla',40,2,3,2,'aamiainen'],['Kanasalaatti',520,42,30,22,'lounas'],['Rahka + banaani',260,22,38,1,'valipala'],['Lohi, peruna ja kasvikset',680,40,60,28,'paivallinen'],['Proteiinipatukka',210,20,18,7,'valipala']];
   for(const [dOff, picks] of [[-1, [0,1,2,3,4]], [0, [0,1,2,5]]]) for(const k of picks){ const f = foods[k]; S.food.entries.push({id:uid() + (n++), sample:true, date:addDays(T, dOff), name:f[0], kcal:f[1], p:f[2], c:f[3], f:f[4], meal:f[5], t:Date.now() - 1000*k}); S.food.entries[S.food.entries.length-1].meal = S.food.meals.some(x => x.id === f[5]) ? f[5] : S.food.meals[0].id; }
+  // painokäyrä ~4 kk: 86,5 → ~82 kg, kohinaa, osa päivistä väliin; ei kirjoiteta käyttäjän omien merkintöjen päälle
+  for(let dOff = -120; dOff <= 0; dOff++){
+    if(rnd() < 0.28 && dOff !== 0) continue;
+    const date = addDays(T, dOff); if(wByDate(date)) continue;
+    const trend = 86.5 - (dOff + 120) * 0.037 + Math.sin((dOff + 120) / 9) * 0.35;
+    S.weight.entries.push({id:uid() + (n++), sample:true, date, kg:Math.round((trend + (rnd() - 0.5) * 0.9) * 10) / 10, note:''});
+  }
+  S.weight.entries.sort((a, b) => a.date < b.date ? -1 : 1);
   save();
 }
 function removeSampleData(silent){
@@ -1457,6 +1688,7 @@ function removeSampleData(silent){
   S.templates = S.templates.filter(t => !t.sample);
   S.sessions = S.sessions.filter(s => !s.sample).map(s => sampleTpl.has(s.templateId) ? Object.assign(s, {templateId:null}) : s);
   S.food.entries = S.food.entries.filter(e => !e.sample);
+  S.weight.entries = S.weight.entries.filter(e => !e.sample);
   if(!silent) save();
 }
 
@@ -1502,6 +1734,28 @@ const ACTIONS = {
     toast(`Poistettu: ${e.name}`, {undo:() => { S.food.entries.push(e); save(); render(); }}); },
   'goals-edit': () => openGoals(),
   'meals-edit': () => openMealEditor(),
+  'w-range': el => { PREFS.wRange = el.dataset.r; savePrefs(); render(); },
+  'w-goal': () => openWeightGoal(),
+  'w-goal-clear': () => { setWeightGoal(''); closeModal(); render(); },
+  'w-edit': el => openWeightEdit(el.dataset.id),
+  'w-del': el => {
+    const e = S.weight.entries.find(x => x.id === el.dataset.id); if(!e) return;
+    S.weight.entries = S.weight.entries.filter(x => x !== e); save(); render();
+    toast(`Poistettu: ${fmtDate(e.date)} ${kgFmt(e.kg)} kg`, {undo:() => { if(!wByDate(e.date)){ S.weight.entries.push(e); S.weight.entries.sort((a, b) => a.date < b.date ? -1 : 1); save(); render(); } }}); },
+  'meal-toggle': el => {
+    const card = el.closest('.meal-card'), open = card.classList.contains('collapsed');
+    setMealOpen(card, open); PREFS.meals[el.dataset.id] = !open; savePrefs(); syncMealsToggle(); },
+  'meals-toggle-all': () => {
+    const collapse = $$('.meal-body').some(x => !x.hidden);
+    PREFS.mealsCollapsed = collapse; PREFS.meals = {}; savePrefs();
+    $$('.meal-card').forEach(c => setMealOpen(c, !collapse)); syncMealsToggle();
+    toast(collapse ? 'Ateriat pienennetty – napauta ateriaa avataksesi' : 'Kaikki ateriat avattu'); },
+  'meal-plus': el => {
+    const m = S.food.meals.find(x => x.id === el.dataset.id); if(!m) return;
+    ui.kalMeal = m.id; render();
+    const card = $('#addFoodCard'); card.scrollIntoView({behavior:'smooth', block:'start'});
+    card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+    toast(`Lisätään aterialle ${m.name} – hae, skannaa tai lisää käsin`); },
   'meal-move': el => { const ms = S.food.meals, i = ms.findIndex(m => m.id === el.dataset.id), j = i + (+el.dataset.dir);
     if(i < 0 || j < 0 || j >= ms.length) return; [ms[i], ms[j]] = [ms[j], ms[i]]; save(); refreshMealUI();
     const b = $(`#mealEditor [data-action=meal-move][data-id="${CSS.escape(ms[j].id)}"][data-dir="${el.dataset.dir}"]`); if(b && !b.disabled) b.focus(); },
@@ -1547,6 +1801,10 @@ const ACTIONS = {
     closeModal(); S = defaultState(); save(); render(); toast('Kaikki tiedot tyhjennetty'); }
 };
 const SUBMITS = {
+  'w-add': f => { if(wUpsert(f.date.value, f.kg.value, f.note.value.trim())) render(); },
+  'w-edit-save': f => { if(wUpsert(f.date.value, f.kg.value, f.note.value.trim(), f.dataset.id)){ closeModal(); render(); } },
+  'w-goal-save': f => { if(setWeightGoal(f.goal.value)){ closeModal(); render(); } },
+  'w-goal-set': f => { if(setWeightGoal(f.wgoal.value)) render(); },
   'tpl-save': f => saveTpl(f),
   'session-save': f => saveSession(f),
   'food-add': f => { const name = f.fname.value.trim(), kcal = num(f.kcal.value);
@@ -1571,12 +1829,18 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-action]'); if(!el) return;
   const fn = ACTIONS[el.dataset.action]; if(fn) fn(el, e);
 });
+document.addEventListener('toggle', e => {
+  const d = e.target; if(!(d instanceof HTMLElement) || !d.matches('details.sec[data-sec]')) return;
+  if(secOpen(d.dataset.sec) === d.open) return;
+  PREFS.sets[d.dataset.sec] = d.open; savePrefs();
+}, true);
 document.addEventListener('submit', e => { const f = e.target, fn = SUBMITS[f.dataset.submit]; if(fn){ e.preventDefault(); fn(f); } });
 document.addEventListener('change', e => {
   const t = e.target;
   if(t.dataset.change === 'keh-sel'){ ui.kehSel = t.value; ui.kehType = 'all'; render(); }
   else if(t.dataset.change === 'hist-type'){ ui.histType = t.value; render(); }
-  else if(t.dataset.change === 'add-burned'){ S.food.addBurnedToGoal = t.checked; save(); toast(t.checked ? 'Treenikulutus lisätään päivän tavoitteeseen' : 'Treenikulutusta ei lisätä tavoitteeseen'); }
+  else if(t.closest('#wForm') && t.name === 'date'){ const w = $('#wExists'); const tx = wDateHint(t.value); w.hidden = !tx; w.textContent = tx; }
+  else if(t.dataset.change === 'add-burned'){ S.food.addBurnedToGoal = t.checked; save(); const ss = t.closest('details') && t.closest('details').querySelector('.sec-sum'); if(ss) ss.textContent = `Treenikulutus tavoitteeseen: ${t.checked ? 'päällä' : 'pois'}`; toast(t.checked ? 'Treenikulutus lisätään päivän tavoitteeseen' : 'Treenikulutusta ei lisätä tavoitteeseen'); }
   else if(t.name === 'asTpl'){ const n = $('#logForm input[name=stitle]'); if(n && t.checked && !n.value.trim()) n.focus(); }
   else if(t.name === 'kind' && t.closest('#tplForm')) updateKindVisibility(t.closest('form'));
   else if(t.name === 'stype' || (t.name === 'date' && t.closest('#logForm'))) updateCalc();
@@ -1594,7 +1858,7 @@ document.addEventListener('change', e => {
     if(S.food.meals.some(x => x !== m && x.name.toLowerCase() === nm.toLowerCase())){ t.value = m.name; toast('Samanniminen ateria on jo olemassa', {error:true}); return; }
     if(nm === m.name) return;
     const old = m.name; m.name = nm; save(); toast(`Ateria nimetty: ${old} → ${nm}`);
-    if(t.closest('#modal')) render(); }
+    if(t.closest('#modal')) render(); else { const ss = $('details.sec[data-sec=ateriat] .sec-sum'); if(ss) ss.textContent = mealsSummary(); } }
   else if(t.id === 'foodName'){ const k = t.value.trim().toLowerCase(); const m = knownFoods().find(x => x.name.trim().toLowerCase() === k); const f = t.form;
     if(m && !f.kcal.value){ f.kcal.value = inNum(m.kcal); f.p.value = inNum(m.p); f.c.value = inNum(m.c); f.fat.value = inNum(m.f); } }
 });
