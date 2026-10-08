@@ -200,6 +200,57 @@ button.food-item:active{background:var(--soft)}
 @keyframes newrow{0%,35%{background:color-mix(in srgb,var(--accent) 18%,transparent)}100%{background:transparent}}
 .meals-foot{display:flex;justify-content:center;margin:2px 0 8px}
 .meals-foot .btn svg{width:16px;height:16px}
+/* v0.4.2 Viikon yhteenveto */
+.kw-card{padding:4px 6px 4px 4px;margin-top:4px}
+.kw-h{margin:0;font-size:inherit}
+.kw-tog{width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent;color:inherit;font:inherit;text-align:left;padding:10px 6px 10px 8px;min-height:56px;border-radius:10px;cursor:pointer}
+.kw-tog .chev{width:18px;height:18px;flex:none;color:var(--muted);transition:transform .2s}
+.kw-card.collapsed .kw-tog .chev{transform:rotate(-90deg)}
+.kw-tog .mt{display:flex;flex-direction:column;min-width:0}
+.kw-title{font-weight:700;font-size:.98rem}
+.kw-sub{font-size:.8rem;color:var(--muted);font-weight:500}
+.kw-body{padding:0 10px 10px 12px}
+.kw-nav{display:flex;align-items:center;justify-content:space-between;background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:2px;margin-bottom:12px}
+.kw-wk{text-align:center;line-height:1.2}.kw-wk small{display:block;color:var(--muted);font-size:.78rem}
+.kw-none{margin:4px 2px 8px}
+.kw-avg{display:flex;align-items:baseline;justify-content:space-between;gap:4px 10px;flex-wrap:wrap}
+.kw-k .v{font-size:1.6rem;font-weight:800;letter-spacing:-.01em}.kw-k .g{color:var(--muted);font-weight:600}
+.kw-dk{font-size:.84rem;color:var(--muted)}.kw-dk b{color:var(--text)}
+.kw-note{margin:-2px 0 2px}
+.kw-macros{margin-top:8px}
+.kw-chart{--ph:132px;position:relative;margin:8px 0 4px}
+.kw-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;position:relative}
+.kw-bar{display:flex;flex-direction:column;align-items:stretch;gap:5px;border:0;background:transparent;color:inherit;font:inherit;padding:0;cursor:pointer;border-radius:8px;min-width:0}
+.kw-plot{height:var(--ph);display:flex;align-items:flex-end;justify-content:center;border-bottom:1.5px solid var(--border);padding:0 2px}
+.kw-stack{width:100%;max-width:38px;display:flex;flex-direction:column-reverse;border-radius:6px 6px 2px 2px;overflow:hidden;gap:1.5px;min-height:3px}
+.kw-stack i{display:block;flex-basis:0;min-height:2px}
+.kw-stack .s-p{background:#7c3aed}.kw-stack .s-c{background:#d97706}.kw-stack .s-f{background:#0891b2}.kw-stack .s-m{background:color-mix(in srgb,var(--muted) 55%,transparent)}
+.kw-lbl{font-size:.72rem;color:var(--muted);font-weight:600;text-align:center;white-space:nowrap;padding:2px 0 3px;border-radius:6px}
+.kw-bar.today .kw-lbl{color:var(--accent-ink);font-weight:800}
+.kw-bar.empty .kw-lbl,.kw-bar.future .kw-lbl{opacity:.6}
+.kw-bar.sel .kw-lbl{background:var(--text);color:var(--card);opacity:1}
+.kw-bar.sel .kw-stack{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--text)}
+.kw-gwrap{position:absolute;left:0;right:0;top:0;height:calc(var(--ph) - 1.5px);pointer-events:none;z-index:1}
+.kw-goal{position:absolute;left:0;right:0;border-top:1.5px dashed color-mix(in srgb,var(--text) 55%,transparent)}
+.kw-leg{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 0;font-size:.74rem;font-weight:600}
+.kw-gl{display:inline-flex;align-items:center;gap:6px}.kw-gl i{width:18px;border-top:1.5px dashed color-mix(in srgb,var(--text) 55%,transparent)}
+.kw-detail,.kw-hint{margin:8px 0 2px;min-height:44px}
+.kw-hint{display:flex;align-items:center;justify-content:center;text-align:center}
+.kw-detail{background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:8px 12px;position:relative}
+.kw-dt{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.kw-open{margin-top:6px}
+.kw-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.92rem}
+.kw-table th,.kw-table td{padding:9px 4px;border-bottom:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums}
+.kw-table thead th{font-size:.76rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding-top:2px}
+.kw-table tbody th{text-align:left;font-weight:600}
+.kw-mn{display:inline-flex;align-items:center;gap:8px}
+.kw-table td{width:30%;font-weight:700}
+.kw-table .sw{width:12px;height:12px;border-radius:3px;flex:none}
+.kw-dev{display:block;font-size:.7rem;font-weight:700}
+.kw-table tr.over td.a{color:var(--danger)}
+.kw-table tr.under td.a{color:var(--warn)}
+.kw-foot{margin:8px 2px 0;font-size:.76rem}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .sheet.full{height:100vh;height:100dvh;max-height:100dvh;border-radius:0}
 .sheet.full .sheet-head{padding-top:calc(8px + env(safe-area-inset-top))}
 .sheet.noanim{animation:none}
@@ -569,7 +620,7 @@ const PREF_KEY = 'treeniappi.ui';
 function loadPrefs(){
   let p = {}; try{ p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; }catch(e){}
   const obj = o => (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
-  return {mealsCollapsed: p.mealsCollapsed !== false, meals: obj(p.meals), setsOpen: p.setsOpen === true, sets: obj(p.sets), wRange: typeof p.wRange === 'string' ? p.wRange : '3m', histWeek: p.histWeek !== false};
+  return {mealsCollapsed: p.mealsCollapsed !== false, meals: obj(p.meals), setsOpen: p.setsOpen === true, sets: obj(p.sets), wRange: typeof p.wRange === 'string' ? p.wRange : '3m', histWeek: p.histWeek !== false, kalWeek: p.kalWeek === true};
 }
 let PREFS = loadPrefs();
 function savePrefs(){ try{ localStorage.setItem(PREF_KEY, JSON.stringify(PREFS)); }catch(e){} }
@@ -1380,8 +1431,91 @@ function renderKalorit(){
   h += `<div class="meals-bar" id="mealsBar"><h2>Ateriat</h2>${entries.length ? `<button type="button" class="btn small ghost" id="mealsToggleAll" data-action="meals-toggle-all">${anyOpen ? 'Pienennä kaikki' : 'Avaa kaikki'}</button>` : ''}</div>`;
   for(const gr of groups) h += mealCardHtml(gr);
   h += `<div class="meals-foot"><button type="button" class="btn small ghost" data-action="meals-edit">${ICON_PEN} Muokkaa aterioita</button></div>`;
+  h += kalWeekHtml();
   ui.newFood = null;
   return h;
+}
+/* ====================== Viikon yhteenveto (v0.4.2) ======================
+   Kalenteriviikko ma–su (ISO-viikko). Pylvään korkeus = päivän merkintöjen kcal. Osat = energia hiilihydraateista (4 kcal/g), rasvasta (9) ja proteiinista (4):
+   jos merkinnän kcal poikkeaa makroista lasketusta (pyöristys, kuitu, alkoholi), osat skaalataan merkinnän kcal:iin. Merkinnät ilman makroja = harmaa "muu". */
+const MACRO_C = {p:'#7c3aed', c:'#d97706', f:'#0891b2'};
+function kalWeekData(mon){
+  const days = WD_SHORT.map((_, i) => addDays(mon, i)), sun = days[6];
+  const inWeek = S.food.entries.filter(e => e.date >= mon && e.date <= sun);
+  const per = days.map(d => {
+    const o = {d, n:0, kcal:0, p:0, c:0, f:0, sp:0, sc:0, sf:0, muu:0};
+    for(const e of inWeek){
+      if(e.date !== d) continue;
+      const k = Math.max(0, +e.kcal || 0), p = Math.max(0, +e.p || 0), c = Math.max(0, +e.c || 0), f = Math.max(0, +e.f || 0);
+      o.n++; o.kcal += k; o.p += p; o.c += c; o.f += f;
+      const mk = 4 * p + 4 * c + 9 * f;
+      if(mk > 0 && k > 0){ const s = k / mk; o.sp += 4 * p * s; o.sc += 4 * c * s; o.sf += 9 * f * s; } else o.muu += k;
+    }
+    return o;
+  });
+  return {mon, sun, days, per, logged:per.filter(x => x.n > 0)};
+}
+const kwMon = () => ui.kalWeekMon || mondayOf(ui.kalDate);
+function kalWeekHtml(){
+  const open = !!PREFS.kalWeek, mon = kwMon(), W = kalWeekData(mon), L = W.logged.length, g = S.food.goals;
+  const avg = k => L ? W.logged.reduce((a, x) => a + x[k], 0) / L : 0;
+  const avgK = avg('kcal');
+  const sub = `Viikko ${isoWeek(mon)} · ${L ? `ka. ${fmtNum(avgK, 0)} kcal/pv` : 'ei merkintöjä'}`;
+  let h = `<section class="card kw-card${open ? '' : ' collapsed'}" id="kalWeek"><h2 class="kw-h"><button type="button" class="kw-tog" data-action="kalweek-toggle" aria-expanded="${open}" aria-controls="kwBody">${ICON_CHEV}<span class="mt"><span class="kw-title">Viikon yhteenveto</span><span class="kw-sub" id="kwSub">${sub}</span></span></button></h2>`;
+  if(!open) return h + '</section>';
+  const curMon = mondayOf(todayISO()), T = todayISO();
+  h += `<div class="kw-body" id="kwBody">
+    <div class="kw-nav"><button type="button" class="icon-btn" data-action="kalweek-nav" data-d="-7" aria-label="Edellinen viikko"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="kw-wk"><b id="kwWeek">Viikko ${isoWeek(mon)}</b><small>${fmtDateShort(mon)}–${fmtDate(W.sun)}</small></div>
+      <button type="button" class="icon-btn" data-action="kalweek-nav" data-d="7" aria-label="Seuraava viikko" ${mon >= curMon ? 'disabled' : ''}><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></div>`;
+  if(!L){
+    h += `<p class="muted small kw-none">Tällä viikolla ei ole ruokamerkintöjä.</p></div></section>`;
+    return h;
+  }
+  // keskiarvot
+  const dK = g.kcal ? avgK - g.kcal : null;
+  const mrow = (lbl, k, goal) => { const v = avg(k); return `<div class="macro" style="--mc:${MACRO_C[k]}"><div class="lbl">${lbl}</div><div class="val">${fmtNum(v, 0)}${goal ? `<span class="mg"> / ${fmtNum(goal, 0)}</span>` : ''} g</div>${goal ? `<div class="bar thin"><i style="width:${Math.min(100, v / goal * 100)}%"></i></div>` : ''}</div>`; };
+  h += `<div class="kw-avg" id="kwAvg"><div class="kw-k"><span class="v">${fmtNum(avgK, 0)}</span> <span class="g">${g.kcal ? `/ ${fmtNum(g.kcal, 0)} ` : ''}kcal/pv</span></div>
+      <div class="kw-dk">${dK != null ? `<b class="${dK > 0 ? 'down' : ''}">${dK > 0 ? '+' : '−'}${fmtNum(Math.abs(dK), 0)} kcal</b> ${dK > 0 ? 'yli' : 'alle'} tavoitteen` : ''}</div></div>
+    <div class="kw-note small muted" id="kwNote">ka. ${L} kirjatulta päivältä</div>
+    <div class="macros kw-macros">${mrow('Proteiini', 'p', g.protein)}${mrow('Hiilihydraatit', 'c', g.carbs)}${mrow('Rasva', 'f', g.fat)}</div>`;
+  // pylväskaavio
+  const maxK = Math.max(g.kcal || 0, ...W.per.map(x => x.kcal)) * 1.1 || 1;
+  const bar = (x, i) => {
+    const hp = x.kcal / maxK * 100, sel = ui.kalWeekSel === x.d;
+    const segs = [['p', x.sp], ['f', x.sf], ['c', x.sc], ['m', x.muu]].filter(s => s[1] > 0).map(([k, v]) => `<i class="s-${k}" style="flex-grow:${v.toFixed(1)}"></i>`).join('');
+    const cls = ['kw-bar', x.n ? '' : 'empty', x.d === T ? 'today' : '', x.d > T ? 'future' : '', sel ? 'sel' : ''].filter(Boolean).join(' ');
+    const lab = `${weekday(x.d)} ${fmtDateShort(x.d)}: ${x.n ? `${fmtNum(x.kcal, 0)} kcal` : 'ei merkintöjä'}`;
+    return `<button type="button" class="${cls}" data-action="kalweek-day" data-d="${x.d}" aria-pressed="${sel}" aria-label="${esc(lab)}" title="${esc(lab)}"><span class="kw-plot">${x.n ? `<span class="kw-stack" style="height:${hp.toFixed(1)}%">${segs}</span>` : ''}</span><span class="kw-lbl">${WD_SHORT[i]} ${+x.d.slice(8)}</span></button>`;
+  };
+  const goalLine = g.kcal ? `<div class="kw-gwrap" aria-hidden="true"><div class="kw-goal" id="kwGoal" style="bottom:${(g.kcal / maxK * 100).toFixed(1)}%"></div></div>` : '';
+  h += `<div class="kw-leg small muted"><span>kcal / päivä</span>${g.kcal ? `<span class="kw-gl" id="kwGoalLbl"><i></i>Tavoite ${fmtNum(g.kcal, 0)}</span>` : ''}</div>`;
+  h += `<div class="kw-chart" id="kwChart" role="group" aria-label="Päivien kalorit ja makrojakauma">${goalLine}<div class="kw-bars">${W.per.map(bar).join('')}</div></div>`;
+  // päivän luvut
+  const s = ui.kalWeekSel && W.per.find(x => x.d === ui.kalWeekSel);
+  h += s ? `<div class="kw-detail" id="kwDetail"><div class="kw-dt"><b>${weekday(s.d)} ${fmtDateShort(s.d)}</b>${s.n ? `<span><b>${fmtNum(s.kcal, 0)}</b> kcal${g.kcal ? ` / ${fmtNum(g.kcal, 0)}` : ''}</span>` : '<span class="muted">Ei merkintöjä</span>'}</div>
+      ${s.n ? `<div class="small muted">P ${fmtNum(s.p, 0)} g · H ${fmtNum(s.c, 0)} g · R ${fmtNum(s.f, 0)} g · ${s.n} ${s.n === 1 ? 'ruoka' : 'ruokaa'}${s.muu ? ` · ${fmtNum(s.muu, 0)} kcal ilman makroja` : ''}</div>` : ''}
+      ${s.d !== ui.kalDate ? `<button type="button" class="btn small ghost kw-open" data-action="kalweek-open" data-d="${s.d}">Avaa päivä</button>` : ''}</div>`
+    : `<div class="kw-hint small muted" id="kwDetail">Napauta pylvästä nähdäksesi päivän luvut</div>`;
+  // makrojakauma-taulukko
+  const tot = {p:0, c:0, f:0, m:0}; W.per.forEach(x => { tot.p += x.sp; tot.c += x.sc; tot.f += x.sf; tot.m += x.muu; });
+  const mt = tot.p + tot.c + tot.f, gt = g.protein && g.carbs && g.fat ? 4 * g.protein + 4 * g.carbs + 9 * g.fat : 0;
+  const tg = {p:gt ? 4 * g.protein / gt * 100 : null, c:gt ? 4 * g.carbs / gt * 100 : null, f:gt ? 9 * g.fat / gt * 100 : null};
+  const row = (k, lbl) => {
+    const a = mt ? tot[k] / mt * 100 : null, t = tg[k], d = a != null && t != null ? Math.round(a) - Math.round(t) : 0;
+    const cls = d >= 5 ? 'over' : d <= -5 ? 'under' : '';
+    const dev = cls ? `<span class="kw-dev">${d > 0 ? '+' : '−'}${Math.abs(d)} %-yks.</span>` : '';
+    return `<tr class="${cls}" data-k="${k}"><th scope="row"><span class="kw-mn"><span class="sw" style="background:${MACRO_C[k]}"></span>${lbl}</span></th><td class="a">${a != null ? `${Math.round(a)} %` : '–'}${dev}</td><td>${t != null ? `${Math.round(t)} %` : '–'}</td></tr>`;
+  };
+  h += `<table class="kw-table" id="kwTable"><thead><tr><th scope="col"><span class="sr-only">Makro</span></th><th scope="col">Yhteensä</th><th scope="col">Tavoite</th></tr></thead><tbody>${row('c', 'Hiilihydraatit')}${row('f', 'Rasva')}${row('p', 'Proteiini')}</tbody></table>
+    <p class="kw-foot small muted">Osuus viikon energiasta${tot.m ? ` · lisäksi ${fmtNum(tot.m, 0)} kcal merkinnöistä ilman makroja (harmaa)` : ''}${gt ? ' · tavoite grammatavoitteista' : ' · aseta P/H/R-tavoitteet nähdäksesi tavoiteosuudet'}</p>
+  </div></section>`;
+  return h;
+}
+function rerenderKalWeek(focusSel){
+  const c = $('#kalWeek'); if(!c) return;
+  c.outerHTML = kalWeekHtml();
+  if(focusSel){ const el = $(focusSel); if(el) el.focus({preventScroll:true}); }
 }
 function mealCardHtml(gr){
   const empty = !gr.list.length, col = empty || mealCollapsed(gr.id), id = esc(gr.id);
@@ -2057,7 +2191,7 @@ function renderAsetukset(){
       <div class="danger-box"><h3>Vaarallinen alue</h3>
         <p class="small">Poistaa pysyvästi kaikki tämän laitteen Treeniappi-tiedot. Toimintoa ei voi perua.</p>
         <button type="button" class="btn danger block" data-action="clear-all">Tyhjennä kaikki tiedot…</button></div></details>
-    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.4.1</p>`;
+    <p class="hint" style="text-align:center">Treeniappi · prototyyppi v0.4.2</p>`;
 }
 /* Koko tietojen tyhjennys: vahva vahvistus (kirjoita POISTA) */
 function openWipeDialog(){
@@ -2200,8 +2334,12 @@ const ACTIONS = {
   'hist-kind': el => { ui.histKind = el.dataset.k; ui.histType = ''; render(); },
   'hist-day': el => { ui.histDay = ui.histDay === el.dataset.d ? null : el.dataset.d; render(); const f = $('#dayFilter'); if(f) f.scrollIntoView({block:'nearest'}); },
   'hist-day-clear': () => { ui.histDay = null; render(); },
-  'kal-day': el => { ui.kalDate = addDays(ui.kalDate, +el.dataset.d); render(); },
-  'kal-today': (el, e) => { e.preventDefault(); ui.kalDate = todayISO(); render(); },
+  'kal-day': el => { ui.kalDate = addDays(ui.kalDate, +el.dataset.d); ui.kalWeekMon = null; ui.kalWeekSel = null; render(); },
+  'kal-today': (el, e) => { e.preventDefault(); ui.kalDate = todayISO(); ui.kalWeekMon = null; ui.kalWeekSel = null; render(); },
+  'kalweek-toggle': () => { PREFS.kalWeek = !PREFS.kalWeek; savePrefs(); rerenderKalWeek('#kalWeek .kw-tog'); if(PREFS.kalWeek){ const c = $('#kalWeek'); if(c) setTimeout(() => c.scrollIntoView({block:'nearest', behavior:'smooth'}), 30); } },
+  'kalweek-nav': el => { const d = +el.dataset.d; ui.kalWeekMon = addDays(kwMon(), d); ui.kalWeekSel = null; rerenderKalWeek(`#kalWeek [data-action=kalweek-nav][data-d="${d}"]:not(:disabled)`) ; },
+  'kalweek-day': el => { const d = el.dataset.d; ui.kalWeekSel = ui.kalWeekSel === d ? null : d; rerenderKalWeek(`#kalWeek [data-action=kalweek-day][data-d="${d}"]`); },
+  'kalweek-open': el => { ui.kalDate = el.dataset.d; ui.kalWeekMon = null; render(); window.scrollTo({top:0, behavior:'smooth'}); toast(`${weekday(ui.kalDate)} ${fmtDate(ui.kalDate)}`); },
   'fs-recent': el => { const e = (ui.fs && ui.fs.list || [])[+el.dataset.i]; if(!e) return;
     const pr = e.code && S.food.products[e.code];
     if(pr && pr.per100 && pr.per100.kcal != null && e.grams) fsProduct(e.code, pr, 'cache', e.grams); else fsAmount(e); },
