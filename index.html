@@ -485,6 +485,51 @@ details.adv[open] .chev{transform:rotate(180deg)}
 #storeErr .se-btns{display:flex;gap:8px;margin-top:8px}
 #storeErr .btn{background:#fff;color:#991b1b;border-color:#fff}
 #storeErr .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+
+/* v0.5.1 */
+#storeErr .se-mini{align-items:center}
+#storeErr .se-mini b{flex:1;min-width:0;font-size:.9rem;line-height:1.25}
+#storeErr .se-mini .btn{flex:none}
+body.store-err main{padding-top:calc(var(--se-h, 0px) + 4px)}
+body.store-err #modal{top:var(--se-h, 0px)}
+body.store-err .sheet{max-height:calc(96dvh - var(--se-h, 0px))}
+body.store-err .sheet.full{height:calc(100dvh - var(--se-h, 0px));max-height:calc(100dvh - var(--se-h, 0px))}
+body.store-err .sheet.full .sheet-head{padding-top:8px}
+#storeErr .se-line{display:flex;gap:8px;align-items:flex-start}
+#storeErr .se-line > div{flex:1}
+#storeErr.mini .se-line{align-items:center}
+#storeErr.mini .se-line b{flex:1}
+#storeErr .se-tog{flex:none;width:36px;height:36px;border:0;border-radius:8px;background:rgba(255,255,255,.18);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+#storeErr .se-tog .i{width:20px;height:20px}
+.draft-card{border-left:4px solid var(--k, var(--accent));padding:12px 14px}
+.draft-card .dc-t{display:flex;gap:10px;align-items:flex-start;font-size:.92rem}
+.draft-card .dc-t .ic{flex:none;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center}
+.draft-card .dc-t .ic .i{width:20px;height:20px}
+.draft-card .dc-b,.draft-note .dn-b{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap}
+.draft-note{background:#fef3c7;color:#78350f;border-radius:10px;padding:10px 12px;font-size:.88rem;margin-bottom:12px}
+.draft-note .btn.ghost{color:#78350f}
+.day-note{background:#fef3c7;color:#78350f;border-radius:8px;padding:8px 10px;margin:-6px 0 12px;font-size:.84rem}
+.day-note .link-btn{color:#78350f;text-decoration:underline;display:block}
+.datenav .d small.fut{color:var(--warn-txt, #b45309);font-weight:700}
+.fs-day{background:var(--accent-soft);color:var(--accent-ink);border-radius:10px;padding:8px 12px;font-size:.86rem;font-weight:600;margin:0 0 10px}
+.fs-day.fut{background:#fef3c7;color:#78350f}
+.rc-row{display:flex;align-items:center;border-top:1px solid var(--border)}
+.rc-row:first-child{border-top:0}
+.rc-row .rc-item{border-top:0;flex:1;min-width:0;padding-right:4px}
+.rc-add{flex:none;width:48px;height:48px;margin-right:4px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border-radius:50%}
+.rc-add:active .rc-plus{transform:scale(.9)}
+.sim-hint{font-size:.82rem;background:#fef3c7;color:#78350f;border-radius:8px;padding:6px 10px;margin:4px 0 8px}
+.sim-hint .link-btn{color:#78350f;text-decoration:underline;padding:0 0 0 4px}
+.ex-tgt{color:var(--text);font-weight:600}
+.ex-btns{display:flex;gap:8px;flex-wrap:wrap}
+.all-done-row{margin:-2px 0 10px}
+#updBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:58;background:var(--accent);color:#fff;border-radius:999px;padding:6px 6px 6px 16px;display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:92vw;width:max-content}
+#updBar .btn{background:#fff;color:var(--accent-ink);border-color:#fff;min-height:36px}
+#updBar .x{border:0;background:transparent;color:#fff;width:36px;height:36px;font-size:1.2rem;cursor:pointer}
+body.modal-open #updBar{display:none}
+body.has-upd #toast{bottom:calc(140px + env(safe-area-inset-bottom))}
+#updBar{background:#0f766e}#updBar .btn{color:#0f766e}
+@media (prefers-color-scheme: dark){.datenav .d small.fut{color:#fbbf24}}
 </style>
 </head>
 <body>
@@ -502,9 +547,10 @@ details.adv[open] .chev{transform:rotate(180deg)}
 <div id="modal" hidden></div>
 <div id="toast" hidden></div>
 <div id="storeErr" role="alert" hidden></div>
+<div id="updBar" hidden><span>Uusi versio saatavilla</span><button type="button" class="btn small" data-action="app-reload">Päivitä</button><button type="button" class="x" data-action="upd-close" aria-label="Sulje">×</button></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 <script>
-const APP_VERSION = '0.5.0';
+const APP_VERSION = '0.5.1';
 'use strict';
 /* ====================== Perusasetukset ====================== */
 const STORE_KEY = 'treeniappi.v1';
@@ -666,10 +712,19 @@ function save(){
   try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); if(storeFailed){ storeFailed = false; showStoreErr(false); } return true; }
   catch(e){ storeFailed = true; showStoreErr(true); return false; }
 }
+/* v0.5.1: varoitus varaa oman tilansa ruudun yläreunasta (sivu ja lomakkeet siirtyvät alemmas), eikä peitä Sulje-/Takaisin-nappeja. Voi pienentää yhdeksi riviksi. */
+let storeErrMini = false;
 function showStoreErr(on){
   const b = document.getElementById('storeErr'); if(!b) return; b.hidden = !on;
-  b.innerHTML = on ? `<div><b>Tallennus epäonnistui – laitteen tallennustila on täynnä.</b> Viimeisimmät muutokset ovat vain muistissa ja katoavat, kun äppi suljetaan. Vie varmuuskopio nyt.</div><div class="se-btns"><button type="button" class="btn small" data-action="export">Vie varmuuskopio</button><button type="button" class="btn small ghost" data-action="store-retry">Yritä uudelleen</button></div>` : '';
+  b.classList.toggle('mini', on && storeErrMini);
+  b.innerHTML = !on ? '' : storeErrMini
+    ? `<div class="se-line se-mini"><b>Tila täynnä – ei tallennettu</b><button type="button" class="btn small" data-action="export">Varmuuskopio</button><button type="button" class="se-tog" data-action="store-mini" aria-label="Näytä koko varoitus">${ICON_DOWN}</button></div>`
+    : `<div class="se-line"><div><b>Tallennus epäonnistui – laitteen tallennustila on täynnä.</b> Viimeisimmät muutokset ovat vain muistissa ja katoavat, kun äppi suljetaan. Vie varmuuskopio nyt.</div><button type="button" class="se-tog" data-action="store-mini" aria-label="Pienennä varoitus">${ICON_UP}</button></div><div class="se-btns"><button type="button" class="btn small" data-action="export">Vie varmuuskopio</button><button type="button" class="btn small ghost" data-action="store-retry">Yritä uudelleen</button></div>`;
+  document.body.classList.toggle('store-err', on);
+  storeErrLayout();
 }
+function storeErrLayout(){ const b = document.getElementById('storeErr'); document.documentElement.style.setProperty('--se-h', b && !b.hidden ? Math.ceil(b.getBoundingClientRect().bottom + 8) + 'px' : '0px'); }
+window.addEventListener('resize', () => storeErrLayout());
 /* Tallennustilan käyttö (localStorage, UTF-16 ≈ 2 tavua/merkki). iPhonen Safari sallii noin 5 Mt. */
 /* Selainten localStorage-raja on n. 5 miljoonaa merkkiä (Safari, Chrome) → käyttöaste merkkeinä */
 const STORE_LIMIT = 5e6;
@@ -679,7 +734,14 @@ const storagePct = () => Math.round(storageUse() / STORE_LIMIT * 100);
 const META_KEY = 'treeniappi.meta', PREIMPORT_KEY = 'treeniappi.preimport';
 function getMeta(){ try{ return JSON.parse(localStorage.getItem(META_KEY) || '{}') || {}; }catch(e){ return {}; } }
 function setMeta(o){ try{ localStorage.setItem(META_KEY, JSON.stringify(Object.assign(getMeta(), o))); }catch(e){} }
-function getPreimport(){ try{ const p = JSON.parse(localStorage.getItem(PREIMPORT_KEY) || 'null'); return p && p.data ? p : null; }catch(e){ return null; } }
+/* v0.5.1: tuontia edeltävä palautuskopio vanhenee 7 päivässä, ettei se varaa tallennustilaa pysyvästi */
+const PREIMPORT_DAYS = 7;
+function getPreimport(){
+  try{ const raw = localStorage.getItem(PREIMPORT_KEY); if(!raw) return null; const p = JSON.parse(raw);
+    if(!p || !p.data || !(Date.now() - (p.t || 0) < PREIMPORT_DAYS * DAY)){ localStorage.removeItem(PREIMPORT_KEY); return null; }
+    p.size = raw.length; return p; }catch(e){ try{ localStorage.removeItem(PREIMPORT_KEY); }catch(_){} return null; }
+}
+const fmtSize = chars => chars >= 1e6 ? `${fmtNum(chars / 1e6, 1)} Mt` : `${fmtNum(Math.max(1, chars / 1e3), 0)} kt`;
 const recordCount = () => S.sessions.length + S.food.entries.length + S.weight.entries.length;
 function daysAgoText(t){ const d = Math.floor((Date.now() - t) / DAY); return d <= 0 ? 'tänään' : d === 1 ? 'eilen' : `${d} pv sitten`; }
 function backupReminder(){
@@ -745,10 +807,10 @@ function closeModal(){ if(typeof stopScanner === 'function') stopScanner(); ui.f
 /* ====================== Reititys ====================== */
 const PAGES = { treenit:()=>renderTreenit(), kehitys:()=>renderKehitys(), historia:()=>renderHistoria(), kalorit:()=>renderKalorit(), paino:()=>renderPaino(), asetukset:()=>renderAsetukset() };
 function route(){
-  const p = location.hash.slice(1), keep = $('#logForm') && logDirty();
+  const p = location.hash.slice(1), keep = $('#logForm') && logDirty(), dk = keep && draftKey(formCtx($('#logForm')));
   if(keep) saveDraftNow();
   ui.page = PAGES[p] ? p : 'treenit'; closeModal(); render(); window.scrollTo(0, 0);
-  if(keep) toast('Keskeneräinen kirjaus on tallessa', {undo:() => restoreDraft(), label:'Jatka', ms:8000});
+  if(keep) toast('Keskeneräinen kirjaus on tallessa (Treenit-sivulla)', {undo:() => restoreDraft(dk), label:'Jatka', ms:8000});
 }
 function render(){
   let html;
@@ -765,8 +827,13 @@ function checkDayChange(){
   const t = todayISO(); if(t === lastDay) return false;
   const prev = lastDay; lastDay = t;
   if(ui.kalDate === prev){ ui.kalDate = t; ui.kalWeekMon = null; ui.kalWeekSel = null; }
-  $$('input[type=date]').forEach(i => { if(i.max === prev) i.max = t; if(i.value === prev) i.value = t; });
-  if($('#logForm')) updateCalc();
+  /* v0.5.1: vain Paino-sivun uusi kirjaus siirtyy uuteen päivään. Muokattavan kirjauksen päivää ei muuteta koskaan;
+     uudessa treenikirjauksessa päivä säilyy ja näytetään ilmoitus, josta sen voi vaihtaa. */
+  $$('input[type=date]').forEach(i => { if(i.max === prev) i.max = t; if(i.value === prev && i.form && i.form.id === 'wForm') i.value = t; });
+  const lf = $('#logForm');
+  if(lf && !lf.dataset.id && lf.date.value === prev && !$('#dayNote'))
+    lf.date.closest('label').insertAdjacentHTML('afterend', `<div class="day-note" id="dayNote">Päivä vaihtui keskiyöllä – kirjaus tallentuu päivälle <b>${weekday(prev)} ${fmtDate(prev)}</b>.<button type="button" class="link-btn" data-action="day-to-today" data-d="${t}">Tallenna sen sijaan tälle päivälle (${weekday(t)} ${fmtDate(t)})</button></div>`);
+  if(lf) updateCalc();
   const wf = $('#wForm'); if(wf){ const w = $('#wExists'), tx = wDateHint(wf.date.value); if(w){ w.hidden = !tx; w.textContent = tx; } }
   const a = document.activeElement, typing = a && a.closest && a.closest('#main') && a.matches('input,textarea,select');
   if($('#modal').hidden && !typing) render();
@@ -808,7 +875,7 @@ function sessionRow(s){
 }
 /* ====================== TREENIT ====================== */
 function renderTreenit(){
-  let h = `<div class="page-head"><h1>Treenit</h1></div>
+  let h = `<div class="page-head"><h1>Treenit</h1></div>${draftCardsHtml()}
   <section class="card" id="oneOffCard"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px"><h2 style="margin:0">Kirjaa kertatreeni</h2><span class="tag-muted">ilman pohjaa</span></div><div class="quick">
     ${KIND_ORDER.map(k => `<button type="button" class="quick-btn k-${k}" data-action="log-new" data-kind="${k}"><span class="ic">${icon(k)}</span>${KINDS[k].short}</button>`).join('')}
   </div><div class="hint">Kertatreeni tallentuu vain historiaan – treenipohjaa ei luoda. Toistuville treeneille tee alta oma pohja, jolloin liikkeet täyttyvät valmiiksi.</div></section>
@@ -848,7 +915,7 @@ function renderTreenit(){
 
 /* ---------- Treenipohjan muokkaus ---------- */
 function tplExRow(e={}){
-  return `<div class="tpl-ex-row"><input type="text" class="te-name" maxlength="60" placeholder="Liike, esim. Penkkipunnerrus" value="${esc(e.name||'')}" aria-label="Liikkeen nimi"><input type="text" class="te-target" placeholder="3×8" value="${esc(e.target||'')}" aria-label="Tavoite (sarjat × toistot)"><button type="button" class="icon-btn" data-action="te-remove" aria-label="Poista liike">${ICON_X}</button></div>`;
+  return `<div class="tpl-ex-row"><input type="text" class="te-name" list="tplExNames" autocomplete="off" maxlength="60" placeholder="Liike, esim. Penkkipunnerrus" value="${esc(e.name||'')}" aria-label="Liikkeen nimi"><input type="text" class="te-target" placeholder="3×8" value="${esc(e.target||'')}" aria-label="Tavoite (sarjat × toistot)"><button type="button" class="icon-btn" data-action="te-remove" aria-label="Poista liike">${ICON_X}</button></div>`;
 }
 function openTplEditor(id){
   const t = id ? tplById(id) : null;
@@ -863,6 +930,7 @@ function openTplEditor(id){
     ${nLogged ? `<div class="hint" id="kindLocked" style="margin:0 0 14px">Lajia ei voi vaihtaa, koska pohjalla on ${nLogged} ${nLogged === 1 ? 'kirjaus' : 'kirjausta'}. Tee toiselle lajille uusi pohja.</div>` : ''}
     <div data-only="gym">
       <div class="f-label">Liikkeet <span style="font-weight:400">(tavoite valinnainen, esim. 3×8)</span></div>
+      <datalist id="tplExNames">${allExerciseNames().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
       <div id="tplExs">${((t && t.exercises && t.exercises.length) ? t.exercises : [{},{},{}]).map(tplExRow).join('')}</div>
       <button type="button" class="btn small" data-action="te-add">+ Lisää liike</button><div style="height:12px"></div>
     </div>
@@ -928,15 +996,37 @@ function allExerciseNames(){
   for(const t of S.templates) if(t.kind === 'gym') for(const e of (t.exercises||[])){ const k = e.name.trim().toLowerCase(); if(k && !seen.has(k)) seen.set(k, e.name.trim()); }
   return [...seen.values()];
 }
+/* v0.5.1: lähes samanniminen liike (kirjoitusvirhe katkaisisi Kehityksen ja edelliset arvot) */
+function editDist(a, b){
+  if(Math.abs(a.length - b.length) > 2) return 9;
+  let p = Array.from({length:b.length + 1}, (_, j) => j);
+  for(let i = 1; i <= a.length; i++){ const c = [i]; for(let j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j-1] + 1, p[j-1] + (a[i-1] === b[j-1] ? 0 : 1)); p = c; }
+  return p[b.length];
+}
+function similarExercise(name){
+  const k = name.trim().toLowerCase(); if(k.length < 4) return null;
+  const names = allExerciseNames(); if(names.some(n => n.toLowerCase() === k)) return null;
+  let best = null, bd = 9;
+  for(const n of names){ const d = editDist(k, n.toLowerCase()), lim = Math.max(n.length, k.length) >= 10 ? 2 : 1; if(d <= lim && d < bd && !/\d/.test(k.replace(n.toLowerCase(), ''))){ best = n; bd = d; } }
+  return best;
+}
+function updateSimHint(input){
+  const row = input.closest('.tpl-ex-row') || input.closest('.ex-head'); if(!row) return;
+  const old = row.nextElementSibling, sim = similarExercise(input.value);
+  if(old && old.classList.contains('sim-hint')){ if(sim && old.dataset.sim === sim) return; old.remove(); } /* sama ehdotus pysyy paikallaan, ettei napautus mene ohi */
+  if(!sim) return;
+  row.insertAdjacentHTML('afterend', `<div class="sim-hint" data-sim="${esc(sim)}">Tarkoititko <b>${esc(sim)}</b>? Eri nimi aloittaa liikkeelle oman historian.<button type="button" class="link-btn" data-action="use-name" data-name="${esc(sim)}">Käytä nimeä ${esc(sim)}</button></div>`);
+}
 function prevText(prev){ return prev ? `Edellinen (${fmtDate(prev.date)}): ${setsText(prev.sets)}` : 'Ei aiempia kirjauksia'; }
-function exBlockHtml(name, rows, prev){
+const exPrevHtml = (prev, target) => `${target ? `<span class="ex-tgt">Tavoite ${esc(target)}</span> · ` : ''}${esc(prevText(prev))}`;
+function exBlockHtml(name, rows, prev, target){
   if(!rows || !rows.length) rows = [{},{},{}];
-  return `<div class="ex-block">
+  return `<div class="ex-block"${target ? ` data-target="${esc(target)}"` : ''}>
     <div class="ex-head"><input type="text" class="ex-name" list="exNameList" autocomplete="off" maxlength="60" placeholder="Liikkeen nimi, esim. Penkkipunnerrus" value="${esc(name||'')}" aria-label="Liikkeen nimi"><button type="button" class="icon-btn" data-action="ex-remove" aria-label="Poista liike">${ICON_X}</button></div>
-    <div class="ex-prev">${esc(prevText(prev))}</div>
+    <div class="ex-prev">${exPrevHtml(prev, target)}</div>
     <div class="set-grid-h"><span>#</span><span>Toistot</span><span>Paino (kg)</span><span>Tehty</span><span></span></div>
     <div class="sets">${rows.map((r, i) => setRowHtml(i+1, r)).join('')}</div>
-    <button type="button" class="btn small" data-action="set-add">+ Sarja</button>
+    <div class="ex-btns"><button type="button" class="btn small" data-action="set-add">+ Sarja</button><button type="button" class="btn small ghost" data-action="ex-all-done">${ICON_CHECK} Kaikki sarjat tehty</button></div>
   </div>`;
 }
 /* ✓: tyhjä sarja täyttyy harmailla arvoilla; uusi napautus perua merkinnän (ja automaattisesti täytetyt arvot) */
@@ -961,6 +1051,18 @@ function toggleSetDone(row){
   if(!k.value.trim() && num(k.placeholder) != null){ k.value = k.placeholder; auto = true; }
   if(!(num(r.value) > 0)){ toast('Kirjoita sarjan toistot', {error:true}); r.focus(); return; }
   row.classList.add('done'); if(auto) row.dataset.auto = '1'; b.setAttribute('aria-pressed', 'true');
+}
+/* v0.5.1: merkitse liikkeen (tai koko treenin) kaikki sarjat tehdyiksi – tyhjät sarjat täyttyvät harmailla arvoilla */
+function markAllDone(scope){
+  let n = 0;
+  for(const row of $$('.set-row', scope)){
+    if(row.classList.contains('done')) continue;
+    const r = row.querySelector('.set-reps');
+    if(!(num(r.value) > 0) && !/^\d+$/.test(r.placeholder)) continue;
+    const blk = row.closest('.ex-block'); if(blk && !blk.querySelector('.ex-name').value.trim()) continue;
+    toggleSetDone(row); if(row.classList.contains('done')) n++;
+  }
+  return n;
 }
 function hrFieldsHtml(v){
   return `<div class="row">
@@ -1022,7 +1124,7 @@ function updatePlWarn(f){
   w.hidden = !msg; w.innerHTML = msg ? `${esc(msg)} – tarkista matka ja kesto.${sw ? ` <button type="button" class="link-btn" data-action="dur-swap">Tarkoititko ${sw.h} h ${sw.m} min? Korjaa</button>` : ''}` : '';
 }
 function rpeSelect(val){ return `<select name="rpe"><option value="">–</option>${RPE_LABELS.slice(1).map((l, i) => `<option value="${i+1}" ${+val === i+1 ? 'selected' : ''}>${l}</option>`).join('')}</select>`; }
-function openLogForm({kind, tplId, sessionId}){
+function openLogForm({kind, tplId, sessionId, fromDraft}){
   const s = sessionId ? sessById(sessionId) : null;
   const t = s ? (s.templateId ? tplById(s.templateId) : null) : (tplId ? tplById(tplId) : null);
   kind = s ? s.kind : (t ? t.kind : kind);
@@ -1048,16 +1150,16 @@ function openLogForm({kind, tplId, sessionId}){
         const fromT = lastT && (lastT.exercises||[]).find(x => x.name.trim().toLowerCase() === e.name.trim().toLowerCase());
         let ph = fromT ? fromT.sets : prev ? prev.sets : null;
         if(!ph){ const m = (e.target||'').match(/(\d+)\s*[x×*]\s*(\d+)/i); if(m) ph = Array.from({length:Math.min(+m[1],10)}, () => ({reps:+m[2], kg:null})); }
-        return {name:e.name, rows:ph ? rowsFromPh(ph) : null, prev};
+        return {name:e.name, rows:ph ? rowsFromPh(ph) : null, prev, target:e.target || ''};
       });
       if(!exs.length) exs = [{name:'', rows:null, prev:null}];
     } else exs = [{name:'', rows:null, prev:null}];
     const names = allExerciseNames();
-    body += `${durFieldsHtml(v.durationSec, 'Kesto (valinn.)')}<div class="f-label">Liikkeet ja sarjat</div>${!s ? '<div class="hint" style="margin:-2px 0 8px">Harmaat luvut ovat edellisen kerran arvot. Napauta ✓, kun sarja on tehty – tyhjä sarja täyttyy harmailla arvoilla. Vain tehdyt tai täytetyt sarjat tallentuvat.</div>' : ''}
+    body += `${durFieldsHtml(v.durationSec, 'Kesto (valinn.)')}<div class="f-label">Liikkeet ja sarjat</div>${!s ? `<div class="hint" style="margin:-2px 0 8px">Harmaat luvut ovat edellisen kerran arvot. Napauta ✓, kun sarja on tehty – tyhjä sarja täyttyy harmailla arvoilla. Vain tehdyt tai täytetyt sarjat tallentuvat.</div>${t ? `<div class="all-done-row"><button type="button" class="btn small" data-action="all-done" id="allDoneBtn">${ICON_CHECK} Merkitse kaikki tehdyksi (kuten viimeksi)</button></div>` : ''}` : ''}
       ${oneOff && !s ? `<div class="hint" style="margin:-2px 0 8px">Kirjoita liikkeen nimi vapaasti – aiemmin käytetyt nimet ehdotetaan.</div>` : ''}
       ${oneOff && !s && names.length ? `<div class="f-label" style="font-weight:500">Aiemmin tehdyt liikkeet – napauta lisätäksesi</div><div class="chips" id="exQuick" style="margin-bottom:10px">${names.slice(0, 10).map(n => `<button type="button" class="chip-btn" data-action="ex-quick" data-name="${esc(n)}">+ ${esc(n)}</button>`).join('')}</div>` : ''}
       <datalist id="exNameList">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>
-      <div id="exs">${exs.map(e => exBlockHtml(e.name, e.rows, e.prev)).join('')}</div>
+      <div id="exs">${exs.map(e => exBlockHtml(e.name, e.rows, e.prev, e.target)).join('')}</div>
       <button type="button" class="btn small" data-action="ex-add">+ Lisää liike</button><div style="height:14px"></div>`;
   }
   if(kind === 'run' || kind === 'swim'){
@@ -1106,6 +1208,9 @@ function openLogForm({kind, tplId, sessionId}){
   openModal(title, body, foot);
   updateCalc();
   ui.logInit = JSON.stringify(logState($('#logForm')));
+  /* v0.5.1: tälle lomakkeelle on tallessa luonnos → tarjotaan jatkamista (luonnosta ei poisteta) */
+  const dr = !fromDraft && loadDraft(draftKey(formCtx($('#logForm'))));
+  if(dr) $('#logForm').insertAdjacentHTML('afterbegin', `<div class="draft-note" id="draftNote"><div><b>Keskeneräinen kirjaus tallessa</b> (muokattu ${draftWhen(dr.t)}).</div><div class="dn-b"><button type="button" class="btn small primary" data-action="draft-fill">Jatka siitä</button><button type="button" class="btn small ghost" data-action="draft-drop">Hylkää luonnos</button></div></div>`);
 }
 function updateCalc(){
   const f = $('#logForm'); if(!f) return; const kind = f.dataset.kind;
@@ -1142,7 +1247,15 @@ function saveSession(f){
   const du = durOf(f); if(du.err) return err(du.err, f.dur_m);
   let skipped = 0;
   if(kind === 'gym'){
-    const blocks = $$('.ex-block', f);
+    let blocks = $$('.ex-block', f);
+    /* v0.5.1: yhtään sarjaa ei merkitty, mutta harmaat edelliset arvot ovat olemassa → kysytään */
+    const named = blocks.filter(b => b.querySelector('.ex-name').value.trim());
+    const anyVal = named.some(b => $$('.set-row', b).some(r => r.querySelector('.set-reps').value.trim() || r.querySelector('.set-kg').value.trim()));
+    const anyPh = named.some(b => $$('.set-reps', b).some(i => /^\d+$/.test(i.placeholder)));
+    if(!anyVal && anyPh){
+      if(!confirm('Et merkinnyt yhtään sarjaa tehdyksi.\n\nTallennetaanko treeni edellisen kerran arvoilla (harmaat luvut)?')){ toast('Napauta ✓ tehdyille sarjoille tai “Kaikki sarjat tehty”'); return; }
+      markAllDone($('#exs', f));
+    }
     const noReps = blocks.find(b => b.querySelector('.ex-name').value.trim() && $$('.set-row', b).some(r => r.querySelector('.set-kg').value.trim() && !(num(r.querySelector('.set-reps').value) > 0)));
     if(noReps) return err(`${noReps.querySelector('.ex-name').value.trim()}: sarjalta puuttuu toistot – kirjoita toistot, napauta ✓ tai tyhjennä paino`, $$('.set-row', noReps).map(r => r.querySelector('.set-reps')).find(i => !(num(i.value) > 0)));
     const badSet = blocks.find(b => $$('.set-row', b).some(r => num(r.querySelector('.set-reps').value) < 0));
@@ -1194,8 +1307,12 @@ function saveSession(f){
   const msg = newTpl ? `Tallennettu – pohja “${newTpl.name}” luotu` : id ? 'Kirjaus päivitetty' : (t ? 'Treeni tallennettu' : 'Kertatreeni tallennettu historiaan');
   toast(msg + (skipped ? ` · ${skipped} ${skipped === 1 ? 'liike' : 'liikettä'} ilman tehtyjä sarjoja ohitettiin` : ''));
 }
-/* ---------- v0.5.0 Keskeneräisen kirjauksen luonnos (säilyy, vaikka iPhone sulkisi äpin taustalla) ---------- */
-const DRAFT_KEY = 'treeniappi.draft';
+/* ---------- Keskeneräisten kirjausten luonnokset (v0.5.0; v0.5.1: oma luonnos jokaiselle lomakkeelle) ----------
+   Luonnos säilyy, kunnes kirjaus tallennetaan tai luonnos hylätään. Koskematon lomake ei koskaan poista luonnosta.
+   localStorage 'treeniappi.draft' = {v:2, list:[…]} (v0.5.0:n yksittäinen luonnos-objekti luetaan edelleen). */
+const DRAFT_KEY = 'treeniappi.draft', DRAFT_DAYS = 7;
+const draftKey = c => c ? `${c.kind}|${c.tplId || ''}|${c.sessionId || ''}` : '';
+const formCtx = f => ({kind:f.dataset.kind, tplId:f.dataset.tpl || null, sessionId:f.dataset.id || null});
 function logState(f){
   if(!f) return null;
   const o = {ctx:{kind:f.dataset.kind, tplId:f.dataset.tpl || null, sessionId:f.dataset.id || null}, fields:{}, exs:null, showAll:f.dataset.showAll === '1'};
@@ -1205,27 +1322,38 @@ function logState(f){
     else if(el.type === 'checkbox') o.fields[el.name] = el.checked;
     else o.fields[el.name] = el.value;
   }
-  if(f.dataset.kind === 'gym') o.exs = $$('.ex-block', f).map(b => ({name:b.querySelector('.ex-name').value, rows:$$('.set-row', b).map(r => {
+  if(f.dataset.kind === 'gym') o.exs = $$('.ex-block', f).map(b => ({name:b.querySelector('.ex-name').value, target:b.dataset.target || '', rows:$$('.set-row', b).map(r => {
     const rp = r.querySelector('.set-reps'), kg = r.querySelector('.set-kg');
     return {reps:rp.value, kg:kg.value, phr:/^\d+$/.test(rp.placeholder) ? rp.placeholder : null, phk:num(kg.placeholder) != null ? kg.placeholder : null, done:r.classList.contains('done'), auto:r.dataset.auto === '1'}; })}));
   return o;
 }
 let draftTimer = null;
 function logDirty(){ const f = $('#logForm'); return !!f && JSON.stringify(logState(f)) !== ui.logInit; }
+function loadDrafts(){
+  let d = null; try{ d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); }catch(e){}
+  const list = !d ? [] : Array.isArray(d.list) ? d.list : (d.ctx ? [d] : []);
+  return list.filter(x => x && x.ctx && KINDS[x.ctx.kind] && Date.now() - (x.t || 0) < DRAFT_DAYS * DAY).sort((a, b) => (b.t || 0) - (a.t || 0));
+}
+function storeDrafts(list){ try{ if(list.length) localStorage.setItem(DRAFT_KEY, JSON.stringify({v:2, list:list.slice(0, 8)})); else localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function loadDraft(key){ const l = loadDrafts(); return key == null ? (l[0] || null) : (l.find(x => draftKey(x.ctx) === key) || null); }
+function draftWhen(t){ const tm = new Date(t); return `${isoOf(tm) === todayISO() ? 'tänään' : fmtDate(isoOf(tm))} klo ${pad(tm.getHours())}.${pad(tm.getMinutes())}`; }
 function saveDraftNow(){
-  clearTimeout(draftTimer); const f = $('#logForm'); if(!f) return;
-  try{ if(logDirty()){ const st = logState(f); st.t = Date.now(); st.title = $('#modal .sheet-head h2') ? $('#modal .sheet-head h2').textContent : ''; localStorage.setItem(DRAFT_KEY, JSON.stringify(st)); } else localStorage.removeItem(DRAFT_KEY); }catch(e){}
+  clearTimeout(draftTimer); const f = $('#logForm'); if(!f || !logDirty()) return;
+  try{ const st = logState(f); st.t = Date.now(); st.title = $('#modal .sheet-head h2') ? $('#modal .sheet-head h2').textContent : '';
+    const keys = [draftKey(st.ctx), f.dataset.draftKey].filter(Boolean);
+    storeDrafts([st, ...loadDrafts().filter(x => !keys.includes(draftKey(x.ctx)))]); }catch(e){}
 }
 function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(saveDraftNow, 400); }
-function clearDraft(){ clearTimeout(draftTimer); try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
-function loadDraft(){ try{ const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); return d && d.ctx && KINDS[d.ctx.kind] && Date.now() - (d.t || 0) < 3 * DAY ? d : null; }catch(e){ return null; } }
-function restoreDraft(){
-  const d = loadDraft(); if(!d) return false;
-  const c = d.ctx;
-  if(c.sessionId && !sessById(c.sessionId)){ clearDraft(); toast('Kirjausta ei enää ole – luonnos hylättiin', {error:true}); return false; }
-  openLogForm({kind:c.kind, tplId:c.tplId && tplById(c.tplId) ? c.tplId : null, sessionId:c.sessionId});
-  const f = $('#logForm'); if(!f) return false;
-  if(d.exs && f.dataset.kind === 'gym') $('#exs').innerHTML = d.exs.map(e => exBlockHtml(e.name, e.rows, findPrevExercise(e.name, c.sessionId))).join('');
+/* Poistaa vain annetun lomakkeen (tai avaimen) luonnoksen – muut luonnokset säilyvät */
+function clearDraft(key){
+  clearTimeout(draftTimer); let keys;
+  if(key != null) keys = [key];
+  else { const f = $('#logForm'); if(!f) return; keys = [draftKey(formCtx(f)), f.dataset.draftKey].filter(Boolean); }
+  storeDrafts(loadDrafts().filter(x => !keys.includes(draftKey(x.ctx))));
+}
+function fillDraft(d){
+  const f = $('#logForm'); if(!f || !d) return false; const c = d.ctx;
+  if(d.exs && f.dataset.kind === 'gym') $('#exs').innerHTML = d.exs.map(e => exBlockHtml(e.name, e.rows, findPrevExercise(e.name, c.sessionId), e.target)).join('');
   const fl = d.fields || {};
   if(fl.stype && !$$('input[name=stype]', f).some(i => i.value === fl.stype)) $('#typeChips').innerHTML = typeChipsHtml(f.dataset.kind, fl.stype);
   for(const [n, val] of Object.entries(fl)){
@@ -1233,19 +1361,33 @@ function restoreDraft(){
     for(const el of els){ if(el.type === 'radio') el.checked = el.value === val; else if(el.type === 'checkbox') el.checked = !!val; else el.value = val; }
   }
   if(d.showAll) f.dataset.showAll = '1';
+  f.dataset.draftKey = draftKey(c);
+  const n = $('#draftNote'); if(n) n.remove();
   updateCalc(); return true;
+}
+function restoreDraft(key){
+  const d = loadDraft(key); if(!d) return false;
+  const c = d.ctx;
+  if(c.sessionId && !sessById(c.sessionId)){ clearDraft(draftKey(c)); toast('Kirjausta ei enää ole – luonnos hylättiin', {error:true}); if(ui.page === 'treenit' && !modalOpen()) render(); return false; }
+  openLogForm({kind:c.kind, tplId:c.tplId && tplById(c.tplId) ? c.tplId : null, sessionId:c.sessionId, fromDraft:true});
+  return fillDraft(d);
 }
 /* Lomakkeen sulkeminen: kysy, jos tietoja on syötetty */
 function requestClose(){
   if($('#logForm') && logDirty()){ if(!confirm('Hylätäänkö kirjaus? Syöttämäsi tiedot katoavat.')) return; clearDraft(); }
   closeModal();
+  if(ui.page === 'treenit' && $('#draftCards')) render();
 }
 function showDraftPrompt(){
   const d = loadDraft(); if(!d) return;
-  const tm = new Date(d.t), when = `${isoOf(tm) === todayISO() ? 'tänään' : fmtDate(isoOf(tm))} klo ${pad(tm.getHours())}.${pad(tm.getMinutes())}`;
-  openModal('Keskeneräinen kirjaus', `<p style="margin-top:0">Sinulla on tallentamaton kirjaus <b>${esc(d.title || KINDS[d.ctx.kind].label)}</b> (muokattu ${when}).</p><p class="muted small">Jatka siitä mihin jäit, tai hylkää luonnos.</p>`,
-    `<button type="button" class="btn" data-action="draft-discard">Hylkää</button><span class="spacer"></span><button type="button" class="btn primary" data-action="draft-resume">Jatka</button>`);
+  openModal('Keskeneräinen kirjaus', `<p style="margin-top:0">Sinulla on tallentamaton kirjaus <b>${esc(d.title || KINDS[d.ctx.kind].label)}</b> (muokattu ${draftWhen(d.t)}).</p><p class="muted small">Jatka siitä mihin jäit, tai hylkää luonnos. Jos suljet tämän ikkunan, luonnos odottaa Treenit-sivun yläreunassa.</p>`,
+    `<button type="button" class="btn" data-action="draft-discard" data-key="${esc(draftKey(d.ctx))}">Hylkää</button><span class="spacer"></span><button type="button" class="btn primary" data-action="draft-resume" data-key="${esc(draftKey(d.ctx))}">Jatka</button>`);
   $('#modal .sheet').id = 'draftPrompt';
+}
+function draftCardsHtml(){
+  const list = loadDrafts(); if(!list.length) return '';
+  return `<div id="draftCards">${list.map(d => { const k = esc(draftKey(d.ctx)); return `<section class="card draft-card k-${d.ctx.kind}" data-key="${k}"><div class="dc-t"><span class="ic">${icon(d.ctx.kind)}</span><span><b>Keskeneräinen kirjaus:</b> ${esc(d.title || KINDS[d.ctx.kind].label)}<br><span class="small muted">muokattu ${draftWhen(d.t)} · ei vielä tallennettu</span></span></div>
+    <div class="dc-b"><button type="button" class="btn small ghost" data-action="draft-discard" data-key="${k}">Hylkää</button><button type="button" class="btn small primary" data-action="draft-resume" data-key="${k}">Jatka kirjausta</button></div></section>`; }).join('')}</div>`;
 }
 
 /* ====================== KEHITYS: kaaviot ====================== */
@@ -1399,8 +1541,8 @@ function kehGym(sessions, tpl){
       </tbody></table></div></details>` : ''}
     </section>`;
   }
-  h += `<section class="card" id="gymSessions"><h2>Treenikerrat</h2><div class="tbl-wrap" tabindex="0"><table class="tbl"><thead><tr><th>Pvm</th><th>Treeni</th><th class="num">Liikk.</th><th class="num">Sarjat</th><th class="num">Volyymi</th><th class="num">Kulutus</th></tr></thead><tbody>
-    ${kehRows(sessions).map(s => { const t = gymTotals(s); return `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.title || '')}${!s.templateId ? ' <span class="tag-muted">kerta</span>' : ''}</td><td class="num">${(s.exercises||[]).length}</td><td class="num">${t.sets}</td><td class="num">${fmtNum(t.vol, 0)}</td><td class="num">${s.kcalBurned ? fmtNum(s.kcalBurned, 0) : '–'}</td></tr>`; }).join('')}
+  h += `<section class="card" id="gymSessions"><h2>Treenikerrat</h2><div class="tbl-wrap" tabindex="0"><table class="tbl"><thead><tr><th>Pvm</th><th>Treeni</th><th class="num">Liikk.</th><th class="num">Sarjat</th><th class="num">Volyymi</th><th class="num">Kesto</th><th class="num">Kulutus</th></tr></thead><tbody>
+    ${kehRows(sessions).map(s => { const t = gymTotals(s); return `<tr data-action="session-edit" data-id="${s.id}" style="cursor:pointer"><td>${fmtDate(s.date)}</td><td>${esc(s.title || '')}${!s.templateId ? ' <span class="tag-muted">kerta</span>' : ''}</td><td class="num">${(s.exercises||[]).length}</td><td class="num">${t.sets}</td><td class="num">${fmtNum(t.vol, 0)}</td><td class="num">${s.durationSec ? fmtDuration(s.durationSec) : '–'}</td><td class="num">${s.kcalBurned ? fmtNum(s.kcalBurned, 0) : '–'}</td></tr>`; }).join('')}
   </tbody></table></div>${kehMore(sessions)}<div class="hint">Napauta riviä muokataksesi.</div></section>`;
   return h;
 }
@@ -1682,11 +1824,12 @@ function renderKalorit(){
   const addB = S.food.addBurnedToGoal && burned > 0 && g.kcal;
   const goalK = g.kcal ? g.kcal + (addB ? burned : 0) : null;
   const pct = goalK ? Math.min(100, kcal / goalK * 100) : 0, over = goalK && kcal > goalK;
-  const isToday = d === todayISO();
+  const isToday = d === todayISO(), rd = daysBetween(todayISO(), d);
+  const rel = isToday ? 'Tänään' : rd === 1 ? 'Huomenna' : rd > 1 ? `Tuleva päivä · ${rd} pv päästä` : rd === -1 ? 'Eilen' : '';
   const macro = (lbl, val, goal, color) => `<div class="macro" style="--mc:${color}"><div class="lbl">${lbl}</div><div class="val">${fmtNum(val, 0)}${goal ? `<span class="mg"> / ${fmtNum(goal, 0)}</span>` : ''} g</div>${goal ? `<div class="bar thin"><i style="width:${Math.min(100, val/goal*100)}%"></i></div>` : ''}</div>`;
   let h = `<div class="page-head"><h1>Kalorit</h1></div>
     <div class="datenav"><button type="button" class="icon-btn" data-action="kal-day" data-d="-1" aria-label="Edellinen päivä"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <div class="d"><label class="kal-pick" title="Valitse päivä kalenterista">${weekday(d)} ${fmtDate(d)} <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><input type="date" id="kalPick" data-change="kal-pick" value="${d}" aria-label="Valitse päivä"></label><small>${isToday ? 'Tänään' : `<a href="#kalorit" data-action="kal-today">Takaisin tähän päivään</a>`}</small></div>
+      <div class="d"><label class="kal-pick" title="Valitse päivä kalenterista">${weekday(d)} ${fmtDate(d)} <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><input type="date" id="kalPick" data-change="kal-pick" value="${d}" aria-label="Valitse päivä"></label><small id="kalRel" class="${rd > 0 ? 'fut' : ''}">${isToday ? rel : `${rel ? `${rel} · ` : ''}<a href="#kalorit" data-action="kal-today">Takaisin tähän päivään</a>`}</small></div>
       <button type="button" class="icon-btn" data-action="kal-day" data-d="1" aria-label="Seuraava päivä"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></div>
     <section class="card sum-card" id="sumCard" data-action="goals-edit" role="button" tabindex="0" aria-label="Päivän yhteenveto – napauta muokataksesi tavoitteita">
       <div class="kcal-big"><div><span class="v">${fmtNum(kcal, 0)}</span> <span class="g" id="goalK">${goalK ? `/ ${fmtNum(goalK, 0)} ` : ''}kcal</span><span class="sum-edit" title="Muokkaa tavoitteita">${ICON_PEN}</span></div>
@@ -1843,7 +1986,8 @@ const saveFoot = form => `<button type="submit" form="${form}" class="btn primar
 function fsOpen(meal){ ui.fs = {meal:validMeal(meal), q:''}; ui.kalMeal = ui.fs.meal; fsPick(); }
 function rcItem(e, i){
   const sub = [e.grams ? `${fmtNum(e.grams)} g` : '', macroLine(e) ? macroLine(e) + ' g' : ''].filter(Boolean).join(' · ') || 'annos';
-  return `<button type="button" class="rc-item" data-action="fs-recent" data-i="${i}">${iconHtml(entryIcon(e), 'sm')}<span class="sr-main"><span class="sr-name">${esc(e.name)}</span><span class="sr-sub">${sub}</span></span><span class="rc-k">${fmtNum(e.kcal, 0)} kcal</span><span class="rc-plus" aria-hidden="true">${ICON_PLUS}</span></button>`;
+  /* v0.5.1: rivi avaa määrän, + lisää heti saman määrän (Kumoa) */
+  return `<div class="rc-row"><button type="button" class="rc-item" data-action="fs-recent" data-i="${i}">${iconHtml(entryIcon(e), 'sm')}<span class="sr-main"><span class="sr-name">${esc(e.name)}</span><span class="sr-sub">${sub}</span></span><span class="rc-k">${fmtNum(e.kcal, 0)} kcal</span></button><button type="button" class="rc-add" data-action="fs-quick" data-i="${i}" aria-label="Lisää heti: ${esc(e.name)} (${esc(sub)}, ${fmtNum(e.kcal, 0)} kcal)" title="Lisää heti sama määrä"><span class="rc-plus" aria-hidden="true">${ICON_PLUS}</span></button></div>`;
 }
 function fsPick(){
   stopScanner();
@@ -1855,10 +1999,12 @@ function fsPick(){
   const copied = yList.length && S.food.entries.some(e => e.date === ui.kalDate && e.meal === meal && e.cp === prev); /* v0.5.0: kopioidut merkinnät tunnistetaan cp-merkinnästä */
   if(copied) lists += `<div class="rc"><button type="button" class="rc-item copy done" disabled aria-disabled="true"><span class="rc-ic">${ICON_COPY}</span><span class="sr-main"><span class="sr-name">Kopioitu ✓</span><span class="sr-sub">${esc(mealName(meal))} ${fmtDate(prev)} on jo lisätty tälle päivälle</span></span></button></div>`;
   else if(yList.length) lists += `<div class="rc"><button type="button" class="rc-item copy" data-action="fs-copy"><span class="rc-ic">${ICON_COPY}</span><span class="sr-main"><span class="sr-name">${ui.kalDate === todayISO() ? 'Kopioi eilisestä' : 'Kopioi edellisestä päivästä'}</span><span class="sr-sub">${esc(mealName(meal))} ${fmtDate(prev)} · ${yList.length} ${yList.length === 1 ? 'ruoka' : 'ruokaa'} · ${fmtNum(yList.reduce((a, e) => a + (e.kcal||0), 0), 0)} kcal</span></span></button></div>`;
+  if(fs.list.length) lists += `<p class="hint rc-help">+ lisää saman määrän heti · rivin napautus avaa määrän</p>`;
   if(inMeal.length) lists += `<div class="fs-sec">${ade ? `Viimeksi ${ade}` : `Viimeksi: ${esc(mealName(meal))}`}</div><div class="rc" id="rcMeal">${inMeal.map((e, i) => rcItem(e, i)).join('')}</div>`;
   if(other.length) lists += `<div class="fs-sec">${inMeal.length ? 'Muut viimeksi käytetyt' : 'Viimeksi käytetyt'}</div><div class="rc" id="rcOther">${other.map((e, i) => rcItem(e, inMeal.length + i)).join('')}</div>`;
-  if(!fs.list.length && !yList.length) lists += `<p class="hint fs-empty">Täällä näkyvät viimeksi käyttämäsi ruoat – yksi napautus lisää ne uudelleen. Hae ruokaa, skannaa viivakoodi tai lisää käsin.</p>`;
-  fsShell(addToTitle(meal), `<div class="fs-top">
+  if(!fs.list.length && !yList.length) lists += `<p class="hint fs-empty">Täällä näkyvät viimeksi käyttämäsi ruoat: + lisää saman määrän heti, rivin napautus avaa määrän muokattavaksi. Hae ruokaa, skannaa viivakoodi tai lisää käsin.</p>`;
+  const dayNote = ui.kalDate !== todayISO() ? `<div class="fs-day${ui.kalDate > todayISO() ? ' fut' : ''}" id="fsDay">Lisätään päivälle ${weekday(ui.kalDate)} ${fmtDate(ui.kalDate)} (${relDays(ui.kalDate)})</div>` : '';
+  fsShell(addToTitle(meal), `${dayNote}<div class="fs-top">
       <form id="searchForm" class="search-wrap" data-submit="food-search" role="search" autocomplete="off"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="foodSearch" placeholder="Hae ruokaa tai tuotetta" aria-label="Hae ruokaa tai tuotetta" enterkeyhint="search" value="${esc(fs.q || '')}"></form>
       <button type="button" class="scan-ic" data-action="scan-open" aria-label="Skannaa viivakoodi" title="Skannaa viivakoodi">${ICON_BARCODE}</button></div>
     <div id="searchResults" class="sr" hidden></div>
@@ -2458,10 +2604,11 @@ function renderAsetukset(){
     <div class="add-inline"><input type="text" data-addfor="${key}" placeholder="Lisää uusi…" aria-label="Uusi tyyppi: ${label}"><button type="button" class="btn small" data-action="type-add" data-k="${key}">Lisää</button></div></div>`;
   return `<div class="page-head"><h1>Asetukset</h1></div>
     ${secHtml('backup', 'Varmuuskopio', `${meta.lastExport ? `Viimeisin varmuuskopio: ${daysAgoText(meta.lastExport)}` : 'Varmuuskopiota ei ole vielä otettu'} · ${fmtNum(bytes/1024, 1)} kt`, `<div class="set-list"><p class="hint" style="margin-top:0">Tiedot tallentuvat vain tämän laitteen selaimeen (localStorage). Ota välillä varmuuskopio – selaimen tietojen tyhjennys poistaa ne.</p>
-      <p class="hint ${pct >= 70 ? 'warn-txt' : ''}" id="storagePct">${pct >= 70 ? '<b>Tallennustila on käymässä vähiin:</b> ' : ''}Käytössä noin ${pct} % selaimen tallennustilasta.${pct >= 70 ? ' Vie varmuuskopio ja poista esim. esimerkkidata.' : ''}</p>
+      <p class="hint ${pct >= 70 ? 'warn-txt' : ''}" id="storagePct">${pct >= 70 ? '<b>Tallennustila on käymässä vähiin:</b> ' : ''}Käytössä noin ${pct}&nbsp;% selaimen tallennustilasta.${pct >= 70 ? (pre ? ' Vie varmuuskopio ja poista tuonnin palautuskopio (alla).' : ' Vie varmuuskopio ja poista esim. esimerkkidata.') : ''}</p>
       <button type="button" class="btn block" data-action="export">Vie tiedot (JSON)</button>
       <button type="button" class="btn block" data-action="import">Tuo tiedot (JSON)…</button>
-      ${pre ? `<button type="button" class="btn block" data-action="import-undo" id="importUndo">Palauta tuontia edeltäneet tiedot (${fmtDateTime(pre.t)})</button>` : ''}
+      ${pre ? `<button type="button" class="btn block" data-action="import-undo" id="importUndo">Palauta tuontia edeltäneet tiedot (${fmtDateTime(pre.t)})</button>
+      <p class="hint" id="preimportInfo">Palautuskopio vie ${fmtSize(pre.size)} tallennustilaa ja poistuu itsestään ${fmtDate(isoOf(new Date(pre.t + PREIMPORT_DAYS * DAY)))}. <button type="button" class="link-btn" data-action="preimport-del">Poista palautuskopio nyt</button></p>` : ''}
       <p class="hint" id="storageCtx">${isStandalone() ? '<b>Avattu kotivalikon web-appina.</b> Näiden tietojen tallennus on erillään Safarista (ja muista kotivalikon kuvakkeista). Tietoja siirretään Vie/Tuo-toiminnoilla. Kuvakkeen poistaminen (Poista appi) poistaa myös nämä tiedot – vie varmuuskopio ensin.' : '<b>Avattu selaimessa.</b> Kotivalikkoon web-appina lisätyllä kuvakkeella on omat, Safarista erilliset tiedot – siirrä tiedot sinne Vie/Tuo-toiminnoilla.'}</p>
       <p class="hint">Tallennettu: ${S.templates.length} treenipohjaa, ${S.sessions.length} kirjausta, ${S.food.entries.length} ruokamerkintää, ${Object.keys(S.food.products).length} tallennettua tuotetta, ${S.weight.entries.length} painomerkintää · ${fmtNum(bytes/1024, 1)} kt</p></div>`)}
     ${secHtml('kalorit', 'Kalorilaskuri', `Treenikulutus tavoitteeseen: ${S.food.addBurnedToGoal ? 'päällä' : 'pois'}`, `<label class="check-row"><input type="checkbox" id="addBurnedToggle" data-change="add-burned" ${S.food.addBurnedToGoal ? 'checked' : ''}><span><b>Lisää treenikulutus päivän kaloritavoitteeseen</b><br><span class="small muted">Kun päällä, päivän tavoite kasvaa sinä päivänä kirjattujen treenien kulutetuilla kaloreilla (esim. 2 500 + 450 = 2 950 kcal). Oletuksena pois päältä.</span></span></label>`)}
@@ -2487,7 +2634,7 @@ function openWipeDialog(){
   const nProd = Object.keys(S.food.products || {}).length;
   openModal('Tyhjennä kaikki tiedot', `<div class="wipe-warn">
       <p><b>Kaikki tiedot poistetaan pysyvästi tästä selaimesta:</b></p>
-      <ul><li>${S.templates.length} treenipohjaa</li><li>${S.sessions.length} treenikirjausta</li><li>${S.food.entries.length} ruokamerkintää ja ${nProd} tallennettua tuotetta</li><li>${S.weight.entries.length} painomerkintää</li><li>kaloritavoitteet, ateriat, treenityypit ja muut asetukset</li></ul>
+      <ul><li>${S.templates.length} treenipohjaa</li><li>${S.sessions.length} treenikirjausta</li><li>${S.food.entries.length} ruokamerkintää ja ${nProd} tallennettua tuotetta</li><li>${S.weight.entries.length} painomerkintää</li><li>kaloritavoitteet, ateriat, treenityypit ja muut asetukset</li><li>keskeneräiset kirjaukset ja tuonnin palautuskopio</li></ul>
       <p>Tätä <b>ei voi perua</b>.</p></div>
     <div class="wipe-backup"><p class="small">Suositus: ota ensin varmuuskopio, jonka voit tarvittaessa tuoda takaisin (Asetukset › Tuo tiedot).</p>
       <button type="button" class="btn block" data-action="wipe-backup">Vie varmuuskopio ensin</button></div>
@@ -2525,11 +2672,17 @@ $('#importFile').addEventListener('change', async ev => {
     if(!obj || typeof obj !== 'object' || !(Array.isArray(obj.sessions) || Array.isArray(obj.templates) || obj.food || obj.weight)) throw new Error('tiedosto ei näytä Treeniäpin varmuuskopiolta');
     const n = normalize(obj);
     if(!confirm(`Tuodaanko varmuuskopio?\n\n${n.templates.length} treenipohjaa, ${n.sessions.length} kirjausta, ${n.food.entries.length} ruokamerkintää, ${n.weight.entries.length} painomerkintää.\n\nNykyiset tiedot korvataan. Nykyisistä tiedoista jää palautuskopio (Asetukset → Varmuuskopio).`)) return;
-    /* v0.5.0: talteen ennen korvaamista → tuonnin voi kumota */
-    const oldS = S; let kept = false;
-    try{ localStorage.setItem(PREIMPORT_KEY, JSON.stringify({t:Date.now(), data:oldS})); kept = true; }catch(e){ console.warn('Palautuskopio ei mahtunut', e); }
-    S = n; save(); render();
-    toast(kept ? 'Tiedot tuotu' : 'Tiedot tuotu (palautuskopiota ei voitu tallentaa)', kept ? {label:'Kumoa tuonti', undo:() => undoImport(), ms:10000} : {});
+    /* v0.5.0: talteen ennen korvaamista → tuonnin voi kumota. v0.5.1: jos kopio ei mahdu, tarjotaan tiedostoa ja tuonti onnistuu silti */
+    const oldS = S, oldStr = JSON.stringify({t:Date.now(), data:oldS}); let kept = false;
+    try{ localStorage.removeItem(PREIMPORT_KEY); }catch(e){}
+    const others = storageUse() - (localStorage.getItem(STORE_KEY) || '').length;
+    const fits = others + oldStr.length + JSON.stringify(n).length < STORE_LIMIT * 0.9;
+    if(!fits && recordCount() && confirm('Nykyisistä tiedoista ei mahdu laitteelle palautuskopiota.\n\nLadataanko nykyiset tiedot ensin varmuuskopiotiedostoksi? (Peruuta = tuo ilman kopiota)')) exportData();
+    if(fits){ try{ localStorage.setItem(PREIMPORT_KEY, oldStr); kept = true; }catch(e){ console.warn('Palautuskopio ei mahtunut', e); } }
+    S = n;
+    if(!save() && kept){ try{ localStorage.removeItem(PREIMPORT_KEY); }catch(e){} kept = false; save(); }
+    render();
+    toast(kept ? 'Tiedot tuotu' : 'Tiedot tuotu (palautuskopiota ei tallennettu)', kept ? {label:'Kumoa tuonti', undo:() => undoImport(), ms:10000} : {});
   } catch(e){ toast('Tuonti epäonnistui: ' + e.message, {error:true}); }
 });
 
@@ -2601,16 +2754,26 @@ function removeSampleData(silent){
 const ACTIONS = {
   'modal-close': () => requestClose(),
   'set-done': el => toggleSetDone(el.closest('.set-row')),
+  'ex-all-done': el => { const n = markAllDone(el.closest('.ex-block')); if(!n) toast('Ei merkittäviä sarjoja – kirjoita toistot ensin', {error:true}); },
+  'all-done': () => { const n = markAllDone($('#exs')); toast(n ? `${n} ${n === 1 ? 'sarja' : 'sarjaa'} merkitty tehdyksi – muuta tarvittaessa ennen tallennusta` : 'Ei merkittäviä sarjoja', n ? {} : {error:true}); },
+  'day-to-today': el => { const f = $('#logForm'); if(!f) return; f.date.max = el.dataset.d; f.date.value = el.dataset.d; const n = $('#dayNote'); if(n) n.remove(); updateCalc(); scheduleDraft(); },
+  'store-mini': () => { storeErrMini = !storeErrMini; showStoreErr(true); },
+  'preimport-del': () => { if(!confirm('Poistetaanko tuonnin palautuskopio? Tuontia ei voi sen jälkeen kumota.')) return; try{ localStorage.removeItem(PREIMPORT_KEY); }catch(e){} render(); toast('Palautuskopio poistettu'); },
+  'app-reload': () => { saveDraftNow(); location.reload(); },
+  'upd-close': () => { $('#updBar').hidden = true; document.body.classList.remove('has-upd'); updDismissed = true; },
   'dur-swap': () => { const f = $('#logForm'), sw = f && durSwapSuggestion(f); if(!sw) return; f.dur_h.value = sw.h; f.dur_m.value = sw.m; f.dur_s.value = ''; updateCalc(); },
-  'draft-resume': () => { closeModal(); restoreDraft(); },
-  'draft-discard': () => { clearDraft(); closeModal(); toast('Luonnos hylätty'); },
+  'draft-resume': el => { closeModal(); restoreDraft(el.dataset.key || null); },
+  'draft-discard': el => { if(!confirm('Hylätäänkö keskeneräinen kirjaus? Sen tiedot katoavat.')) return; const k = el.dataset.key || draftKey((loadDraft() || {}).ctx); clearDraft(k); closeModal(); if(ui.page === 'treenit') render(); toast('Luonnos hylätty'); },
+  'draft-fill': () => { const f = $('#logForm'); if(f) fillDraft(loadDraft(draftKey(formCtx(f)))); },
+  'draft-drop': () => { const f = $('#logForm'); if(!f || !confirm('Hylätäänkö tallessa oleva luonnos?')) return; clearDraft(draftKey(formCtx(f))); const n = $('#draftNote'); if(n) n.remove(); toast('Luonnos hylätty'); },
   'tpl-new': () => openTplEditor(null),
   'tpl-edit': el => openTplEditor(el.dataset.id),
   'tpl-delete': el => { const t = tplById(el.dataset.id); const n = S.sessions.filter(s => s.templateId === t.id).length;
     if(!confirm(`Poistetaanko treeni “${t.name}”?${n ? `\n\nSen ${n} kirjausta säilyvät historiassa.` : ''}`)) return;
     S.templates = S.templates.filter(x => x.id !== t.id); S.sessions.forEach(s => { if(s.templateId === t.id) s.templateId = null; }); save(); closeModal(); render(); toast('Treeni poistettu'); },
   'te-add': () => { $('#tplExs').insertAdjacentHTML('beforeend', tplExRow()); const r = $$('#tplExs .te-name'); r[r.length-1].focus(); },
-  'te-remove': el => el.closest('.tpl-ex-row').remove(),
+  'te-remove': el => { const r = el.closest('.tpl-ex-row'), h = r.nextElementSibling; if(h && h.classList.contains('sim-hint')) h.remove(); r.remove(); },
+  'use-name': el => { const h = el.closest('.sim-hint'), inp = h && h.previousElementSibling && (h.previousElementSibling.querySelector('.te-name, .ex-name')); if(!inp) return; inp.value = el.dataset.name; h.remove(); inp.dispatchEvent(new Event('change', {bubbles:true})); },
   'log-new': el => openLogForm({kind:el.dataset.kind}),
   'log-tpl': el => openLogForm({tplId:el.dataset.id}),
   'session-edit': el => openLogForm({sessionId:el.dataset.id}),
@@ -2652,6 +2815,9 @@ const ACTIONS = {
   'fs-recent': el => { const e = (ui.fs && ui.fs.list || [])[+el.dataset.i]; if(!e) return;
     const pr = e.code && S.food.products[e.code];
     if(pr && pr.per100 && pr.per100.kcal != null && e.grams) fsProduct(e.code, pr, 'cache', e.grams); else fsAmount(e); },
+  'fs-quick': el => { const e = (ui.fs && ui.fs.list || [])[+el.dataset.i]; if(!e) return;
+    const extra = {}; if(e.code) extra.code = e.code; if(e.grams) extra.grams = e.grams; if(e.icon && FOOD_ICONS[e.icon]) extra.icon = e.icon;
+    addFood(e.name, e.kcal, e.p, e.c, e.f, ui.fs.meal, extra); },
   'fs-back': () => { if(ui.fs) fsPick(); else closeModal(); },
   'fs-copy': () => copyPrevDay(),
   'icon-toggle': () => { const p = $('#iconPicker'); if(!p) return; p.hidden = !p.hidden; $('#iconBtn').setAttribute('aria-expanded', String(!p.hidden)); if(!p.hidden) p.scrollIntoView({block:'nearest', behavior:'smooth'}); },
@@ -2724,7 +2890,8 @@ const ACTIONS = {
   'wipe-backup': () => exportData(),
   'wipe-confirm': () => {
     const i = $('#wipeConfirm'); if(!i || i.value.trim() !== 'POISTA') return;
-    closeModal(); S = defaultState(); save(); render(); toast('Kaikki tiedot tyhjennetty'); }
+    closeModal(); S = defaultState(); for(const k of [PREIMPORT_KEY, DRAFT_KEY]) try{ localStorage.removeItem(k); }catch(e){}
+    save(); render(); toast('Kaikki tiedot tyhjennetty'); }
 };
 const SUBMITS = {
   'w-add': f => { if(wUpsert(f.date.value, f.kg.value, f.note.value.trim())) render(); },
@@ -2782,9 +2949,11 @@ document.addEventListener('change', e => {
   else if(t.name === 'asTpl'){ const n = $('#logForm input[name=stitle]'); if(n && t.checked && !n.value.trim()) n.focus(); }
   else if(t.name === 'kind' && t.closest('#tplForm')) updateKindVisibility(t.closest('form'));
   else if(t.name === 'stype' || (t.name === 'date' && t.closest('#logForm'))) updateCalc();
+  else if(t.classList.contains('te-name')) updateSimHint(t);
   else if(t.classList.contains('ex-name') && t.closest('#logForm')){
     const b = t.closest('.ex-block'), f = t.closest('form'), prev = findPrevExercise(t.value, f.dataset.id || null);
-    b.querySelector('.ex-prev').textContent = prevText(prev);
+    updateSimHint(t);
+    b.querySelector('.ex-prev').innerHTML = exPrevHtml(prev, b.dataset.target);
     const setInputs = $$('.set-row input', b);
     /* v0.5.0: päivitetään vain harmaat esitäytöt paikallaan – rivejä ei korvata, ettei samaan aikaan napautettu ✓ katoa */
     if(prev && setInputs.every(i => !i.value.trim())) syncPlaceholders(b, rowsFromPh(prev.sets));
@@ -2815,9 +2984,24 @@ window.addEventListener('storage', e => { if(e.key === STORE_KEY){ S = load(); r
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service worker ei käynnistynyt', e)));
 }
+/* v0.5.1: service worker avaa äpin heti välimuistista ja hakee uuden version taustalla → "Uusi versio saatavilla – Päivitä" */
+let updDismissed = false;
+async function checkUpdate(){
+  try{
+    if(updDismissed || !('caches' in window) || !navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+    const r = await caches.match('./index.html'); if(!r) return;
+    const m = (await r.text()).match(/const APP_VERSION = '([^']+)'/);
+    if(m && m[1] !== APP_VERSION){ $('#updBar').hidden = false; document.body.classList.add('has-upd'); }
+  }catch(e){}
+}
+if(navigator.serviceWorker){
+  navigator.serviceWorker.addEventListener('message', e => { if(e.data && e.data.type === 'update-ready') checkUpdate(); });
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) setTimeout(checkUpdate, 3000); });
+  setTimeout(checkUpdate, 6000);
+}
 /* Kalorit: päivän nimeä napauttamalla avautuu kalenteri (työpöytäselaimissa showPicker) */
 document.addEventListener('click', e => { const i = e.target.closest && e.target.closest('#kalPick'); if(i && typeof i.showPicker === 'function'){ try{ i.showPicker(); }catch(err){} } });
-route();
+route(); getPreimport(); /* vanhentunut palautuskopio poistuu */
 if(loadDraft()) showDraftPrompt(); else setTimeout(backupReminder, 1500);
 /* v0.5.0: pyydetään pysyvää tallennustilaa (selain ei siivoa tietoja itsestään) */
 try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(p => p || navigator.storage.persist()).catch(() => {}); }catch(e){}
