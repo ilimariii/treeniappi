@@ -504,6 +504,7 @@ body.store-err .sheet.full .sheet-head{padding-top:8px}
 #storeErr .se-tog{flex:none;width:36px;height:36px;border:0;border-radius:8px;background:rgba(255,255,255,.18);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 #storeErr .se-tog .i{width:20px;height:20px}
 .draft-card{border-left:4px solid var(--k, var(--accent));padding:12px 14px}
+.draft-group{padding:12px 14px}.draft-group>summary{cursor:pointer;min-height:32px;display:flex;align-items:center;flex-wrap:wrap;gap:4px}.draft-group[open]>summary{margin-bottom:10px}.draft-group .draft-card{box-shadow:none;margin:8px 0 0}
 .draft-card .dc-t{display:flex;gap:10px;align-items:flex-start;font-size:.92rem}
 .draft-card .dc-t .ic{flex:none;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center}
 .draft-card .dc-t .ic .i{width:20px;height:20px}
@@ -552,7 +553,7 @@ body.has-upd #toast{bottom:calc(140px + env(safe-area-inset-bottom))}
 <div id="updBar" hidden><span>Uusi versio saatavilla</span><button type="button" class="btn small" data-action="app-reload">Päivitä</button><button type="button" class="x" data-action="upd-close" aria-label="Sulje">×</button></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 <script>
-const APP_VERSION = '0.5.2';
+const APP_VERSION = '0.5.3';
 'use strict';
 /* ====================== Perusasetukset ====================== */
 const STORE_KEY = 'treeniappi.v1';
@@ -745,9 +746,11 @@ function getPreimport(){
 }
 const fmtSize = chars => chars >= 1e6 ? `${fmtNum(chars / 1e6, 1)} Mt` : `${fmtNum(Math.max(1, chars / 1e3), 0)} kt`;
 const recordCount = () => S.sessions.length + S.food.entries.length + S.weight.entries.length;
+/* v0.5.3: esimerkkidata ei laukaise varmuuskopiomuistutusta eikä merkkiä */
+const ownCount = () => [S.sessions, S.food.entries, S.weight.entries].reduce((a, l) => a + l.filter(x => !x.sample).length, 0);
 function daysAgoText(t){ const d = Math.floor((Date.now() - t) / DAY); return d <= 0 ? 'tänään' : d === 1 ? 'eilen' : `${d} pv sitten`; }
 /* v0.5.2: pysyvä merkki Asetukset-välilehdessä, kun varmuuskopio on vanhentunut (poistuu viennillä) */
-const backupDue = () => { const m = getMeta(); return recordCount() >= 10 && !(m.lastExport && Date.now() - m.lastExport < 14 * DAY); };
+const backupDue = () => { const m = getMeta(); return ownCount() >= 10 && !(m.lastExport && Date.now() - m.lastExport < 14 * DAY); };
 function updateBackupBadge(){ const t = document.querySelector('a.tab[data-page=asetukset]'); if(!t) return; const due = backupDue(); t.classList.toggle('bk-due', due); t.title = due ? 'Varmuuskopio kannattaa ottaa' : ''; }
 /* v0.5.2: muistutus myös taustalta palatessa ja luonnosikkunan sulkemisen jälkeen */
 let remindTimer;
@@ -755,7 +758,7 @@ function scheduleReminder(ms = 1500){ clearTimeout(remindTimer); remindTimer = s
 document.addEventListener('visibilitychange', () => { if(!document.hidden) scheduleReminder(); });
 function backupReminder(){
   const m = getMeta(), now = Date.now();
-  if(recordCount() < 10 || (m.lastExport && now - m.lastExport < 14 * DAY) || (m.lastRemind && now - m.lastRemind < 3 * DAY)) return;
+  if(ownCount() < 10 || (m.lastExport && now - m.lastExport < 14 * DAY) || (m.lastRemind && now - m.lastRemind < 3 * DAY)) return;
   setMeta({lastRemind:now});
   toast(m.lastExport ? `Edellisestä varmuuskopiosta on ${Math.floor((now - m.lastExport) / DAY)} päivää` : 'Et ole vielä ottanut varmuuskopiota tiedoistasi', {label:'Vie nyt', undo:() => exportData(), ms:9000});
 }
@@ -1400,8 +1403,10 @@ function showDraftPrompt(){
 }
 function draftCardsHtml(){
   const list = loadDrafts(); if(!list.length) return '';
-  return `<div id="draftCards">${list.map(d => { const k = esc(draftKey(d.ctx)); return `<section class="card draft-card k-${d.ctx.kind}" data-key="${k}"><div class="dc-t"><span class="ic">${icon(d.ctx.kind)}</span><span><b>Keskeneräinen kirjaus:</b> ${esc(d.title || KINDS[d.ctx.kind].label)}<br><span class="small muted">muokattu ${draftWhen(d.t)} · ei vielä tallennettu</span></span></div>
-    <div class="dc-b"><button type="button" class="btn small ghost" data-action="draft-discard" data-key="${k}">Hylkää</button><button type="button" class="btn small primary" data-action="draft-resume" data-key="${k}">Jatka kirjausta</button></div></section>`; }).join('')}</div>`;
+  const cards = list.map(d => { const k = esc(draftKey(d.ctx)); return `<section class="card draft-card k-${d.ctx.kind}" data-key="${k}"><div class="dc-t"><span class="ic">${icon(d.ctx.kind)}</span><span><b>Keskeneräinen kirjaus:</b> ${esc(d.title || KINDS[d.ctx.kind].label)}<br><span class="small muted">muokattu ${draftWhen(d.t)} · ei vielä tallennettu</span></span></div>
+    <div class="dc-b"><button type="button" class="btn small ghost" data-action="draft-discard" data-key="${k}">Hylkää</button><button type="button" class="btn small primary" data-action="draft-resume" data-key="${k}">Jatka kirjausta</button></div></section>`; }).join('');
+  /* v0.5.3: yli 2 luonnosta → yksi avattava kortti */
+  return list.length > 2 ? `<div id="draftCards"><details class="card draft-group"><summary><b>${list.length} keskeneräistä kirjausta</b><span class="small muted"> · ei vielä tallennettu</span></summary>${cards}</details></div>` : `<div id="draftCards">${cards}</div>`;
 }
 
 /* ====================== KEHITYS: kaaviot ====================== */
@@ -1635,7 +1640,7 @@ function fmtMinutes(sec){ const m = Math.round(sec / 60), h = Math.floor(m / 60)
 function weekStripHtml(){
   const T = todayISO(), curMon = mondayOf(T);
   if(ui.histWeekMon && ui.histWeekMon > curMon) ui.histWeekMon = null;
-  const mon = ui.histWeekMon || curMon, isCur = mon === curMon, days = WD_SHORT.map((_, i) => addDays(mon, i)), sun = days[6];
+  const mon = ui.histWeekMon || curMon, isCur = mon === curMon, firstMon = S.sessions.length ? mondayOf(S.sessions.reduce((a, x) => x.date < a ? x.date : a, T)) : curMon, isFirst = mon <= firstMon, days = WD_SHORT.map((_, i) => addDays(mon, i)), sun = days[6];
   const wk = S.sessions.filter(x => x.date >= mon && x.date <= sun);
   const secs = wk.reduce((a, x) => a + (x.durationSec || 0), 0);
   const km = wk.filter(x => x.kind === 'run' || x.kind === 'bike').reduce((a, x) => a + (x.distanceKm || 0), 0);
@@ -1648,7 +1653,7 @@ function weekStripHtml(){
     const mark = list.length ? `<span class="wk-mark k-${kinds[0]}"><svg class="i" viewBox="0 0 24 24">${KIND_ICONS[kinds[0]]}</svg>${list.length > 1 ? `<span class="wk-n">${list.length}</span>` : ''}</span>${kinds.length > 1 ? `<span class="wk-more">${kinds.slice(1).map(k => `<i class="k-${k}"></i>`).join('')}</span>` : ''}` : '<span class="wk-empty"></span>';
     return `<button type="button" class="${cls}" ${list.length ? `data-action="hist-day" data-d="${d}"` : 'disabled'} aria-label="${esc(tip)}" title="${esc(tip)}"><span class="wd">${WD_SHORT[i]}</span>${mark}</button>`;
   };
-  return `<section class="card wk-strip" id="weekStrip"><div class="wk-head"><span class="wk-t"><button type="button" class="icon-btn wk-nav" data-action="hist-week" data-d="-7" aria-label="Edellinen viikko"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><b title="${fmtDateShort(mon)}–${fmtDateShort(sun)}">Viikko ${isoWeek(mon)}</b><button type="button" class="icon-btn wk-nav" data-action="hist-week" data-d="7" aria-label="Seuraava viikko" ${isCur ? 'disabled' : ''}><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>${isCur ? '' : `<small class="wk-range">${fmtDateShort(mon)}–${fmtDateShort(sun)}</small>`}</span><span class="wk-tot" id="weekTotal">${tot}</span></div><div class="wk-days">${days.map(dayHtml).join('')}</div></section>`;
+  return `<section class="card wk-strip" id="weekStrip"><div class="wk-head"><span class="wk-t"><button type="button" class="icon-btn wk-nav" data-action="hist-week" data-d="-7" aria-label="Edellinen viikko" ${isFirst ? 'disabled' : ''}><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><b title="${fmtDateShort(mon)}–${fmtDateShort(sun)}">Viikko ${isoWeek(mon)}</b><button type="button" class="icon-btn wk-nav" data-action="hist-week" data-d="7" aria-label="Seuraava viikko" ${isCur ? 'disabled' : ''}><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>${isCur ? '' : `<small class="wk-range">${fmtDateShort(mon)}–${fmtDateShort(sun)}</small>`}</span><span class="wk-tot" id="weekTotal">${tot}</span></div><div class="wk-days">${days.map(dayHtml).join('')}</div></section>`;
 }
 function renderHistoria(){
   const mStart = todayISO().slice(0, 8) + '01';
@@ -2570,7 +2575,7 @@ async function runOffSearch(q, seq){
 }
 function srItem(action, i, r, sub){
   const img = iconHtml(r.cat, 'sm');
-  return `<button type="button" class="sr-item" data-action="${action}" data-i="${i}">${img}<span class="sr-main"><span class="sr-name">${esc(r.name)}</span><span class="sr-sub">${sub}</span></span><span class="sr-kcal">${r.kcal != null ? `${fmtNum(r.kcal, 0)}<small>${r.type === 'food' ? ' kcal' : ' kcal/100 g'}</small>` : '<small>kcal ?</small>'}</span></button>`;
+  return `<button type="button" class="sr-item" data-action="${action}" data-i="${i}">${img}<span class="sr-main"><span class="sr-name">${esc(r.name)}</span><span class="sr-sub">${sub}</span></span><span class="sr-kcal">${r.kcal != null ? `${fmtNum(r.kcal, 0)}<small>${r.type === 'food' ? ' kcal' : ' kcal/100 g'}</small>` : '<small class="sr-fill">täydennä arvot</small>'}</span></button>`;
 }
 function renderSearch(st){
   const box = $('#searchResults'); if(!box) return; box.hidden = false;
@@ -2672,7 +2677,7 @@ function exportData(){
     const file = new File([blob], name, {type:'application/json'});
     if(navigator.canShare({files:[file]})){
       navigator.share({files:[file], title:'Treeniäppi – varmuuskopio'})
-        .then(() => { setMeta({lastExport:Date.now()}); toast('Varmuuskopio jaettu – tallenna se esim. Tiedostot-sovellukseen'); })
+        .then(() => { setMeta({lastExport:Date.now()}); if(ui.page === 'asetukset' && !modalOpen()) render(); toast('Varmuuskopio jaettu – tallenna se esim. Tiedostot-sovellukseen'); })
         .catch(e => { if(!e || e.name !== 'AbortError') download(); });
       return;
     }
@@ -2684,13 +2689,20 @@ $('#importFile').addEventListener('change', async ev => {
   try{
     let obj; try{ obj = JSON.parse(await file.text()); }catch(e){ throw new Error('tiedosto ei ole kelvollinen varmuuskopio (JSON-muoto on rikki)'); }
     if(!obj || typeof obj !== 'object' || !(Array.isArray(obj.sessions) || Array.isArray(obj.templates) || obj.food || obj.weight)) throw new Error('tiedosto ei näytä Treeniäpin varmuuskopiolta');
+    /* v0.5.3: mahdottomat ruokamerkinnät (kcal < 0 tai > 20 000, makrot < 0 tai > 2 000 g) ohitetaan */
+    let skipped = 0;
+    if(obj.food && Array.isArray(obj.food.entries)){ const bad = (v, max) => v != null && v !== '' && isFinite(+v) && (+v < 0 || +v > max);
+      obj.food = Object.assign({}, obj.food, {entries:obj.food.entries.filter(e => { const x = !e || typeof e !== 'object' || bad(e.kcal, 20000) || ['p','c','f'].some(k => bad(e[k], 2000)); if(x && e && typeof e === 'object') skipped++; return !x; })}); }
     const n = normalize(obj);
+    const skipTxt = skipped ? `\n\n${skipped} ${skipped === 1 ? 'ruokamerkintä' : 'ruokamerkintää'} ohitetaan mahdottomien arvojen vuoksi.` : '';
+    const prevCopy = getPreimport();
     /* v0.5.2: tiedosto ilman yhtään kelvollista tietoa ei saa korvata nykyisiä tietoja */
     if(!(n.sessions.length + n.templates.length + n.food.entries.length + n.weight.entries.length)) throw new Error('Tiedostosta ei löytynyt tietoja');
-    if(!confirm(`Tuodaanko varmuuskopio?\n\n${n.templates.length} treenipohjaa, ${n.sessions.length} kirjausta, ${n.food.entries.length} ruokamerkintää, ${n.weight.entries.length} painomerkintää.\n\nNykyiset tiedot korvataan. Nykyisistä tiedoista jää palautuskopio (Asetukset → Varmuuskopio).`)) return;
+    if(!confirm(`Tuodaanko varmuuskopio?\n\n${n.templates.length} treenipohjaa, ${n.sessions.length} kirjausta, ${n.food.entries.length} ruokamerkintää, ${n.weight.entries.length} painomerkintää.${skipTxt}\n\nNykyiset tiedot korvataan. ${prevCopy ? `Aiemman tuonnin palautuskopio (${fmtDate(isoOf(new Date(prevCopy.t)))}) säilyy: "Kumoa tuonti" palauttaa tiedot sellaisiksi kuin ne olivat ennen ensimmäistä tuontia.` : 'Nykyisistä tiedoista jää palautuskopio (Asetukset → Varmuuskopio).'}`)) return;
     /* v0.5.0: talteen ennen korvaamista → tuonnin voi kumota. v0.5.1: jos kopio ei mahdu, tarjotaan tiedostoa ja tuonti onnistuu silti */
     const oldS = S, oldStr = JSON.stringify({t:Date.now(), data:oldS}); let kept = false;
-    try{ localStorage.removeItem(PREIMPORT_KEY); }catch(e){}
+    if(prevCopy){ S = n; save(); setMeta({importSig:stateSig()}); render();
+      toast(`Tiedot tuotu${skipped ? ` (${skipped} ohitettu)` : ''}`, {label:'Kumoa tuonti', undo:() => undoImport(), ms:10000}); return; }
     const others = storageUse() - (localStorage.getItem(STORE_KEY) || '').length;
     const fits = others + oldStr.length + JSON.stringify(n).length < STORE_LIMIT * 0.9;
     if(!fits && recordCount() && confirm('Nykyisistä tiedoista ei mahdu laitteelle palautuskopiota.\n\nLadataanko nykyiset tiedot ensin varmuuskopiotiedostoksi? (Peruuta = tuo ilman kopiota)')) exportData();
@@ -2699,7 +2711,7 @@ $('#importFile').addEventListener('change', async ev => {
     if(!save() && kept){ try{ localStorage.removeItem(PREIMPORT_KEY); }catch(e){} kept = false; save(); }
     if(kept) setMeta({importSig:stateSig()});
     render();
-    toast(kept ? 'Tiedot tuotu' : 'Tiedot tuotu (palautuskopiota ei tallennettu)', kept ? {label:'Kumoa tuonti', undo:() => undoImport(), ms:10000} : {});
+    toast((kept ? 'Tiedot tuotu' : 'Tiedot tuotu (palautuskopiota ei tallennettu)') + (skipped ? ` – ${skipped} ruokamerkintää ohitettu` : ''), kept ? {label:'Kumoa tuonti', undo:() => undoImport(), ms:10000} : {});
   } catch(e){ toast('Tuonti epäonnistui: ' + e.message, {error:true}); }
 });
 
@@ -2910,7 +2922,7 @@ const ACTIONS = {
   'store-retry': () => { if(save()) toast('Tallennus onnistui'); else toast('Tallennus ei vieläkään onnistu – vie varmuuskopio ja vapauta tilaa', {error:true}); },
   'wipe-backup': () => exportData(),
   'wipe-confirm': () => {
-    const i = $('#wipeConfirm'); if(!i || i.value.trim() !== 'POISTA') return;
+    const i = $('#wipeConfirm'); if(!i || i.value !== 'POISTA') return;
     closeModal(); S = defaultState(); for(const k of [PREIMPORT_KEY, DRAFT_KEY]) try{ localStorage.removeItem(k); }catch(e){}
     save(); render(); toast('Kaikki tiedot tyhjennetty'); }
 };
@@ -2991,7 +3003,7 @@ document.addEventListener('change', e => {
   else if(t.id === 'foodName'){ const k = t.value.trim().toLowerCase(); const m = knownFoods().find(x => x.name.trim().toLowerCase() === k); const f = t.form;
     if(m && !f.kcal.value){ f.kcal.value = inNum(m.kcal); f.p.value = inNum(m.p); f.c.value = inNum(m.c); f.fat.value = inNum(m.f); } }
 });
-document.addEventListener('input', e => { if(e.target.id === 'wipeConfirm'){ $('#wipeGo').disabled = e.target.value.trim() !== 'POISTA'; return; } if(e.target.id === 'foodSearch') onSearchInput(false); else if(e.target.closest('#logForm')){ updateCalc(); scheduleDraft(); } else if(e.target.closest('#prodForm')) updateProdCalc(); else if(e.target.id === 'amtInput') amtFromBase(); else if(e.target.dataset.v && e.target.closest('#amtForm')) amtToBase(e.target); else if(e.target.id === 'codeInput') e.target.value = e.target.value.replace(/\D/g, ''); });
+document.addEventListener('input', e => { if(e.target.id === 'wipeConfirm'){ $('#wipeGo').disabled = e.target.value !== 'POISTA'; return; } if(e.target.id === 'foodSearch') onSearchInput(false); else if(e.target.closest('#logForm')){ updateCalc(); scheduleDraft(); } else if(e.target.closest('#prodForm')) updateProdCalc(); else if(e.target.id === 'amtInput') amtFromBase(); else if(e.target.dataset.v && e.target.closest('#amtForm')) amtToBase(e.target); else if(e.target.id === 'codeInput') e.target.value = e.target.value.replace(/\D/g, ''); });
 document.addEventListener('keydown', e => {
   if(e.key === 'Escape' && !$('#modal').hidden){ e.preventDefault(); if($('#foodSheet [data-action=fs-back]')) ACTIONS['fs-back'](); else requestClose(); return; }
   if((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-action]')){ e.preventDefault(); e.target.click(); return; }

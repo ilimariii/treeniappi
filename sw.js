@@ -1,9 +1,9 @@
-/* Treeniäppi – service worker (v0.5.2)
+/* Treeniäppi – service worker (v0.5.3)
    Välimuisti ensin: äppi aukeaa heti myös heikolla verkolla tai ilman verkkoa. Uusi versio haetaan taustalla
    ja otetaan käyttöön seuraavalla avauksella (sivulle ilmoitetaan "Uusi versio saatavilla – Päivitä").
    Viivakoodinlukija (ZXing) tallennetaan laitteelle, joten skannaus toimii myös ilman verkkoa.
    Tiedot (treenit, ruoka, paino) ovat localStoragessa – service worker ei koske niihin. */
-const VERSION = '0.5.2';
+const VERSION = '0.5.3';
 const CACHE = 'treeniappi-' + VERSION, EXT = 'treeniappi-ext';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png',
   './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png', './icons/favicon.svg'];
