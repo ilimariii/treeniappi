@@ -338,6 +338,8 @@ nav.tabs .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:re
 .tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;min-width:0;white-space:nowrap;letter-spacing:-.01em;color:var(--muted);font-size:.7rem;font-weight:600;cursor:pointer;text-decoration:none}
 .tab svg{width:24px;height:24px}
 .tab.active{color:var(--accent)}
+/* v0.5.2: varmuuskopiomerkki Asetukset-välilehdessä */
+.tab{position:relative}.tab.bk-due::after{content:'';position:absolute;top:6px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:#e5484d;border:2px solid var(--card)}
 #modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 #modal[hidden]{display:none!important}
 .sheet{background:var(--bg);width:100%;max-width:600px;max-height:96vh;max-height:96dvh;border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden;animation:up .2s ease-out}
@@ -550,7 +552,7 @@ body.has-upd #toast{bottom:calc(140px + env(safe-area-inset-bottom))}
 <div id="updBar" hidden><span>Uusi versio saatavilla</span><button type="button" class="btn small" data-action="app-reload">Päivitä</button><button type="button" class="x" data-action="upd-close" aria-label="Sulje">×</button></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 <script>
-const APP_VERSION = '0.5.1';
+const APP_VERSION = '0.5.2';
 'use strict';
 /* ====================== Perusasetukset ====================== */
 const STORE_KEY = 'treeniappi.v1';
@@ -733,7 +735,7 @@ const storagePct = () => Math.round(storageUse() / STORE_LIMIT * 100);
 /* Varmuuskopioinnin seuranta (ei varmuuskopioon) + tuontia edeltävä kopio */
 const META_KEY = 'treeniappi.meta', PREIMPORT_KEY = 'treeniappi.preimport';
 function getMeta(){ try{ return JSON.parse(localStorage.getItem(META_KEY) || '{}') || {}; }catch(e){ return {}; } }
-function setMeta(o){ try{ localStorage.setItem(META_KEY, JSON.stringify(Object.assign(getMeta(), o))); }catch(e){} }
+function setMeta(o){ try{ localStorage.setItem(META_KEY, JSON.stringify(Object.assign(getMeta(), o))); }catch(e){} if('lastExport' in o && typeof updateBackupBadge === 'function') updateBackupBadge(); }
 /* v0.5.1: tuontia edeltävä palautuskopio vanhenee 7 päivässä, ettei se varaa tallennustilaa pysyvästi */
 const PREIMPORT_DAYS = 7;
 function getPreimport(){
@@ -744,6 +746,13 @@ function getPreimport(){
 const fmtSize = chars => chars >= 1e6 ? `${fmtNum(chars / 1e6, 1)} Mt` : `${fmtNum(Math.max(1, chars / 1e3), 0)} kt`;
 const recordCount = () => S.sessions.length + S.food.entries.length + S.weight.entries.length;
 function daysAgoText(t){ const d = Math.floor((Date.now() - t) / DAY); return d <= 0 ? 'tänään' : d === 1 ? 'eilen' : `${d} pv sitten`; }
+/* v0.5.2: pysyvä merkki Asetukset-välilehdessä, kun varmuuskopio on vanhentunut (poistuu viennillä) */
+const backupDue = () => { const m = getMeta(); return recordCount() >= 10 && !(m.lastExport && Date.now() - m.lastExport < 14 * DAY); };
+function updateBackupBadge(){ const t = document.querySelector('a.tab[data-page=asetukset]'); if(!t) return; const due = backupDue(); t.classList.toggle('bk-due', due); t.title = due ? 'Varmuuskopio kannattaa ottaa' : ''; }
+/* v0.5.2: muistutus myös taustalta palatessa ja luonnosikkunan sulkemisen jälkeen */
+let remindTimer;
+function scheduleReminder(ms = 1500){ clearTimeout(remindTimer); remindTimer = setTimeout(() => { if(document.hidden || modalOpen()) return; if(!$('#toast').hidden) return scheduleReminder(3000); backupReminder(); }, ms); }
+document.addEventListener('visibilitychange', () => { if(!document.hidden) scheduleReminder(); });
 function backupReminder(){
   const m = getMeta(), now = Date.now();
   if(recordCount() < 10 || (m.lastExport && now - m.lastExport < 14 * DAY) || (m.lastRemind && now - m.lastRemind < 3 * DAY)) return;
@@ -802,7 +811,7 @@ function openModal(title, body, foot){
 }
 const modalOpen = () => !$('#modal').hidden;
 function fmtDateTime(t){ const d = new Date(t); return `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()} klo ${d.getHours()}.${String(d.getMinutes()).padStart(2, '0')}`; }
-function closeModal(){ if(typeof stopScanner === 'function') stopScanner(); ui.fs = null; const m = $('#modal'); m.hidden = true; m.innerHTML = ''; document.body.classList.remove('modal-open'); }
+function closeModal(){ const wasPrompt = !!document.getElementById('draftPrompt'); if(typeof stopScanner === 'function') stopScanner(); ui.fs = null; const m = $('#modal'); m.hidden = true; m.innerHTML = ''; document.body.classList.remove('modal-open'); if(wasPrompt) scheduleReminder(); }
 
 /* ====================== Reititys ====================== */
 const PAGES = { treenit:()=>renderTreenit(), kehitys:()=>renderKehitys(), historia:()=>renderHistoria(), kalorit:()=>renderKalorit(), paino:()=>renderPaino(), asetukset:()=>renderAsetukset() };
@@ -813,6 +822,7 @@ function route(){
   if(keep) toast('Keskeneräinen kirjaus on tallessa (Treenit-sivulla)', {undo:() => restoreDraft(dk), label:'Jatka', ms:8000});
 }
 function render(){
+  updateBackupBadge();
   let html;
   try{ html = PAGES[ui.page](); }
   catch(e){ console.warn('Sivun piirto epäonnistui', e);
@@ -1053,13 +1063,15 @@ function toggleSetDone(row){
   row.classList.add('done'); if(auto) row.dataset.auto = '1'; b.setAttribute('aria-pressed', 'true');
 }
 /* v0.5.1: merkitse liikkeen (tai koko treenin) kaikki sarjat tehdyiksi – tyhjät sarjat täyttyvät harmailla arvoilla */
+function targetReps(t){ const m = String(t || '').match(/^\s*\d+\s*[x×*]\s*(\d+)/i); return m && +m[1] > 0 ? m[1] : null; }
 function markAllDone(scope){
   let n = 0;
   for(const row of $$('.set-row', scope)){
     if(row.classList.contains('done')) continue;
     const r = row.querySelector('.set-reps');
-    if(!(num(r.value) > 0) && !/^\d+$/.test(r.placeholder)) continue;
     const blk = row.closest('.ex-block'); if(blk && !blk.querySelector('.ex-name').value.trim()) continue;
+    /* v0.5.2: ensimmäinen kerta → toistot pohjan tavoitteesta (esim. 3×8 → 8), kilot jäävät kirjoitettaviksi */
+    if(!(num(r.value) > 0) && !/^\d+$/.test(r.placeholder)){ const tr = blk && targetReps(blk.dataset.target); if(!tr) continue; r.value = tr; }
     toggleSetDone(row); if(row.classList.contains('done')) n++;
   }
   return n;
@@ -1334,14 +1346,16 @@ function loadDrafts(){
   const list = !d ? [] : Array.isArray(d.list) ? d.list : (d.ctx ? [d] : []);
   return list.filter(x => x && x.ctx && KINDS[x.ctx.kind] && Date.now() - (x.t || 0) < DRAFT_DAYS * DAY).sort((a, b) => (b.t || 0) - (a.t || 0));
 }
-function storeDrafts(list){ try{ if(list.length) localStorage.setItem(DRAFT_KEY, JSON.stringify({v:2, list:list.slice(0, 8)})); else localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+const DRAFT_MAX = 20;
+function storeDrafts(list){ try{ if(list.length) localStorage.setItem(DRAFT_KEY, JSON.stringify({v:2, list:list.slice(0, DRAFT_MAX)})); else localStorage.removeItem(DRAFT_KEY); }catch(e){} return Math.max(0, list.length - DRAFT_MAX); }
 function loadDraft(key){ const l = loadDrafts(); return key == null ? (l[0] || null) : (l.find(x => draftKey(x.ctx) === key) || null); }
 function draftWhen(t){ const tm = new Date(t); return `${isoOf(tm) === todayISO() ? 'tänään' : fmtDate(isoOf(tm))} klo ${pad(tm.getHours())}.${pad(tm.getMinutes())}`; }
 function saveDraftNow(){
   clearTimeout(draftTimer); const f = $('#logForm'); if(!f || !logDirty()) return;
   try{ const st = logState(f); st.t = Date.now(); st.title = $('#modal .sheet-head h2') ? $('#modal .sheet-head h2').textContent : '';
     const keys = [draftKey(st.ctx), f.dataset.draftKey].filter(Boolean);
-    storeDrafts([st, ...loadDrafts().filter(x => !keys.includes(draftKey(x.ctx)))]); }catch(e){}
+    const all = [st, ...loadDrafts().filter(x => !keys.includes(draftKey(x.ctx)))], gone = all.slice(DRAFT_MAX);
+    if(storeDrafts(all) > 0) toast(`Vanhin keskeneräinen kirjaus poistettiin (${gone.map(x => x.title || KINDS[x.ctx.kind].label).join(', ')}) – luonnoksia säilyy enintään ${DRAFT_MAX}`, {ms:6000}); }catch(e){}
 }
 function scheduleDraft(){ clearTimeout(draftTimer); draftTimer = setTimeout(saveDraftNow, 400); }
 /* Poistaa vain annetun lomakkeen (tai avaimen) luonnoksen – muut luonnokset säilyvät */
@@ -2671,6 +2685,8 @@ $('#importFile').addEventListener('change', async ev => {
     let obj; try{ obj = JSON.parse(await file.text()); }catch(e){ throw new Error('tiedosto ei ole kelvollinen varmuuskopio (JSON-muoto on rikki)'); }
     if(!obj || typeof obj !== 'object' || !(Array.isArray(obj.sessions) || Array.isArray(obj.templates) || obj.food || obj.weight)) throw new Error('tiedosto ei näytä Treeniäpin varmuuskopiolta');
     const n = normalize(obj);
+    /* v0.5.2: tiedosto ilman yhtään kelvollista tietoa ei saa korvata nykyisiä tietoja */
+    if(!(n.sessions.length + n.templates.length + n.food.entries.length + n.weight.entries.length)) throw new Error('Tiedostosta ei löytynyt tietoja');
     if(!confirm(`Tuodaanko varmuuskopio?\n\n${n.templates.length} treenipohjaa, ${n.sessions.length} kirjausta, ${n.food.entries.length} ruokamerkintää, ${n.weight.entries.length} painomerkintää.\n\nNykyiset tiedot korvataan. Nykyisistä tiedoista jää palautuskopio (Asetukset → Varmuuskopio).`)) return;
     /* v0.5.0: talteen ennen korvaamista → tuonnin voi kumota. v0.5.1: jos kopio ei mahdu, tarjotaan tiedostoa ja tuonti onnistuu silti */
     const oldS = S, oldStr = JSON.stringify({t:Date.now(), data:oldS}); let kept = false;
@@ -2681,13 +2697,18 @@ $('#importFile').addEventListener('change', async ev => {
     if(fits){ try{ localStorage.setItem(PREIMPORT_KEY, oldStr); kept = true; }catch(e){ console.warn('Palautuskopio ei mahtunut', e); } }
     S = n;
     if(!save() && kept){ try{ localStorage.removeItem(PREIMPORT_KEY); }catch(e){} kept = false; save(); }
+    if(kept) setMeta({importSig:stateSig()});
     render();
     toast(kept ? 'Tiedot tuotu' : 'Tiedot tuotu (palautuskopiota ei tallennettu)', kept ? {label:'Kumoa tuonti', undo:() => undoImport(), ms:10000} : {});
   } catch(e){ toast('Tuonti epäonnistui: ' + e.message, {error:true}); }
 });
 
+/* v0.5.2: tunniste tuonnin jälkeisestä tilasta → tiedetään, onko tuonnin jälkeen kirjattu tai muokattu jotain */
+function stateSig(){ const t = JSON.stringify(S); let h = 0; for(let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return t.length + ':' + h; }
 function undoImport(){
   const p = getPreimport(); if(!p){ toast('Palautuskopiota ei löytynyt', {error:true}); return; }
+  const sig = getMeta().importSig;
+  if(sig && sig !== stateSig() && !confirm('Olet kirjannut tai muokannut tietoja tuonnin jälkeen.\n\nJos kumoat tuonnin, palataan tuontia edeltäneisiin tietoihin ja kaikki tuonnin jälkeen tehdyt muutokset katoavat. Kumotaanko silti?')) return;
   S = normalize(p.data); if(save()) try{ localStorage.removeItem(PREIMPORT_KEY); }catch(e){}
   render(); toast('Tuontia edeltäneet tiedot palautettu');
 }
